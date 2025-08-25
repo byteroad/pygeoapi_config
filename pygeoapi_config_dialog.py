@@ -25,12 +25,18 @@
 import os
 import yaml
 
+
 from .models.top_level.providers.records import ProviderTypes
 from .ui_widgets.providers.NewProviderWindow import NewProviderWindow
-
+from .ui_widgets.WarningDialog import ReadOnlyTextDialog
 from .ui_widgets import DataSetterFromUi, UiSetter
 from .models.ConfigData import ConfigData
-from .models.top_level.utils import InlineList, get_enum_value_from_string
+from .models.top_level.utils import (
+    InlineList,
+    get_enum_value_from_string,
+    is_url_responsive,
+)
+from .models.top_level.utils import STRING_SEPARATOR
 
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -114,11 +120,11 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 QgsMessageLog.logMessage(
                     f"Properties are missing or have invalid values: {invalid_props}"
                 )
-                QMessageBox.warning(
+                ReadOnlyTextDialog(
                     self,
                     "Warning",
                     f"Properties are missing or have invalid values: {invalid_props}",
-                )
+                ).exec_()
                 return
 
         except Exception as e:
@@ -158,7 +164,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             return
 
         try:
-            QApplication.setOverrideCursor(Qt.WaitCursor)
+            # QApplication.setOverrideCursor(Qt.WaitCursor)
             with open(file_name, "r", encoding="utf-8") as file:
                 file_content = file.read()
 
@@ -181,18 +187,17 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 QgsMessageLog.logMessage(
                     f"All missing or replaced properties: {self.config_data.all_missing_props}"
                 )
-
                 if len(all_missing_props) > 0:
-                    QMessageBox.warning(
+                    ReadOnlyTextDialog(
                         self,
                         "Warning",
                         f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
-                    )
+                    ).exec_()
 
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
-        finally:
-            QApplication.restoreOverrideCursor()
+        # finally:
+        #     QApplication.restoreOverrideCursor()
 
     def on_button_clicked(self, button):
 
@@ -299,7 +304,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def add_res_link(self):
         """Called from .ui file."""
-        self.ui_setter.add_listwidget_element_from_multi_lineedit(
+        self.ui_setter.add_listwidget_element_from_multi_widgets(
             line_widgets_mandatory=[
                 self.addResLinksTypeLineEdit,
                 self.addResLinksRelLineEdit,
@@ -307,30 +312,41 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             ],
             line_widgets_optional=[
                 self.addResLinksTitleLineEdit,
-                self.addResLinkshreflangLineEdit,
+                self.addResLinkshreflangComboBox,
                 self.addResLinksLengthLineEdit,
             ],
             list_widget=self.listWidgetResLinks,
             sort=False,
         )
 
-    def try_add_res_provider(self):
-        """Called from .ui file."""
+    def try_add_res_provider(self, provider_index=None, data: list[str] | None = None):
+        """Called from .ui file, and from this class."""
         provider_type: ProviderTypes = get_enum_value_from_string(
-            ProviderTypes, self.comboBoxResProviderType.currentText()
-        )
-        self.provider_window = NewProviderWindow(
-            self.comboBoxResProviderType, provider_type
-        )
-        # set new provider data to ConfigData when user clicks 'Add'
-        self.provider_window.signal_provider_values.connect(
-            lambda values: self._validate_and_add_res_provider(values, provider_type)
+            ProviderTypes, self.comboBoxResProviderType.currentText().lower()
         )
 
-    def _validate_and_add_res_provider(self, values, provider_type):
+        if not data:
+            self.provider_window = NewProviderWindow(provider_type)
+            provider_index = None
+
+        else:
+            # if the window is triggered for editing, ignore widget provider type and read it from data instead
+            provider_type = get_enum_value_from_string(ProviderTypes, data[0])
+            self.provider_window = NewProviderWindow(provider_type, data[1:])
+
+        # add or replace provider data to ConfigData when user clicks 'Add'
+        self.provider_window.signal_provider_values.connect(
+            lambda provider_window, values: self._validate_and_add_res_provider(
+                provider_window, values, provider_type, provider_index
+            )
+        )
+
+    def _validate_and_add_res_provider(
+        self, provider_window, values, provider_type, provider_index: int | None = None
+    ):
         """Calls the Provider validation method and displays a warning if data is invalid."""
-        invalid_fields = self.config_data.set_new_provider_data(
-            values, self.current_res_name, provider_type
+        invalid_fields = self.config_data.set_validate_new_provider_data(
+            values, self.current_res_name, provider_type, provider_index
         )
 
         self.ui_setter.set_providers_ui_from_data(
@@ -338,9 +354,27 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         )
         if len(invalid_fields) > 0:
             QMessageBox.warning(
-                self,
+                provider_window,
                 "Warning",
                 f"Invalid Provider values: {invalid_fields}",
+            )
+        else:
+            self.provider_window.signal_provider_close.emit()
+
+    def validate_res_extents_crs(self):
+        """Called from .ui file."""
+        url = self.data_from_ui_setter.get_extents_crs_from_ui(self)
+        if is_url_responsive(url, True):
+            QMessageBox.information(
+                self,
+                "Information",
+                f"Valid CRS URL: {url}",
+            )
+        else:
+            QMessageBox.warning(
+                self,
+                "Warning",
+                f"Invalid CRS URL: {url}",
             )
 
     def delete_metadata_id_title(self):
@@ -374,6 +408,14 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def delete_res_link(self):
         """Called from .ui file."""
         self.ui_setter.delete_list_widget_selected_item(self.listWidgetResLinks)
+
+    def edit_res_provider(self):
+        """Called from .ui file."""
+        selected_items = self.listWidgetResProvider.selectedItems()
+        if selected_items:
+            item = selected_items[0]  # get the first (and only) selected item
+            data_list = item.text().split(STRING_SEPARATOR)
+            self.try_add_res_provider(self.listWidgetResProvider.row(item), data_list)
 
     def delete_res_provider(self):
         """Called from .ui file."""
@@ -448,7 +490,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.groupBoxCollectionLoaded.show()
 
         res_data = self.config_data.resources[self.current_res_name]
-        self.ui_setter.setup_resouce_loaded_ui(res_data)
+        # self.ui_setter.setup_resouce_loaded_ui(res_data)
 
         # set the values to UI widgets
         self.ui_setter.set_resource_ui_from_data(res_data)

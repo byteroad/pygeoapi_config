@@ -1,32 +1,29 @@
 from PyQt5.QtWidgets import QGridLayout
-from .utils import create_label_lineedit_pair
+from .utils import add_widgets_to_grid_by_specs
 
 
-def create_feature_provider_window(group_layout: QGridLayout):
+def create_feature_provider_window(
+    grid_layout: QGridLayout, data_list: list[str] | None = None
+):
 
     rows = [
-        ("name", "PostgreSQL", ""),
-        ("crs", "http://www.opengis.net/def/crs/OGC/1.3/CRS84", ""),
-        ("host", "", ""),
-        ("port", "", ""),
-        ("dbname", "", ""),
-        ("user", "", ""),
-        ("password", "", ""),
-        ("search_path", "", "e.g. 'osm, public'"),
-        ("id_field", "", "(optional)"),
-        ("table", "", "(optional)"),
-        ("geom_field", "", "(optional)"),
+        ("name", str, "PostgreSQL", ""),
+        ("crs", list, "", ""),
+        (
+            "storage_crs",
+            str,
+            "",
+            "(optional) http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+        ),
+        ("data.host", str, "", ""),
+        ("data.port", str, "", ""),
+        ("data.dbname", str, "", ""),
+        ("data.user", str, "", ""),
+        ("data.password", str, "", ""),
+        ("data.search_path", str, "", "e.g. 'osm, public'"),
+        ("id_field", str, "", ""),
+        ("table", str, "", ""),
+        ("geom_field", str, "", ""),
     ]
 
-    all_lineedits = {}
-
-    for row_idx, (label, default, placeholder) in enumerate(rows):
-        label_widget, line_edit_widget = create_label_lineedit_pair(
-            label, default, placeholder
-        )
-        group_layout.addWidget(label_widget, row_idx, 0)
-        group_layout.addWidget(line_edit_widget, row_idx, 1)
-
-        all_lineedits[label] = line_edit_widget
-
-    return all_lineedits
+    return add_widgets_to_grid_by_specs(rows, grid_layout, data_list)

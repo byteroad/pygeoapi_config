@@ -2,13 +2,15 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ..models.top_level import ResourceConfigTemplate
-from ..models.top_level.ResourceConfigTemplate import ResourceVisibilityEnum
-from ..models.top_level.providers.records import ProviderTypes
-
-from ..models.top_level.providers import (
-    ProviderMvtProxy,
-    ProviderPostgresql,
-    ProviderWmsFacade,
+from ..models.top_level.ResourceConfigTemplate import (
+    ResourceTypesEnum,
+    ResourceVisibilityEnum,
+)
+from ..models.top_level.providers.records import (
+    CrsAuthorities,
+    Languages,
+    ProviderTypes,
+    TrsAuthorities,
 )
 
 from ..models.top_level.utils import (
@@ -24,9 +26,10 @@ from .ui_setter_utils import (
     pack_list_data_into_list_widget,
     select_list_widget_items_by_texts,
 )
+from .utils import get_widget_text_value, reset_widget
 
 
-from PyQt5.QtGui import QRegularExpressionValidator, QIntValidator
+from PyQt5.QtGui import QIntValidator
 from PyQt5.QtCore import (
     QRegularExpression,
     Qt,
@@ -240,6 +243,24 @@ class UiSetter:
         """Set values for Resource UI from resource data."""
         dialog = self.dialog
 
+        # first, reset some fields to defaults (e.g. for data setting, or optional - they might not have a new value to overwrite it)
+        # data entry fields
+        dialog.addResTitleLineEdit.setText("")
+        dialog.addResDescriptionLineEdit.setText("")
+        dialog.addResKeywordsLineEdit.setText("")
+
+        dialog.addResLinksTypeLineEdit.setText("")
+        dialog.addResLinksRelLineEdit.setText("")
+        dialog.addResLinksHrefLineEdit.setText("")
+        dialog.addResLinksTitleLineEdit.setText("")
+        dialog.addResLinkshreflangComboBox.setCurrentIndex(0)
+        dialog.addResLinksLengthLineEdit.setText("")
+
+        # optional temporal extents
+        dialog.lineEditResExtentsTemporalBegin.setText("")
+        dialog.lineEditResExtentsTemporalEnd.setText("")
+        dialog.comboBoxResExtentsTemporalTrs.setCurrentIndex(0)
+
         # alias
         dialog.lineEditResAlias.setText(dialog.current_res_name)
 
@@ -271,13 +292,18 @@ class UiSetter:
         )
 
         # spatial bbox
-        bbox_str = (
-            str(res_data.extents.spatial.bbox)
-            .replace("[", "")
-            .replace("]", "")
-            .replace(" ", "")
+        dialog.lineEditResExtentsSpatialXMin.setText(
+            str(res_data.extents.spatial.bbox[0])
         )
-        dialog.lineEditResExtentsSpatialBbox.setText(bbox_str)
+        dialog.lineEditResExtentsSpatialYMin.setText(
+            str(res_data.extents.spatial.bbox[1])
+        )
+        dialog.lineEditResExtentsSpatialXMax.setText(
+            str(res_data.extents.spatial.bbox[2])
+        )
+        dialog.lineEditResExtentsSpatialYMax.setText(
+            str(res_data.extents.spatial.bbox[3])
+        )
 
         # spatial CRS authority
         set_combo_box_value_from_data(
@@ -306,13 +332,11 @@ class UiSetter:
             else:
                 dialog.lineEditResExtentsTemporalEnd.setText("")
 
-            # temporal end
-            if res_data.extents.temporal.trs:
-                dialog.lineEditResExtentsTemporalTrs.setText(
-                    res_data.extents.temporal.trs
-                )
-            else:
-                dialog.lineEditResExtentsTemporalTrs.setText("")
+            # temporal trs
+            set_combo_box_value_from_data(
+                combo_box=dialog.comboBoxResExtentsTemporalTrs,
+                value=res_data.extents.temporal.trs,
+            )
 
         # links
         pack_list_data_into_list_widget(
@@ -334,45 +358,7 @@ class UiSetter:
 
         data_lists = []
         for p in res_data.providers:
-            if isinstance(p, ProviderPostgresql):
-                data_chunk = [
-                    p.type.value,
-                    p.name,
-                    p.crs,
-                    p.data.host,
-                    p.data.port,
-                    p.data.dbname,
-                    p.data.user,
-                    p.data.password,
-                    p.data.search_path,
-                    p.id_field,
-                    p.table,
-                    p.geom_field,
-                ]
-            elif isinstance(p, ProviderWmsFacade):
-                data_chunk = [
-                    p.type.value,
-                    p.name,
-                    p.crs,
-                    p.data,
-                    p.options.layer,
-                    p.options.style,
-                    p.options.version,
-                    p.format.name,
-                    p.format.mimetype,
-                ]
-            elif isinstance(p, ProviderMvtProxy):
-                data_chunk = [
-                    p.type.value,
-                    p.name,
-                    p.crs,
-                    p.data,
-                    p.options.zoom.min,
-                    p.options.zoom.max,
-                    p.format.name,
-                    p.format.mimetype,
-                ]
-
+            data_chunk: list = p.pack_data_to_list()
             data_lists.append(data_chunk)
 
         pack_list_data_into_list_widget(
@@ -382,28 +368,58 @@ class UiSetter:
 
     def customize_ui_on_launch(self):
         """Pre-fill ComboBoxes, assign validators to LineEdits where needed."""
-        config_data: ConfigData = self.dialog.config_data
+        dialog = self.dialog
+        config_data: ConfigData = dialog.config_data
 
-        # add default values to the UI
-        fill_combo_box(self.dialog.comboBoxExceed, config_data.server.limits.on_exceed)
-        fill_combo_box(self.dialog.comboBoxLog, config_data.logging.level)
+        # add default values to the main UI
+        fill_combo_box(dialog.comboBoxExceed, config_data.server.limits.on_exceed)
+        fill_combo_box(dialog.comboBoxLog, config_data.logging.level)
         fill_combo_box(
-            self.dialog.comboBoxMetadataIdKeywordsType,
+            dialog.comboBoxMetadataIdKeywordsType,
             config_data.metadata.identification.keywords_type,
         )
         fill_combo_box(
-            self.dialog.comboBoxMetadataContactRole,
+            dialog.comboBoxMetadataContactRole,
             config_data.metadata.contact.role,
         )
 
-        # set validators for some fields
-
-        # resource bbox
-        regex_bbox = QRegularExpression(
-            r"-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?"
+        # add default values to the Resource UI
+        fill_combo_box(
+            dialog.comboBoxResType,
+            ResourceTypesEnum.COLLECTION,
         )
-        validator_bbox = QRegularExpressionValidator(regex_bbox)
-        self.dialog.lineEditResExtentsSpatialBbox.setValidator(validator_bbox)
+        fill_combo_box(
+            dialog.comboBoxResVisibility,
+            ResourceVisibilityEnum.NONE,  # mock value, as default is None
+        )
+        fill_combo_box(
+            dialog.comboBoxResExtentsSpatialCrsType,
+            CrsAuthorities.OGC13,
+        )
+        fill_combo_box(
+            dialog.comboBoxResExtentsTemporalTrs,
+            TrsAuthorities.ISO8601,
+        )
+
+        fill_combo_box(
+            dialog.comboBoxResProviderType,
+            ProviderTypes.FEATURE,  # mock value to get type
+        )
+
+        fill_combo_box(
+            self.dialog.addResLinkshreflangComboBox,
+            Languages.NONE,  # mock value, as default is None. Only for setting data - not actual resource value
+        )
+
+        # set validators for some fields
+        # resource bbox
+        self.dialog.lineEditResExtentsSpatialXMin.setValidator(QIntValidator())
+        self.dialog.lineEditResExtentsSpatialYMin.setValidator(QIntValidator())
+        self.dialog.lineEditResExtentsSpatialXMax.setValidator(QIntValidator())
+        self.dialog.lineEditResExtentsSpatialYMax.setValidator(QIntValidator())
+        # regex_bbox = QRegularExpression(r"-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?")
+        # validator_bbox = QRegularExpressionValidator(regex_bbox)
+        # self.dialog.lineEditResExtentsSpatialBbox.setValidator(validator_bbox)
 
         # resource content size
         self.dialog.addResLinksLengthLineEdit.setValidator(QIntValidator())
@@ -485,27 +501,6 @@ class UiSetter:
                 dialog.listViewCollection.setCurrentIndex(index)
                 break
 
-    def setup_resouce_loaded_ui(self, res_data: ResourceConfigTemplate):
-        dialog = self.dialog
-
-        fill_combo_box(
-            dialog.comboBoxResType,
-            res_data.type,
-        )
-        fill_combo_box(
-            dialog.comboBoxResVisibility,
-            res_data.visibility
-            or ResourceVisibilityEnum.NONE,  # mock value, as default is None
-        )
-        fill_combo_box(
-            dialog.comboBoxResExtentsSpatialCrsType,
-            res_data.extents.spatial.crs_authority,
-        )
-        fill_combo_box(
-            dialog.comboBoxResProviderType,
-            ProviderTypes.FEATURE,  # mock value if we don't yet have an object to get the value from
-        )
-
     def _lang_entry_exists_in_list_widget(self, list_widget, locale) -> bool:
         for i in range(list_widget.count()):
             if list_widget.item(i).text().startswith(f"{locale}: "):
@@ -553,7 +548,7 @@ class UiSetter:
             if sort:
                 list_widget.model().sort(0)
 
-    def add_listwidget_element_from_multi_lineedit(
+    def add_listwidget_element_from_multi_widgets(
         self,
         *,
         line_widgets_mandatory: list,
@@ -561,12 +556,16 @@ class UiSetter:
         list_widget,
         sort=False,
     ):
+        """Add new QListWidget entry from combined data from several widgets (e.g. Providers, Links)."""
         dialog = self.dialog
 
         final_text = ""
-        for line_edit_widget in line_widgets_mandatory:
-            text = line_edit_widget.text().strip()
-            if not text:
+        mandatory_fields_count = len(line_widgets_mandatory)
+        for i, widget in enumerate(line_widgets_mandatory + line_widgets_optional):
+            text = get_widget_text_value(widget)
+
+            # check if the field is in a 'mandatory' list and empty
+            if i < mandatory_fields_count and not text:
                 QMessageBox.warning(dialog, "Warning", "Mandatory field is empty")
                 return
 
@@ -574,16 +573,7 @@ class UiSetter:
             if len(final_text) > 0:
                 final_text += STRING_SEPARATOR
             final_text += text
-            line_edit_widget.clear()
-
-        for line_edit_widget in line_widgets_optional:
-            text = line_edit_widget.text().strip()
-
-            # add separator if not the first value
-            if len(final_text) > 0:
-                final_text += STRING_SEPARATOR
-            final_text += text
-            line_edit_widget.clear()
+            reset_widget(widget)
 
         list_widget.addItem(final_text)
 

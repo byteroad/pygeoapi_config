@@ -8,47 +8,61 @@ from PyQt5.QtWidgets import (
     QGroupBox,
     QMainWindow,
     QGridLayout,
+    QDialog,
 )
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, Qt
+from PyQt5.QtGui import QIntValidator
 
 from ...models.top_level.providers.records import ProviderTypes
 from .provider_features import create_feature_provider_window
+from .provider_map import create_map_provider_window
+from .provider_tile import create_tile_provider_window
+from .StringListWidget import StringListWidget
 
 
-class NewProviderWindow(QMainWindow):
+class NewProviderWindow(QDialog):
 
     elements_with_values: dict
-    signal_provider_values = pyqtSignal(dict)
+    signal_provider_values = pyqtSignal(object, dict)
+    signal_provider_close = pyqtSignal()
 
     def __init__(
-        self, comboBoxResProviderType: QComboBox, provider_type: ProviderTypes
+        self,
+        provider_type: ProviderTypes,
+        data_list: list[str] | None = None,
     ):
         super().__init__()
-        value = comboBoxResProviderType.currentText().lower()
-        self.setWindowTitle(f"{value.title()} Provider Configuration")
+        self.signal_provider_close.connect(self.close)
 
-        # Create the main window
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        self.main_layout = QVBoxLayout()
-        central_widget.setLayout(self.main_layout)
+        self.setWindowTitle(f"{provider_type.value.title()} Provider Configuration")
+
+        self.setWindowFlag(Qt.WindowStaysOnTopHint)  # always on top
+        self.setModal(True)  # parent becomes unclickable
+
+        self.main_layout = QVBoxLayout(self)
 
         # Create group box
-        group_box = QGroupBox(f"{value.title()} Provider")
+        group_box = QGroupBox(f"{provider_type.value.title()} Provider")
         group_layout = QGridLayout()
         group_box.setLayout(group_layout)
         self.main_layout.addWidget(group_box)
 
         # fill the box depending on the provider type
         self.elements_with_values = {}
-        if value == provider_type.FEATURE.value:
-            self.elements_with_values = create_feature_provider_window(group_layout)
+        if provider_type == ProviderTypes.FEATURE:
+            self.elements_with_values = create_feature_provider_window(
+                group_layout, data_list
+            )
 
-        elif value == provider_type.MAP.value:
-            pass
+        elif provider_type == ProviderTypes.MAP:
+            self.elements_with_values = create_map_provider_window(
+                group_layout, data_list
+            )
 
-        elif value == provider_type.TILE.value:
-            pass
+        elif provider_type == ProviderTypes.TILE:
+            self.elements_with_values = create_tile_provider_window(
+                group_layout, data_list
+            )
 
         # Add buttons at the bottom
         self.btn_add = QPushButton("Save")
@@ -75,12 +89,23 @@ class NewProviderWindow(QMainWindow):
             values[key] = self.extract_value_from_ui(element)
 
         # emit values to the parent widget
-        self.signal_provider_values.emit(values)
+        self.signal_provider_values.emit(self, values)
 
         # Close the window
-        self.close()
+        # self.close()
 
     def extract_value_from_ui(self, element):
 
         if isinstance(element, QLineEdit):
-            return element.text()
+
+            validator = element.validator()
+            if isinstance(validator, QIntValidator):
+                try:
+                    return int(element.text())
+                except ValueError:  # e.g. if the field is empty
+                    return None
+            else:
+                return element.text()
+
+        elif isinstance(element, StringListWidget):
+            return element.values_to_list()

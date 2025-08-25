@@ -1,4 +1,6 @@
 from enum import Enum
+import requests
+from urllib.parse import urlparse
 
 STRING_SEPARATOR = " | "
 
@@ -22,3 +24,51 @@ def get_enum_value_from_string(enum_type: Enum, text: str):
             if text == member.value:
                 return member
     raise AttributeError(f"Unexpected attribute type '{text}'", name="text")
+
+
+def bbox_from_list(raw_bbox_list: list):
+
+    # this loop is to not add empty decimals unnecessarily
+    list_bbox_val = []
+    for part in raw_bbox_list:
+        if isinstance(part, str):  # if the list is read from UI widgets
+            part = part.strip()
+            if "." in part:
+                list_bbox_val.append(float(part))
+            else:
+                list_bbox_val.append(int(part))
+        else:  # if the list is already taken from actual data (int or float)
+            list_bbox_val.append(part)
+
+    if len(list_bbox_val) != 4 and len(list_bbox_val) != 6:
+        raise ValueError(
+            f"Wrong number of values: {len(list_bbox_val)}. Expected: 4 or 6"
+        )
+
+    return InlineList(list_bbox_val)
+
+
+def is_url_responsive(url: str, detect_exceptions_in_successful_response=False) -> bool:
+
+    parsed_url = urlparse(url)
+    if not all([parsed_url.scheme, parsed_url.netloc]):
+        return False
+
+    try:
+        if detect_exceptions_in_successful_response:
+            # Detect OGC ExceptionReport (invalid request)
+            response = requests.get(url, allow_redirects=True, timeout=5)
+            if response.status_code != 200:
+                return False
+            else:
+                text = response.text
+                if "ExceptionReport" in text or "ExceptionText" in text:
+                    return False
+                return True
+
+        else:  # lighter request (if content is not needed)
+            response = requests.head(url, allow_redirects=True, timeout=5)
+            return response.status_code == 200
+
+    except requests.RequestException:
+        return False

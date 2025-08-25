@@ -1620,7 +1620,7 @@
               </item>
 
 
-              <item row="4" column="0">
+              <item row="4" column="0" rowspan="2">
               
                 <widget class="QGroupBox">
                   <property name="title">
@@ -1628,6 +1628,7 @@
                   </property>
 
                   <layout class="QGridLayout">
+                  
                     <item row="0" column="0">
                       <widget class="QLabel">
                         <property name="text">
@@ -1635,13 +1636,86 @@
                         </property>
                       </widget>
                     </item>
-                    <item row="0" column="1" columnspan="2">
-                      <widget class="QLineEdit" name="lineEditResExtentsSpatialBbox">
-                        <property name="placeholderText">
-                          <string>-180,-90,180,90</string>
-                        </property>
-                      </widget>
+
+                    <item row="0" column="1">
+                      <layout class="QGridLayout">
+                        
+                        <item row="0" column="0">
+                          <layout class="QHBoxLayout">
+                            <item>
+                              <widget class="QLabel">
+                                <property name="text">
+                                <string>XMin</string>
+                                </property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QLineEdit" name="lineEditResExtentsSpatialXMin">
+                                <property name="placeholderText">
+                                  <string>-180</string>
+                                </property>
+                              </widget>
+                            </item>
+                          </layout>
+                        </item>
+                        <item row="0" column="1">
+                          <layout class="QHBoxLayout">
+                            <item>
+                              <widget class="QLabel">
+                                <property name="text">
+                                <string>YMin</string>
+                                </property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QLineEdit" name="lineEditResExtentsSpatialYMin">
+                                <property name="placeholderText">
+                                  <string>-90</string>
+                                </property>
+                              </widget>
+                            </item>
+                          </layout>
+                        </item>
+                        <item row="0" column="2">
+                          <layout class="QHBoxLayout">
+                            <item>
+                              <widget class="QLabel">
+                                <property name="text">
+                                <string>XMax</string>
+                                </property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QLineEdit" name="lineEditResExtentsSpatialXMax">
+                                <property name="placeholderText">
+                                  <string>180</string>
+                                </property>
+                              </widget>
+                            </item>
+                          </layout>
+                        </item>
+                        <item row="0" column="3">
+                          <layout class="QHBoxLayout">
+                            <item>
+                              <widget class="QLabel">
+                                <property name="text">
+                                <string>YMax</string>
+                                </property>
+                              </widget>
+                            </item>
+                            <item>
+                              <widget class="QLineEdit" name="lineEditResExtentsSpatialYMax">
+                                <property name="placeholderText">
+                                  <string>90</string>
+                                </property>
+                              </widget>
+                            </item>
+                          </layout>
+                        </item>
+
+                      </layout>
                     </item>
+
                     <item row="1" column="0">
                       <widget class="QLabel">
                         <property name="text">
@@ -1658,11 +1732,22 @@
                         </widget>
                       </item>
                       <item>
-                        <widget class="QLineEdit" name="lineEditResExtentsSpatialCrs">
-                          <property name="placeholderText">
-                            <string>CRS84</string>
-                          </property>
-                        </widget>
+                        <layout class = "QHBoxLayout">
+                          <item>
+                            <widget class="QLineEdit" name="lineEditResExtentsSpatialCrs">
+                              <property name="placeholderText">
+                                <string>CRS84</string>
+                              </property>
+                            </widget>
+                          </item>
+                          <item>
+                            <widget class="QPushButton" name="validateResExtentsCrsButton">
+                              <property name="text">
+                                <string>Validate</string>
+                              </property>
+                            </widget>
+                          </item>
+                        </layout>
                       </item>
                     </layout>
                     </item>
@@ -1774,7 +1859,7 @@
                                 </widget>
                               </item>
                               <item row="4" column="1">
-                                <widget class="QLineEdit" name="addResLinkshreflangLineEdit">
+                                <widget class="QComboBox" name="addResLinkshreflangComboBox">
                                   <property name="placeholderText">
                                     <string>(optional) e.g. 'en-US'</string>
                                   </property>
@@ -1900,13 +1985,26 @@
                             </property>
                             </widget>
                           </item>
+
                           <item>
-                            <widget class="QPushButton" name="deleteResProviderButton">
-                            <property name="text">
-                              <string>Delete Selected</string>
-                            </property>
-                            </widget>
+                            <layout class = "QHBoxLayout">
+                              <item>
+                                <widget class="QPushButton" name="editResProviderButton">
+                                <property name="text">
+                                  <string>Edit Selected</string>
+                                </property>
+                                </widget>
+                              </item>
+                              <item>
+                                <widget class="QPushButton" name="deleteResProviderButton">
+                                <property name="text">
+                                  <string>Delete Selected</string>
+                                </property>
+                                </widget>
+                              </item>
+                            </layout>
                           </item>
+
                         </layout>
                       </item>
                     </layout>
@@ -1960,10 +2058,7 @@
                       </widget>
                     </item>
                     <item row="2" column="1">
-                      <widget class="QLineEdit" name="lineEditResExtentsTemporalTrs">
-                      <property name="placeholderText">
-                          <string>http://www.opengis.net/def/uom/ISO-8601/0/Gregorian</string>
-                        </property>
+                      <widget class="QComboBox" name="comboBoxResExtentsTemporalTrs">
                       </widget>
                     </item>
                   </layout>
@@ -2298,6 +2393,23 @@
   </connection>
 
   <connection>
+   <sender>editResProviderButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>edit_res_provider()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+  <connection>
    <sender>deleteResProviderButton</sender>
    <signal>clicked()</signal>
    <receiver>PygeoapiConfigDialogBase</receiver>
@@ -2451,6 +2563,23 @@
    <signal>clicked()</signal>
    <receiver>PygeoapiConfigDialogBase</receiver>
    <slot>exit_resource_edit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  
+  <connection>
+   <sender>validateResExtentsCrsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>validate_res_extents_crs()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>434</x>
