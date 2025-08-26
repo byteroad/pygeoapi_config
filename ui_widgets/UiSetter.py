@@ -1,4 +1,5 @@
 from __future__ import annotations
+import json
 from typing import TYPE_CHECKING
 
 from ..models.top_level import ResourceConfigTemplate
@@ -17,11 +18,12 @@ from ..models.top_level.utils import (
     STRING_SEPARATOR,
 )
 
+from .utils import set_combo_box_value_from_data
+
 from .ui_setter_utils import (
     clear_layout,
     create_rect_layer_from_bbox,
     fill_combo_box,
-    set_combo_box_value_from_data,
     pack_locales_data_into_list,
     pack_list_data_into_list_widget,
     select_list_widget_items_by_texts,
@@ -357,13 +359,23 @@ class UiSetter:
         dialog = self.dialog
 
         data_lists = []
+        read_only_data_lists = []
         for p in res_data.providers:
-            data_chunk: list = p.pack_data_to_list()
-            data_lists.append(data_chunk)
+
+            if isinstance(p, dict):  # provider type not supported yet
+                read_only_data_lists.append(str(json.dumps(p)))
+            else:
+
+                data_chunk: list = p.pack_data_to_list()
+                data_lists.append(data_chunk)
 
         pack_list_data_into_list_widget(
             data_lists,
             dialog.listWidgetResProvider,
+        )
+        pack_list_data_into_list_widget(
+            read_only_data_lists,
+            dialog.listWidgetResReadOnlyProviders,
         )
 
     def customize_ui_on_launch(self):
@@ -583,6 +595,6 @@ class UiSetter:
 
     def delete_list_widget_selected_item(self, list_widget):
         """Delete selected List item from widget."""
-        selected_item = list_widget.currentRow()
-        if selected_item >= 0:
-            list_widget.takeItem(selected_item)
+        selected_index = list_widget.currentRow()
+        if selected_index >= 0:
+            list_widget.takeItem(selected_index)

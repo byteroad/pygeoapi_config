@@ -71,27 +71,6 @@ def _apply_red_transparent_style(layer):
     layer.triggerRepaint()
 
 
-def set_combo_box_value_from_data(*, combo_box, value):
-    """Set the combo box value based on the available choice and provided value."""
-
-    for i in range(combo_box.count()):
-        if isinstance(value, str):
-            if combo_box.itemText(i) == value:
-                combo_box.setCurrentIndex(i)
-                return
-
-        if isinstance(value, Enum):
-            if combo_box.itemText(i) == value.value:
-                combo_box.setCurrentIndex(i)
-                return
-
-    # If the value is not found, set to the first item or clear it
-    if combo_box.count() > 0:
-        combo_box.setCurrentIndex(0)
-    else:
-        combo_box.clear()
-
-
 def pack_locales_data_into_list(data, list_widget):
     """Use ConfigData (list of strings, dict with strings, or a single string) to fill the UI widget list."""
     list_widget.clear()
@@ -121,23 +100,28 @@ def pack_locales_data_into_list(data, list_widget):
                 list_widget.addItem(value)
 
 
-def pack_list_data_into_list_widget(data: list[list], list_widget):
+def pack_list_data_into_list_widget(data: list[list | str], list_widget):
     list_widget.clear()
 
     for line_data in data:
         all_elements = []
-        for d in line_data:
-            # convert all values to strings and joint with SEPARATOR symbol
-            if d:
-                if isinstance(d, list):
-                    # convert list to a string without brackets (e.g. for bbox)
-                    all_elements.append(",".join(d))
-                elif isinstance(d, Enum):  # e.g. Languages Enum
-                    all_elements.append(str(d.value))
+
+        if isinstance(line_data, str):  # if Provider type not supported yet
+            all_elements.append(line_data)
+
+        else:
+            for d in line_data:
+                # convert all values to strings and joint with SEPARATOR symbol
+                if d is not None:
+                    if isinstance(d, list):
+                        # convert list to a string without brackets (e.g. for bbox)
+                        all_elements.append(",".join(d))
+                    elif isinstance(d, Enum):  # e.g. Languages Enum
+                        all_elements.append(str(d.value))
+                    else:
+                        all_elements.append(str(d))
                 else:
-                    all_elements.append(str(d))
-            else:
-                all_elements.append("")
+                    all_elements.append("")
 
         text_entry = STRING_SEPARATOR.join(all_elements)
         list_widget.addItem(text_entry)

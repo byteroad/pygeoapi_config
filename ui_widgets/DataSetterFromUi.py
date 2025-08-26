@@ -1,4 +1,5 @@
 from __future__ import annotations
+import json
 from typing import TYPE_CHECKING
 
 from datetime import datetime
@@ -285,7 +286,9 @@ class DataSetterFromUi:
 
         # providers
         config_data.resources[res_name].providers = []
-        providers_data_lists = unpack_listwidget_values_to_sublists(
+
+        # add editable providers from a widget
+        providers_data_lists: list[list] = unpack_listwidget_values_to_sublists(
             dialog.listWidgetResProvider
         )
 
@@ -296,10 +299,51 @@ class DataSetterFromUi:
 
             config_data.resources[res_name].providers.append(new_pr)
 
+        # add read-only providers from another widget
+        read_only_providers_data_lists: list[list] = (
+            unpack_listwidget_values_to_sublists(
+                dialog.listWidgetResReadOnlyProviders, 1
+            )
+        )
+        for read_pr in read_only_providers_data_lists:
+            new_read_pr = read_pr[0]
+            config_data.resources[res_name].providers.append(json.loads(new_read_pr))
+
         # change resource key to a new alias
         new_alias = dialog.lineEditResAlias.text()
         if res_name in config_data.resources:
             config_data.resources[new_alias] = config_data.resources.pop(res_name)
+
+    def delete_selected_provider_type_and_name(self, list_widget):
+        """Find and remove first matching resource provider with specified type and name."""
+        dialog: PygeoapiConfigDialog = self.dialog
+        config_data: ConfigData = dialog.config_data
+        res_name = dialog.current_res_name
+
+        # get selected provider data from a widget (by selection index)
+        providers_data_lists: list[list] = unpack_listwidget_values_to_sublists(
+            list_widget
+        )
+        selected_index = list_widget.currentRow()
+        if selected_index < 0:
+            return
+        selected_pr_data = providers_data_lists[selected_index]
+        selected_pr_type = get_enum_value_from_string(
+            ProviderTypes, selected_pr_data[0]
+        )
+        selected_pr_name = selected_pr_data[1]
+
+        # iterate through resource providers and delete the first matching one
+        for res_provider in config_data.resources[res_name].providers:
+            if isinstance(res_provider, dict):
+                continue  # ignore read-only providers
+
+            if (
+                res_provider.name == selected_pr_name
+                and res_provider.type == selected_pr_type
+            ):
+                config_data.resources[res_name].providers.remove(res_provider)
+                break
 
     def get_extents_crs_from_ui(self, dialog):
         return (
