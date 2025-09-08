@@ -40,6 +40,7 @@ from .models.top_level.utils import (
 )
 from .models.top_level.utils import STRING_SEPARATOR
 
+from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import (
     QMainWindow,
     QFileDialog,
@@ -55,14 +56,17 @@ from PyQt5.QtCore import (
     QSortFilterProxyModel,
 )  # Not strictly needed, can use Python file API instead
 
-from qgis.core import (
-    QgsMessageLog,
-    QgsRasterLayer,
-    QgsVectorLayer,
-)
+# make imports optional for pytests
+try:
+    from qgis.core import (
+        QgsMessageLog,
+        QgsRasterLayer,
+        QgsVectorLayer,
+    )
 
-from qgis.gui import QgsMapCanvas
-from qgis.PyQt import QtWidgets, uic
+    from qgis.gui import QgsMapCanvas
+except:
+    pass
 
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
@@ -80,9 +84,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     # these need to be class properties, otherwise, without constant reference, they are not displayed in a widget
     provider_window: QMainWindow
-    bbox_map_canvas: QgsMapCanvas
-    bbox_base_layer: QgsRasterLayer
-    bbox_extents_layer: QgsVectorLayer
+    bbox_map_canvas: "QgsMapCanvas"
+    bbox_base_layer: "QgsRasterLayer"
+    bbox_extents_layer: "QgsVectorLayer"
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -130,31 +134,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.ui_setter.set_ui_from_data()
         self.ui_setter.setup_map_widget()
 
-    def save_to_file(self):
-        # Set and validate data from UI
-        try:
-            self.data_from_ui_setter.set_data_from_ui()
-            invalid_props = self.config_data.validate_config_data()
-            if len(invalid_props) > 0:
-                QgsMessageLog.logMessage(
-                    f"Properties are missing or have invalid values: {invalid_props}"
-                )
-                ReadOnlyTextDialog(
-                    self,
-                    "Warning",
-                    f"Properties are missing or have invalid values: {invalid_props}",
-                ).exec_()
-                return
-
-        except Exception as e:
-            QgsMessageLog.logMessage(f"Error deserializing: {e}")
-            QMessageBox.warning(f"Error deserializing: {e}")
-            return
-
-        # Open dialog to set file path
-        file_path, _ = QFileDialog.getSaveFileName(
-            self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
-        )
+    def save_to_file(self, file_path):
 
         if file_path:
             QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -169,19 +149,25 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                         allow_unicode=True,
                         indent=4,
                     )
-                QgsMessageLog.logMessage(f"File saved to: {file_path}")
+
+                # try/except in case of running it from pytests
+                try:
+                    QgsMessageLog.logMessage(f"File saved to: {file_path}")
+                except:
+                    pass
+
             except Exception as e:
                 QgsMessageLog.logMessage(f"Error saving file: {e}")
             finally:
                 QApplication.restoreOverrideCursor()
 
-    def open_file(self):
-        file_name, _ = QFileDialog.getOpenFileName(
-            self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
-        )
+    def open_file(self, file_name):
 
         if not file_name:
             return
+
+        # exit Resource view
+        self.exit_resource_edit()
 
         try:
             # QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -194,25 +180,29 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 self.ui_setter.set_ui_from_data()
 
                 # log messages about missing or mistyped values during deserialization
-                QgsMessageLog.logMessage(
-                    f"Errors during deserialization: {self.config_data.error_message}"
-                )
-                QgsMessageLog.logMessage(
-                    f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
-                )
+                # try/except in case of running it from pytests
+                try:
+                    QgsMessageLog.logMessage(
+                        f"Errors during deserialization: {self.config_data.error_message}"
+                    )
+                    QgsMessageLog.logMessage(
+                        f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
+                    )
 
-                # summarize all properties missing/overwitten with defaults
-                # atm, warning with the full list of properties
-                all_missing_props = self.config_data.all_missing_props
-                QgsMessageLog.logMessage(
-                    f"All missing or replaced properties: {self.config_data.all_missing_props}"
-                )
-                if len(all_missing_props) > 0:
-                    ReadOnlyTextDialog(
-                        self,
-                        "Warning",
-                        f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
-                    ).exec_()
+                    # summarize all properties missing/overwitten with defaults
+                    # atm, warning with the full list of properties
+                    QgsMessageLog.logMessage(
+                        f"All missing or replaced properties: {self.config_data.all_missing_props}"
+                    )
+
+                    if len(self.config_data.all_missing_props) > 0:
+                        ReadOnlyTextDialog(
+                            self,
+                            "Warning",
+                            f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
+                        ).exec_()
+                except:
+                    pass
 
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
@@ -226,11 +216,46 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # You can also check the standard button type
         if button == self.buttonBox.button(QDialogButtonBox.Save):
-            self.save_to_file()
+            if self._set_validate_ui_data()[0]:
+                file_path, _ = QFileDialog.getSaveFileName(
+                    self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
+                )
+                self.save_to_file(file_path)
         elif button == self.buttonBox.button(QDialogButtonBox.Open):
-            self.open_file()
+            file_name, _ = QFileDialog.getOpenFileName(
+                self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
+            )
+            self.open_file(file_name)
         elif button == self.buttonBox.button(QDialogButtonBox.Close):
             self.reject()
+
+    def _set_validate_ui_data(self) -> tuple[bool, list]:
+        # Set and validate data from UI
+        try:
+            self.data_from_ui_setter.set_data_from_ui()
+            invalid_props = self.config_data.validate_config_data()
+            if len(invalid_props) > 0:
+
+                # in case of running from pytests
+                try:
+                    QgsMessageLog.logMessage(
+                        f"Properties are missing or have invalid values: {invalid_props}"
+                    )
+                    ReadOnlyTextDialog(
+                        self,
+                        "Warning",
+                        f"Properties are missing or have invalid values: {invalid_props}",
+                    ).exec_()
+                except:
+                    pass
+
+                return False, invalid_props
+            return True, []
+
+        except Exception as e:
+            QgsMessageLog.logMessage(f"Error deserializing: {e}")
+            QMessageBox.warning(f"Error deserializing: {e}")
+            return
 
     def open_templates_path_dialog(self):
         """Defining Server.templates.path path, called from .ui file."""
