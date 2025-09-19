@@ -9,14 +9,14 @@ from ...utils import update_dataclass_from_dict
 @dataclass(kw_only=True)
 class WmsFacadeOptions:
     layer: str = ""
-    style: str = ""
-    version: str = ""
+    version: str | None = None
+    style: str | None = None
 
 
 @dataclass(kw_only=True)
 class WmsFacadeFormat:
-    name: str = ""
-    mimetype: str = ""
+    name: str | None = None
+    mimetype: str | None = None
 
 
 # All Provider subclasses need to have default values even for mandatory fields,
@@ -31,7 +31,7 @@ class ProviderWmsFacade(ProviderTemplate):
 
     # provider-specific attributes
     options: WmsFacadeOptions = field(default_factory=lambda: WmsFacadeOptions())
-    format: WmsFacadeFormat = field(default_factory=lambda: WmsFacadeFormat())
+    format: WmsFacadeFormat | None = None
 
     def assign_ui_dict_to_provider_data(self, values: dict[str, str | list | int]):
 
@@ -74,8 +74,13 @@ class ProviderWmsFacade(ProviderTemplate):
         self.options.layer = values[4]
         self.options.style = values[5]
         self.options.version = values[6]
-        self.format.name = values[7]
-        self.format.mimetype = values[8]
+
+        format_name = values[7] if is_valid_string(values[7]) else None
+        format_mimetype = values[8] if is_valid_string(values[8]) else None
+        if format_name or format_mimetype:
+            self.format = WmsFacadeFormat()
+            self.format.name = format_name
+            self.format.mimetype = format_mimetype
 
     def get_invalid_properties(self):
         """Checks the values of mandatory fields."""

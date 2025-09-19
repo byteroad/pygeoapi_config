@@ -14,8 +14,8 @@ class MvtProxyZoom:
 
 @dataclass(kw_only=True)
 class MvtProxyOptions:
-    zoom: MvtProxyZoom = field(default_factory=lambda: MvtProxyZoom())
-    schemes: list = field(default_factory=lambda: [])
+    zoom: MvtProxyZoom | None = None
+    schemes: list | None = None
 
 
 @dataclass(kw_only=True)
@@ -35,7 +35,7 @@ class ProviderMvtProxy(ProviderTemplate):
     data: str = ""
 
     # provider-specific attributes
-    options: MvtProxyOptions = field(default_factory=lambda: MvtProxyOptions())
+    options: MvtProxyOptions | None = None
     format: MvtProxyFormat = field(default_factory=lambda: MvtProxyFormat())
 
     def assign_ui_dict_to_provider_data(self, values: dict[str, str | list | int]):
@@ -84,13 +84,26 @@ class ProviderMvtProxy(ProviderTemplate):
         self.name = values[1]
         self.crs = values[2].split(",") if is_valid_string(values[2]) else None
         self.data = values[3]
-        self.options.zoom.min = int(values[4])
-        self.options.zoom.max = int(values[5])
-        self.options.schemes = (
-            values[6].split(",") if is_valid_string(values[6]) else []
-        )
+
         self.format.name = values[7]
         self.format.mimetype = values[8]
+
+        # implement Options only if one of the child values provided
+        try:
+            options_zoom_min = int(values[4])
+        except ValueError:
+            options_zoom_min = None
+        try:
+            options_zoom_max = int(values[5])
+        except ValueError:
+            options_zoom_max = None
+        options_schemes = values[6].split(",") if is_valid_string(values[6]) else None
+
+        if options_zoom_min or options_zoom_max or options_schemes:
+            self.options = MvtProxyOptions()
+            self.options.zoom.min = options_zoom_min
+            self.options.zoom.max = options_zoom_max
+            self.options.schemes = options_schemes
 
     def get_invalid_properties(self):
         """Checks the values of mandatory fields."""

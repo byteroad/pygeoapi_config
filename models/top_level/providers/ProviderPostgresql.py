@@ -9,11 +9,13 @@ from ..utils import InlineList, is_valid_string
 @dataclass(kw_only=True)
 class PostgresqlData:
     host: str = ""
-    port: str = ""
     dbname: str = ""
     user: str = ""
-    password: str = ""
-    search_path: InlineList = field(default_factory=lambda: InlineList([]))
+    password: str | None = None
+    port: int | str | None = None
+    search_path: InlineList | None = (
+        None  # field(default_factory=lambda: InlineList([]))
+    )
 
 
 # All Provider subclasses need to have default values even for mandatory fields,
@@ -29,7 +31,13 @@ class ProviderPostgresql(ProviderTemplate):
     # provider-specific attributes
     id_field: str = ""
     table: str = ""
-    geom_field: str = ""
+    geom_field: str | None = None
+
+    # optional
+    storage_crs: str | None = None
+    options: dict | None = None
+    time_field: str | None = None
+    properties: list | None = None
 
     def assign_ui_dict_to_provider_data(self, values: dict[str, str | list | int]):
 
@@ -83,7 +91,11 @@ class ProviderPostgresql(ProviderTemplate):
         self.crs = values[2].split(",") if is_valid_string(values[2]) else None
         self.storage_crs = values[3]
         self.data.host = values[4]
-        self.data.port = values[5]
+        try:
+            self.data.port = int(values[5])
+        except ValueError:
+            self.data.port = values[5] if is_valid_string(values[5]) else None
+
         self.data.dbname = values[6]
         self.data.user = values[7]
         self.data.password = values[8]
