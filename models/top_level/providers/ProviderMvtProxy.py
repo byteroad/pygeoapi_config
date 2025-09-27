@@ -15,6 +15,7 @@ class MvtProxyZoom:
 @dataclass(kw_only=True)
 class MvtProxyOptions:
     zoom: MvtProxyZoom | None = None
+    # not implemented (greyed out in the UI)
     schemes: list | None = None
 
 
@@ -57,22 +58,21 @@ class ProviderMvtProxy(ProviderTemplate):
 
         # Exception: if Zoom values are empty (e.g. missing in the UI), they will not overwrite the class attributes
         # This happens because if new value is abcent, there is nothing we can replace a default 'int' with. Manual overwrite:
-        if values["options.zoom.min"] is None:
-            self.options.zoom.min = None
-        if values["options.zoom.max"] is None:
-            self.options.zoom.max = None
+        if values["options.zoom.min"] is None or values["options.zoom.max"] is None:
+            self.options.zoom = None
 
     def pack_data_to_list(self):
         return [
             self.type.value,
             self.name,
-            self.crs,
             self.data,
-            self.options.zoom.min,
-            self.options.zoom.max,
-            self.options.schemes,
             self.format.name,
             self.format.mimetype,
+            # non-mandatory
+            self.crs,
+            self.options.schemes,
+            self.options.zoom.min,
+            self.options.zoom.max,
         ]
 
     def assign_value_list_to_provider_data(self, values: list):
@@ -81,29 +81,34 @@ class ProviderMvtProxy(ProviderTemplate):
                 f"Unexpected number of value to unpack: {len(values)}. Expected: 9"
             )
 
-        self.name = values[1]
-        self.crs = values[2].split(",") if is_valid_string(values[2]) else None
-        self.data = values[3]
+        self.name: str = values[1]
+        self.data: str = values[2]
+        self.format.name: str = values[3]
+        self.format.mimetype: str = values[4]
 
-        self.format.name = values[7]
-        self.format.mimetype = values[8]
+        # non-mandatory
+        self.crs: list | None = (
+            values[5].split(",") if is_valid_string(values[5]) else None
+        )
 
         # implement Options only if one of the child values provided
+        options_schemes: list | None = values[6].split(",") if is_valid_string(values[6]) else None
+
         try:
-            options_zoom_min = int(values[4])
+            options_zoom_min: int = int(values[7])
         except ValueError:
             options_zoom_min = None
         try:
-            options_zoom_max = int(values[5])
+            options_zoom_max: int = int(values[8])
         except ValueError:
             options_zoom_max = None
-        options_schemes = values[6].split(",") if is_valid_string(values[6]) else None
-
         if options_zoom_min or options_zoom_max or options_schemes:
             self.options = MvtProxyOptions()
-            self.options.zoom.min = options_zoom_min
-            self.options.zoom.max = options_zoom_max
             self.options.schemes = options_schemes
+            if options_zoom_min is not None and options_zoom_max is not None:
+                self.options.zoom = MvtProxyZoom()
+                self.options.zoom.min = options_zoom_min
+                self.options.zoom.max = options_zoom_max
 
     def get_invalid_properties(self):
         """Checks the values of mandatory fields."""
@@ -119,11 +124,5 @@ class ProviderMvtProxy(ProviderTemplate):
             all_invalid_fields.append("format.name")
         if not is_valid_string(self.format.mimetype):
             all_invalid_fields.append("format.mimetype")
-        if not isinstance(self.options.zoom.min, int):
-            all_invalid_fields.append("options.zoom.min")
-        if not isinstance(self.options.zoom.max, int):
-            all_invalid_fields.append("options.zoom.max")
-        if len(self.options.schemes) == 0:
-            all_invalid_fields.append("options.schemes")
 
         return all_invalid_fields

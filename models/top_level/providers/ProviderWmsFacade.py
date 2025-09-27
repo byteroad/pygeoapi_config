@@ -53,9 +53,10 @@ class ProviderWmsFacade(ProviderTemplate):
         return [
             self.type.value,
             self.name,
-            self.crs,
             self.data,
             self.options.layer,
+            # non-mandatory
+            self.crs,
             self.options.style,
             self.options.version,
             self.format.name,
@@ -68,15 +69,23 @@ class ProviderWmsFacade(ProviderTemplate):
                 f"Unexpected number of value to unpack: {len(values)}. Expected: 9"
             )
 
-        self.name = values[1]
-        self.crs = values[2].split(",") if is_valid_string(values[2]) else None
-        self.data = values[3]
-        self.options.layer = values[4]
-        self.options.style = values[5]
-        self.options.version = values[6]
+        self.name: str = values[1]
+        self.data: str = values[2]
+        self.options.layer: str = values[3]
 
-        format_name = values[7] if is_valid_string(values[7]) else None
-        format_mimetype = values[8] if is_valid_string(values[8]) else None
+        # non-mandatory
+        self.crs: list | None = (
+            values[4].split(",") if is_valid_string(values[4]) else None
+        )
+        self.options.style: str | None = (
+            values[5] if is_valid_string(values[5]) else None
+        )
+        self.options.version: str | None = (
+            values[6] if is_valid_string(values[6]) else None
+        )
+
+        format_name: str | None = values[7] if is_valid_string(values[7]) else None
+        format_mimetype: str | None = values[8] if is_valid_string(values[8]) else None
         if format_name or format_mimetype:
             self.format = WmsFacadeFormat()
             self.format.name = format_name
@@ -92,15 +101,7 @@ class ProviderWmsFacade(ProviderTemplate):
             all_invalid_fields.append("name")
         if not is_valid_string(self.data):
             all_invalid_fields.append("data")
-        if not is_valid_string(self.format.name):
-            all_invalid_fields.append("format.name")
-        if not is_valid_string(self.format.mimetype):
-            all_invalid_fields.append("format.mimetype")
         if not is_valid_string(self.options.layer):
             all_invalid_fields.append("options.layer")
-        if not is_valid_string(self.options.style):
-            all_invalid_fields.append("options.style")
-        if not is_valid_string(self.options.version):
-            all_invalid_fields.append("options.version")
 
         return all_invalid_fields

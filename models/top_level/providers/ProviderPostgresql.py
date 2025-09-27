@@ -1,3 +1,4 @@
+import ast
 from dataclasses import dataclass, field
 
 from ...utils import update_dataclass_from_dict
@@ -13,9 +14,7 @@ class PostgresqlData:
     user: str = ""
     password: str | None = None
     port: int | str | None = None
-    search_path: InlineList | None = (
-        None  # field(default_factory=lambda: InlineList([]))
-    )
+    search_path: list | None = None  # field(default_factory=lambda: InlineList([]))
 
 
 # All Provider subclasses need to have default values even for mandatory fields,
@@ -35,6 +34,8 @@ class ProviderPostgresql(ProviderTemplate):
 
     # optional
     storage_crs: str | None = None
+
+    # not implemented by choice (greyed out in the UI)
     options: dict | None = None
     time_field: str | None = None
     properties: list | None = None
@@ -66,47 +67,68 @@ class ProviderPostgresql(ProviderTemplate):
         return [
             self.type.value,
             self.name,
-            self.crs,
-            self.storage_crs,
+            self.table,
+            self.id_field,
             self.data.host,
-            self.data.port,
             self.data.dbname,
             self.data.user,
-            self.data.password,
-            self.data.search_path,
-            self.id_field,
-            self.table,
+            # non-mandatory:
+            self.crs,
             self.geom_field,
+            self.storage_crs,
+            self.data.password,
+            self.data.port,
+            self.data.search_path,
+            self.options,
+            self.time_field,
+            self.properties,
         ]
 
     def assign_value_list_to_provider_data(self, values: list):
-        if len(values) != 13:
+        if len(values) != 16:
             raise ValueError(
-                f"Unexpected number of value to unpack: {len(values)}. Expected: 13"
+                f"Unexpected number of value to unpack: {len(values)}. Expected: 16"
             )
 
         # self.type = get_enum_value_from_string(ProviderTypes, pr[0])
 
-        self.name = values[1]
-        self.crs = values[2].split(",") if is_valid_string(values[2]) else None
-        self.storage_crs = values[3]
-        self.data.host = values[4]
-        try:
-            self.data.port = int(values[5])
-        except ValueError:
-            self.data.port = values[5] if is_valid_string(values[5]) else None
+        self.name: str = values[1]
+        self.table: str = values[2]
+        self.id_field: str = values[3]
 
-        self.data.dbname = values[6]
-        self.data.user = values[7]
-        self.data.password = values[8]
-        self.data.search_path = (
-            InlineList(values[9].split(","))
-            if is_valid_string(values[9])
-            else InlineList([])
+        self.data.host: str = values[4]
+        self.data.dbname: str = values[5]
+        self.data.user: str = values[6]
+
+        # non-mandatory:
+        self.crs: list | None = (
+            values[7].split(",") if is_valid_string(values[7]) else None
         )
-        self.id_field = values[10]
-        self.table = values[11]
-        self.geom_field = values[12]
+        self.geom_field: str | None = values[8] if is_valid_string(values[8]) else None
+        self.storage_crs: str | None = (
+            values[9] if is_valid_string(values[79]) else None
+        )
+        self.data.password: str | None = (
+            values[10] if is_valid_string(values[10]) else None
+        )
+        try:
+            self.data.port = int(values[11])
+        except ValueError:
+            self.data.port: str | None = (
+                values[11] if is_valid_string(values[11]) else None
+            )
+        self.data.search_path: list | None = (
+            values[12].split(",") if is_valid_string(values[12]) else []
+        )
+        self.options: dict | None = (
+            ast.literal_eval(values[13]) if is_valid_string(values[13]) else None
+        )
+        self.time_field: str | None = (
+            values[14] if is_valid_string(values[14]) else None
+        )
+        self.properties: list | None = (
+            values[15].split(",") if is_valid_string(values[15]) else None
+        )
 
     def get_invalid_properties(self):
         """Checks the values of mandatory fields."""
@@ -116,24 +138,17 @@ class ProviderPostgresql(ProviderTemplate):
             all_invalid_fields.append("type")
         if not is_valid_string(self.name):
             all_invalid_fields.append("name")
-        if not is_valid_string(self.data.host):
-            all_invalid_fields.append("data.host")
-        if not is_valid_string(self.data.port):
-            all_invalid_fields.append("data.port")
-        if not is_valid_string(self.data.dbname):
-            all_invalid_fields.append("data.dbname")
-        if not is_valid_string(self.data.user):
-            all_invalid_fields.append("data.user")
-        if not is_valid_string(self.data.password):
-            all_invalid_fields.append("data.password")
-        if len(self.data.search_path) == 0:
-            all_invalid_fields.append("data.search_path")
 
         if not is_valid_string(self.id_field):
             all_invalid_fields.append("id_field")
         if not is_valid_string(self.table):
             all_invalid_fields.append("table")
-        if not is_valid_string(self.geom_field):
-            all_invalid_fields.append("geom_field")
+
+        if not is_valid_string(self.data.host):
+            all_invalid_fields.append("data.host")
+        if not is_valid_string(self.data.dbname):
+            all_invalid_fields.append("data.dbname")
+        if not is_valid_string(self.data.user):
+            all_invalid_fields.append("data.user")
 
         return all_invalid_fields
