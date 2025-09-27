@@ -43,7 +43,6 @@ class ProviderPostgresql(ProviderTemplate):
     def assign_ui_dict_to_provider_data_on_save(
         self, values: dict[str, str | list | int]
     ):
-
         # adjust structure to match the class structure
         values["data"] = {}
         for k, v in values.items():
@@ -53,16 +52,9 @@ class ProviderPostgresql(ProviderTemplate):
                 "data.dbname",
                 "data.user",
                 "data.password",
+                "data.search_path",
             ]:
                 values["data"][k.split(".")[1]] = v
-        r"""
-        # custom change
-        values["data"]["search_path"] = (
-            values["data.search_path"].split(",")
-            if is_valid_string(values["data.search_path"])
-            else []
-        )
-        """
 
         update_dataclass_from_dict(self, values, "ProviderPostgresql")
 
@@ -91,7 +83,7 @@ class ProviderPostgresql(ProviderTemplate):
             (
                 *cls.get_field_info(cls, "storage_crs"),
                 None,
-                "(optional) http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+                "e.g. http://www.opengis.net/def/crs/OGC/1.3/CRS84",
             ),
             (
                 *cls.get_field_info(cls, "data.password"),
