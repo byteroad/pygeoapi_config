@@ -90,8 +90,6 @@ class NewProviderWindow(QDialog):
     def on_save_clicked(self):
         values = {}
         # Extract all QLineEdit values into a list
-
-        # print("_______________")
         for key, element in self.elements_with_values.items():
             widget = element["widget"]
             data_type = element["data_type"]
@@ -102,7 +100,14 @@ class NewProviderWindow(QDialog):
                     ui_value, data_type, key
                 )
             else:
-                values[key] = cast_element_to_type(ui_value, data_type, key)
+                try:
+                    values[key] = cast_element_to_type(ui_value, data_type, key)
+                except ValueError as e:  # if value is not matched
+                    if ui_value == "":
+                        ui_value = None
+                        values[key] = cast_element_to_type(ui_value, data_type, key)
+                    else:
+                        raise e
         # print(values)
         # emit values to the parent widget
         self.signal_provider_values.emit(self, values)

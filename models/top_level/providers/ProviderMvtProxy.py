@@ -8,8 +8,8 @@ from ...utils import update_dataclass_from_dict
 
 @dataclass(kw_only=True)
 class MvtProxyZoom:
-    min: int = 0
-    max: int = 15
+    min: int | None = None
+    max: int | None = None
 
 
 @dataclass(kw_only=True)
@@ -39,7 +39,9 @@ class ProviderMvtProxy(ProviderTemplate):
     options: MvtProxyOptions | None = None
     format: MvtProxyFormat = field(default_factory=lambda: MvtProxyFormat())
 
-    def assign_ui_dict_to_provider_data(self, values: dict[str, str | list | int]):
+    def assign_ui_dict_to_provider_data_on_save(
+        self, values: dict[str, str | list | int]
+    ):
 
         # adjust structure to match the class structure
         values["options"] = {}
@@ -58,21 +60,22 @@ class ProviderMvtProxy(ProviderTemplate):
 
         # Exception: if Zoom values are empty (e.g. missing in the UI), they will not overwrite the class attributes
         # This happens because if new value is abcent, there is nothing we can replace a default 'int' with. Manual overwrite:
-        if values["options.zoom.min"] is None or values["options.zoom.max"] is None:
+        if values["options.zoom.min"] is None and values["options.zoom.max"] is None:
             self.options.zoom = None
 
     @classmethod
     def ui_elements_grid(cls):
+        # Mandatory to align the fields order with data packing and assigning.
         # label, data_type, default, special_widget_type, placeholder
         return [
-            (*cls.get_field_info(cls, "name"), str, "QComboBox", ["MVT-proxy"]),
-            (*cls.get_field_info(cls, "crs"), list, None, ""),
-            (*cls.get_field_info(cls, "data"), str, None, ""),
-            (*cls.get_field_info(cls, "format.name"), str, None, ""),
-            (*cls.get_field_info(cls, "format.mimetype"), str, None, ""),
-            (*cls.get_field_info(cls, "options.zoom.min"), int, None, ""),
-            (*cls.get_field_info(cls, "options.zoom.max"), int, None, ""),
-            (*cls.get_field_info(cls, "options.schemes"), list, "disabled", ""),
+            (*cls.get_field_info(cls, "name"), "QComboBox", ["MVT-proxy"]),
+            (*cls.get_field_info(cls, "data"), None, ""),
+            (*cls.get_field_info(cls, "format.name"), None, ""),
+            (*cls.get_field_info(cls, "format.mimetype"), None, ""),
+            (*cls.get_field_info(cls, "crs"), None, ""),
+            (*cls.get_field_info(cls, "options.zoom.min"), None, ""),
+            (*cls.get_field_info(cls, "options.zoom.max"), None, ""),
+            (*cls.get_field_info(cls, "options.schemes"), "disabled", ""),
         ]
 
     def pack_data_to_list(self):
@@ -84,12 +87,13 @@ class ProviderMvtProxy(ProviderTemplate):
             self.format.mimetype,
             # non-mandatory
             self.crs,
-            self.options.schemes,
-            self.options.zoom.min,
-            self.options.zoom.max,
+            self.options.zoom.min if (self.options and self.options.zoom) else None,
+            self.options.zoom.max if (self.options and self.options.zoom) else None,
+            self.options.schemes if self.options else None,
         ]
 
-    def assign_value_list_to_provider_data(self, values: list):
+    def assign_value_list_to_provider_data_on_read(self, values: list):
+        print("_______assign_value_list_to_provider_data_on_read")
         if len(values) != 9:
             raise ValueError(
                 f"Unexpected number of value to unpack: {len(values)}. Expected: 9"
@@ -106,22 +110,23 @@ class ProviderMvtProxy(ProviderTemplate):
         )
 
         # implement Options only if one of the child values provided
-        options_schemes: list | None = (
-            values[6].split(",") if is_valid_string(values[6]) else None
-        )
 
         try:
-            options_zoom_min: int = int(values[7])
+            options_zoom_min: int = int(values[6])
         except ValueError:
             options_zoom_min = None
         try:
-            options_zoom_max: int = int(values[8])
+            options_zoom_max: int = int(values[7])
         except ValueError:
             options_zoom_max = None
+
+        options_schemes: list | None = (
+            values[8].split(",") if is_valid_string(values[8]) else None
+        )
         if options_zoom_min or options_zoom_max or options_schemes:
             self.options = MvtProxyOptions()
             self.options.schemes = options_schemes
-            if options_zoom_min is not None and options_zoom_max is not None:
+            if options_zoom_min is not None or options_zoom_max is not None:
                 self.options.zoom = MvtProxyZoom()
                 self.options.zoom.min = options_zoom_min
                 self.options.zoom.max = options_zoom_max

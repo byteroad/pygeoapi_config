@@ -16,8 +16,8 @@ def create_label_lineedit_pair(
     label_text: str, default_value="", placeholder: str = "", validation_callback=None
 ) -> QHBoxLayout:
     label = QLabel(label_text)
-    line_edit = QLineEdit(default_value)
-    line_edit.setPlaceholderText(placeholder)
+    line_edit = QLineEdit(str(default_value) if default_value is not None else "")
+    line_edit.setPlaceholderText(str(placeholder) if placeholder is not None else "")
 
     return {"label": label, "line_edit": line_edit}
 
@@ -50,7 +50,7 @@ def add_widgets_to_grid_by_specs(
         label, data_type, default, special_widget_type, placeholder = row_specs
 
         # if regular widget (QLineEdit for str and int; QListWIdget for list)
-        if not special_widget_type:
+        if special_widget_type != "QComboBox":
 
             # set up defaults
             default_list_entry = ""
@@ -83,14 +83,11 @@ def add_widgets_to_grid_by_specs(
                     new_widgets["line_edit"].setValidator(QIntValidator())
 
         else:
-            if special_widget_type == "QComboBox":
-                all_values: list = placeholder  # case for dropdowns
-                # assign data_widget!
-                label_widget, data_widget = create_label_dropdown_pair(
-                    label, all_values
-                )
-                group_layout.addWidget(label_widget, i, 0)
-                group_layout.addWidget(data_widget, i, 1)
+            all_values: list = placeholder  # case for dropdowns
+            # assign data_widget!
+            label_widget, data_widget = create_label_dropdown_pair(label, all_values)
+            group_layout.addWidget(label_widget, i, 0)
+            group_layout.addWidget(data_widget, i, 1)
 
         # extra check:
         if special_widget_type == "disabled":

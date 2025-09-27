@@ -34,7 +34,9 @@ class ProviderWmsFacade(ProviderTemplate):
     options: WmsFacadeOptions = field(default_factory=lambda: WmsFacadeOptions())
     format: WmsFacadeFormat | None = None
 
-    def assign_ui_dict_to_provider_data(self, values: dict[str, str | list | int]):
+    def assign_ui_dict_to_provider_data_on_save(
+        self, values: dict[str, str | list | int]
+    ):
 
         # adjust structure to match the class structure
         values["options"] = {}
@@ -52,16 +54,17 @@ class ProviderWmsFacade(ProviderTemplate):
 
     @classmethod
     def ui_elements_grid(cls):
+        # Mandatory to align the fields order with data packing and assigning.
         # label, data_type, default, special_widget_type, placeholder
         return [
-            (*cls.get_field_info(cls, "name"), str, "QComboBox", ["WMSFacade"]),
-            (*cls.get_field_info(cls, "crs"), list, None, ""),
-            (*cls.get_field_info(cls, "data"), str, None, ""),
-            (*cls.get_field_info(cls, "options.layer"), str, None, ""),
-            (*cls.get_field_info(cls, "options.style"), str, None, ""),
-            (*cls.get_field_info(cls, "options.version"), str, None, ""),
-            (*cls.get_field_info(cls, "format.name"), str, None, ""),
-            (*cls.get_field_info(cls, "format.mimetype"), str, None, ""),
+            (*cls.get_field_info(cls, "name"), "QComboBox", ["WMSFacade"]),
+            (*cls.get_field_info(cls, "data"), None, ""),
+            (*cls.get_field_info(cls, "options.layer"), None, ""),
+            (*cls.get_field_info(cls, "crs"), None, ""),
+            (*cls.get_field_info(cls, "options.style"), None, ""),
+            (*cls.get_field_info(cls, "options.version"), None, ""),
+            (*cls.get_field_info(cls, "format.name"), None, ""),
+            (*cls.get_field_info(cls, "format.mimetype"), None, ""),
         ]
 
     def pack_data_to_list(self):
@@ -74,11 +77,12 @@ class ProviderWmsFacade(ProviderTemplate):
             self.crs,
             self.options.style,
             self.options.version,
-            self.format.name,
-            self.format.mimetype,
+            self.format.name if self.format else None,
+            self.format.mimetype if self.format else None,
         ]
 
-    def assign_value_list_to_provider_data(self, values: list):
+    def assign_value_list_to_provider_data_on_read(self, values: list):
+        print("_______assign_value_list_to_provider_data_on_read")
         if len(values) != 9:
             raise ValueError(
                 f"Unexpected number of value to unpack: {len(values)}. Expected: 9"

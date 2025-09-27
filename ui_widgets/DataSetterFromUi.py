@@ -295,7 +295,7 @@ class DataSetterFromUi:
         for pr in providers_data_lists:
             provider_type = get_enum_value_from_string(ProviderTypes, pr[0])
             new_pr = ProviderTemplate.init_provider_from_type(provider_type)
-            new_pr.assign_value_list_to_provider_data(pr)
+            new_pr.assign_value_list_to_provider_data_on_read(pr)
 
             config_data.resources[res_name].providers.append(new_pr)
 

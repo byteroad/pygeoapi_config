@@ -107,7 +107,13 @@ def cast_element_to_type(value: Any, expected_type, prop_name: str):
     if type(expected_type) is UnionType:
         args = get_args(expected_type)
         for inner_type in args:
-            if _is_instance_of_type(value, inner_type):
+            # handle the case when manual casting is required
+            if type(value) is str and inner_type is int:
+                try:
+                    return int(value)
+                except ValueError:
+                    pass
+            elif _is_instance_of_type(value, inner_type):
                 return cast_element_to_type(value, inner_type, prop_name)
 
     elif is_dataclass(expected_type):

@@ -40,7 +40,9 @@ class ProviderPostgresql(ProviderTemplate):
     time_field: str | None = None
     properties: list | None = None
 
-    def assign_ui_dict_to_provider_data(self, values: dict[str, str | list | int]):
+    def assign_ui_dict_to_provider_data_on_save(
+        self, values: dict[str, str | list | int]
+    ):
 
         # adjust structure to match the class structure
         values["data"] = {}
@@ -66,12 +68,21 @@ class ProviderPostgresql(ProviderTemplate):
 
     @classmethod
     def ui_elements_grid(cls):
+        # Mandatory to align the fields order with data packing and assigning.
         # label, data_type, default, special_widget_type, placeholder
         return [
             (*cls.get_field_info(cls, "name"), "QComboBox", ["PostgreSQL"]),
-            (*cls.get_field_info(cls, "crs"), None, ""),
             (*cls.get_field_info(cls, "table"), None, ""),
             (*cls.get_field_info(cls, "id_field"), None, ""),
+            (*cls.get_field_info(cls, "data.host"), None, ""),
+            (
+                *cls.get_field_info(cls, "data.dbname"),
+                None,
+                "",
+            ),
+            (*cls.get_field_info(cls, "data.user"), None, ""),
+            # non-mandatory:
+            (*cls.get_field_info(cls, "crs"), None, ""),
             (
                 *cls.get_field_info(cls, "geom_field"),
                 None,
@@ -82,13 +93,6 @@ class ProviderPostgresql(ProviderTemplate):
                 None,
                 "(optional) http://www.opengis.net/def/crs/OGC/1.3/CRS84",
             ),
-            (*cls.get_field_info(cls, "data.host"), None, ""),
-            (
-                *cls.get_field_info(cls, "data.dbname"),
-                None,
-                "",
-            ),
-            (*cls.get_field_info(cls, "data.user"), None, ""),
             (
                 *cls.get_field_info(cls, "data.password"),
                 None,
@@ -136,7 +140,8 @@ class ProviderPostgresql(ProviderTemplate):
             self.properties,
         ]
 
-    def assign_value_list_to_provider_data(self, values: list):
+    def assign_value_list_to_provider_data_on_read(self, values: list):
+        print("_______assign_value_list_to_provider_data_on_read")
         if len(values) != 16:
             raise ValueError(
                 f"Unexpected number of value to unpack: {len(values)}. Expected: 16"
