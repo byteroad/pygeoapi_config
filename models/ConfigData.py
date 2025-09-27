@@ -173,7 +173,7 @@ class ConfigData:
 
         # initialize provider; assign ui_dict data to the provider instance
         new_provider = ProviderTemplate.init_provider_from_type(provider_type)
-        new_provider.assign_ui_dict_to_provider_data(values)
+        new_provider.assign_ui_dict_to_provider_data_on_save(values)
 
         # if incomplete data, remove Provider from ConfigData and show Warning
         invalid_props = new_provider.get_invalid_properties()
