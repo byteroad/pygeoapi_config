@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import get_type_hints
 
 from .records import ProviderTypes
 from ..providers import ProviderTemplate
@@ -48,6 +49,20 @@ class ProviderWmsFacade(ProviderTemplate):
         values["format"]["mimetype"] = values["format.mimetype"]
 
         update_dataclass_from_dict(self, values, "ProviderWmsFacade")
+
+    @classmethod
+    def ui_elements_grid(cls):
+        # label, data_type, default, special_widget_type, placeholder
+        return [
+            (*cls.get_field_info(cls, "name"), str, "QComboBox", ["WMSFacade"]),
+            (*cls.get_field_info(cls, "crs"), list, None, ""),
+            (*cls.get_field_info(cls, "data"), str, None, ""),
+            (*cls.get_field_info(cls, "options.layer"), str, None, ""),
+            (*cls.get_field_info(cls, "options.style"), str, None, ""),
+            (*cls.get_field_info(cls, "options.version"), str, None, ""),
+            (*cls.get_field_info(cls, "format.name"), str, None, ""),
+            (*cls.get_field_info(cls, "format.mimetype"), str, None, ""),
+        ]
 
     def pack_data_to_list(self):
         return [

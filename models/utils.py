@@ -76,7 +76,7 @@ def update_dataclass_from_dict(
 
                     elif isinstance(new_value, list):
                         new_value, more_wrong_types = (
-                            _cast_list_elements_to_expected_types(
+                            cast_list_elements_to_expected_types(
                                 new_value, expected_type, f"{prop_name}.{field_name}"
                             )
                         )
@@ -100,7 +100,7 @@ def update_dataclass_from_dict(
     return missing_fields, wrong_types, all_missing_props
 
 
-def _cast_element_to_type(value: Any, expected_type, prop_name: str):
+def cast_element_to_type(value: Any, expected_type, prop_name: str):
     """Function intended to cast non-iterable values, or dict (to dataclasses)."""
 
     # if there are alternative options for the expected type: recurse
@@ -108,7 +108,7 @@ def _cast_element_to_type(value: Any, expected_type, prop_name: str):
         args = get_args(expected_type)
         for inner_type in args:
             if _is_instance_of_type(value, inner_type):
-                return _cast_element_to_type(value, inner_type, prop_name)
+                return cast_element_to_type(value, inner_type, prop_name)
 
     elif is_dataclass(expected_type):
         class_instance = expected_type()
@@ -123,10 +123,12 @@ def _cast_element_to_type(value: Any, expected_type, prop_name: str):
         if _is_instance_of_type(value, expected_type):
             return value
 
-    raise ValueError("Element type not matched")
+    raise ValueError(
+        f"Element type not matched: {prop_name}={value}, expected type is {expected_type}"
+    )
 
 
-def _cast_list_elements_to_expected_types(
+def cast_list_elements_to_expected_types(
     new_value: list, expected_type, prop_name: str
 ):
     """Cast all elements in the list to one of the expected types."""
@@ -140,7 +142,7 @@ def _cast_list_elements_to_expected_types(
         # e.g. 'list | dict'
         for possible_type in args:
             if _is_instance_of_type(new_value, possible_type):
-                casted_values, more_wrong_types = _cast_list_elements_to_expected_types(
+                casted_values, more_wrong_types = cast_list_elements_to_expected_types(
                     new_value, possible_type, prop_name
                 )
                 wrong_types.extend(more_wrong_types)
@@ -153,7 +155,7 @@ def _cast_list_elements_to_expected_types(
             value_casted = False
             for inner_type in args:
                 try:
-                    casted_element = _cast_element_to_type(val, inner_type, prop_name)
+                    casted_element = cast_element_to_type(val, inner_type, prop_name)
                     casted_values.append(casted_element)
                     value_casted = True
                     break

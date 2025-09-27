@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from typing import Any
+from dataclasses import dataclass, is_dataclass, MISSING
+from typing import Any, Type, get_type_hints
 from .records import ProviderTypes
 
 
@@ -17,6 +17,46 @@ class ProviderTemplate(ABC):
 
     # optional, but with assumed default value:
     crs: list | None = None
+
+    @abstractmethod
+    def ui_elements_grid(cls):
+        """Return specifications for the UI dialog for the given Resource Provider.
+        Each UI element is reading from the assigned type and default value of class property.
+        """
+        return []
+
+    def get_field_info(cls: Type, field_path: str) -> tuple[str, Type, Any]:
+        """
+        Inspect a (possibly nested) dataclass field on `cls` and return (type, default_value).
+        If no default is defined, default_value is None.
+        """
+        parts = field_path.split(".")
+        current_cls = cls
+        default = None
+        field_type = None
+
+        for i, part in enumerate(parts):
+            type_hints = get_type_hints(current_cls)
+            field_type = type_hints.get(part)
+            field_obj = current_cls.__dataclass_fields__[part]
+
+            # Get default or default_factory
+            default = field_obj.default
+            if default is MISSING:
+                factory = field_obj.default_factory
+                if factory is not MISSING:
+                    default = factory()
+                else:
+                    default = None
+
+            # If there are more nested parts, move deeper
+            if i < len(parts) - 1:
+                # If default is None but field_type is a dataclass, instantiate a dummy
+                if default is None and is_dataclass(field_type):
+                    default = field_type()
+                current_cls = field_type
+
+        return field_path, field_type, default
 
     @staticmethod
     def init_provider_from_type(provider_type: ProviderTypes):

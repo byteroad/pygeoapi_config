@@ -13,11 +13,16 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtGui import QIntValidator
 
+from ...models.top_level.providers import (
+    ProviderPostgresql,
+    ProviderMvtProxy,
+    ProviderWmsFacade,
+)
+
 from ...models.top_level.providers.records import ProviderTypes
-from .provider_features import create_feature_provider_window
-from .provider_map import create_map_provider_window
-from .provider_tile import create_tile_provider_window
+from ...models.utils import cast_list_elements_to_expected_types, cast_element_to_type
 from .StringListWidget import StringListWidget
+from .utils import add_widgets_to_grid_by_specs
 
 
 class NewProviderWindow(QDialog):
@@ -50,18 +55,18 @@ class NewProviderWindow(QDialog):
         # fill the box depending on the provider type
         self.elements_with_values = {}
         if provider_type == ProviderTypes.FEATURE:
-            self.elements_with_values = create_feature_provider_window(
-                group_layout, data_list
+            self.elements_with_values = add_widgets_to_grid_by_specs(
+                ProviderPostgresql.ui_elements_grid(), group_layout, data_list
             )
 
         elif provider_type == ProviderTypes.MAP:
-            self.elements_with_values = create_map_provider_window(
-                group_layout, data_list
+            self.elements_with_values = add_widgets_to_grid_by_specs(
+                ProviderWmsFacade.ui_elements_grid(), group_layout, data_list
             )
 
         elif provider_type == ProviderTypes.TILE:
-            self.elements_with_values = create_tile_provider_window(
-                group_layout, data_list
+            self.elements_with_values = add_widgets_to_grid_by_specs(
+                ProviderMvtProxy.ui_elements_grid(), group_layout, data_list
             )
 
         # Add buttons at the bottom
@@ -85,31 +90,41 @@ class NewProviderWindow(QDialog):
     def on_save_clicked(self):
         values = {}
         # Extract all QLineEdit values into a list
-        for key, element in self.elements_with_values.items():
-            ui_value: int | list | str | None = self.extract_value_from_ui(element)
-            values[key] = ui_value
 
+        # print("_______________")
+        for key, element in self.elements_with_values.items():
+            widget = element["widget"]
+            data_type = element["data_type"]
+
+            ui_value: int | list | str | None = self.extract_value_from_ui(widget)
+            if ui_value is list:
+                values[key] = cast_list_elements_to_expected_types(
+                    ui_value, data_type, key
+                )
+            else:
+                values[key] = cast_element_to_type(ui_value, data_type, key)
+        # print(values)
         # emit values to the parent widget
         self.signal_provider_values.emit(self, values)
 
         # Close the window
         # self.close()
 
-    def extract_value_from_ui(self, element) -> int | list | str | None:
+    def extract_value_from_ui(self, widget) -> int | list | str | None:
 
-        if isinstance(element, QLineEdit):
+        if isinstance(widget, QLineEdit):
 
-            validator = element.validator()
+            validator = widget.validator()
             if isinstance(validator, QIntValidator):
                 try:
-                    return int(element.text())
+                    return int(widget.text())
                 except ValueError:  # e.g. if the field is empty
                     return None
             else:
-                return element.text()
+                return widget.text()
 
-        elif isinstance(element, QComboBox):
-            return element.currentText()
+        elif isinstance(widget, QComboBox):
+            return widget.currentText()
 
-        elif isinstance(element, StringListWidget):
-            return element.values_to_list()
+        elif isinstance(widget, StringListWidget):
+            return widget.values_to_list()

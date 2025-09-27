@@ -61,6 +61,20 @@ class ProviderMvtProxy(ProviderTemplate):
         if values["options.zoom.min"] is None or values["options.zoom.max"] is None:
             self.options.zoom = None
 
+    @classmethod
+    def ui_elements_grid(cls):
+        # label, data_type, default, special_widget_type, placeholder
+        return [
+            (*cls.get_field_info(cls, "name"), str, "QComboBox", ["MVT-proxy"]),
+            (*cls.get_field_info(cls, "crs"), list, None, ""),
+            (*cls.get_field_info(cls, "data"), str, None, ""),
+            (*cls.get_field_info(cls, "format.name"), str, None, ""),
+            (*cls.get_field_info(cls, "format.mimetype"), str, None, ""),
+            (*cls.get_field_info(cls, "options.zoom.min"), int, None, ""),
+            (*cls.get_field_info(cls, "options.zoom.max"), int, None, ""),
+            (*cls.get_field_info(cls, "options.schemes"), list, "disabled", ""),
+        ]
+
     def pack_data_to_list(self):
         return [
             self.type.value,

@@ -53,15 +53,66 @@ class ProviderPostgresql(ProviderTemplate):
                 "data.password",
             ]:
                 values["data"][k.split(".")[1]] = v
-
+        r"""
         # custom change
         values["data"]["search_path"] = (
             values["data.search_path"].split(",")
             if is_valid_string(values["data.search_path"])
             else []
         )
+        """
 
         update_dataclass_from_dict(self, values, "ProviderPostgresql")
+
+    @classmethod
+    def ui_elements_grid(cls):
+        # label, data_type, default, special_widget_type, placeholder
+        return [
+            (*cls.get_field_info(cls, "name"), "QComboBox", ["PostgreSQL"]),
+            (*cls.get_field_info(cls, "crs"), None, ""),
+            (*cls.get_field_info(cls, "table"), None, ""),
+            (*cls.get_field_info(cls, "id_field"), None, ""),
+            (
+                *cls.get_field_info(cls, "geom_field"),
+                None,
+                "",
+            ),
+            (
+                *cls.get_field_info(cls, "storage_crs"),
+                None,
+                "(optional) http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+            ),
+            (*cls.get_field_info(cls, "data.host"), None, ""),
+            (
+                *cls.get_field_info(cls, "data.dbname"),
+                None,
+                "",
+            ),
+            (*cls.get_field_info(cls, "data.user"), None, ""),
+            (
+                *cls.get_field_info(cls, "data.password"),
+                None,
+                "",
+            ),
+            (*cls.get_field_info(cls, "data.port"), None, ""),
+            (
+                *cls.get_field_info(cls, "data.search_path"),
+                None,
+                "e.g. 'osm, public'",
+            ),
+            # not implemented
+            (*cls.get_field_info(cls, "options"), "disabled", ""),
+            (
+                *cls.get_field_info(cls, "time_field"),
+                "disabled",
+                "",
+            ),
+            (
+                *cls.get_field_info(cls, "properties"),
+                "disabled",
+                "",
+            ),
+        ]
 
     def pack_data_to_list(self):
         return [
@@ -79,6 +130,7 @@ class ProviderPostgresql(ProviderTemplate):
             self.data.password,
             self.data.port,
             self.data.search_path,
+            # not implemented
             self.options,
             self.time_field,
             self.properties,
