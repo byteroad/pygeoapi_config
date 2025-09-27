@@ -20,6 +20,10 @@ copy this folder to your QGIS plugin directory. Something like:
 
 Modify the user interface by opening pygeoapiconfig_dialog_base.ui in [Qt Creator](https://doc.qt.io/qtcreator/).
 
+ ## Run unit tests locally
+ Run the following command from the root folder: 
+ `python tests\run_tests_locally.py` 
+
  ## Screenshot
 
 ![screenshot](/screenshot.png)
