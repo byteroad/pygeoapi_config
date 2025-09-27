@@ -1,10 +1,10 @@
-import ast
 from dataclasses import dataclass, field
+import json
 
 from ...utils import update_dataclass_from_dict
 from .records import ProviderTypes
 from ..providers import ProviderTemplate
-from ..utils import InlineList, is_valid_string
+from ..utils import is_valid_string
 
 
 @dataclass(kw_only=True)
@@ -121,7 +121,7 @@ class ProviderPostgresql(ProviderTemplate):
             values[12].split(",") if is_valid_string(values[12]) else []
         )
         self.options: dict | None = (
-            ast.literal_eval(values[13]) if is_valid_string(values[13]) else None
+            json.loads(values[13]) if is_valid_string(values[13]) else None
         )
         self.time_field: str | None = (
             values[14] if is_valid_string(values[14]) else None

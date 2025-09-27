@@ -288,7 +288,7 @@ class DataSetterFromUi:
         config_data.resources[res_name].providers = []
 
         # add editable providers from a widget
-        providers_data_lists: list[list] = unpack_listwidget_values_to_sublists(
+        providers_data_lists: list[list[str]] = unpack_listwidget_values_to_sublists(
             dialog.listWidgetResProvider
         )
 
@@ -300,7 +300,7 @@ class DataSetterFromUi:
             config_data.resources[res_name].providers.append(new_pr)
 
         # add read-only providers from another widget
-        read_only_providers_data_lists: list[list] = (
+        read_only_providers_data_lists: list[list[str]] = (
             unpack_listwidget_values_to_sublists(
                 dialog.listWidgetResReadOnlyProviders, 1
             )

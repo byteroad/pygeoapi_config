@@ -43,13 +43,13 @@ class ProviderMvtProxy(ProviderTemplate):
 
         # adjust structure to match the class structure
         values["options"] = {}
-        values["options"]["zoom"] = {}
         values["format"] = {}
 
         # custom change
+        values["options"]["zoom"] = {}
         values["options"]["zoom"]["min"] = values["options.zoom.min"]
         values["options"]["zoom"]["max"] = values["options.zoom.max"]
-        values["options"]["schemes"] = values["options.schemes"]  # already list
+        values["options"]["schemes"] = values["options.schemes"]
 
         values["format"]["name"] = values["format.name"]
         values["format"]["mimetype"] = values["format.mimetype"]
@@ -92,7 +92,9 @@ class ProviderMvtProxy(ProviderTemplate):
         )
 
         # implement Options only if one of the child values provided
-        options_schemes: list | None = values[6].split(",") if is_valid_string(values[6]) else None
+        options_schemes: list | None = (
+            values[6].split(",") if is_valid_string(values[6]) else None
+        )
 
         try:
             options_zoom_min: int = int(values[7])

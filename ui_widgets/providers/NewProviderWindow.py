@@ -86,7 +86,8 @@ class NewProviderWindow(QDialog):
         values = {}
         # Extract all QLineEdit values into a list
         for key, element in self.elements_with_values.items():
-            values[key] = self.extract_value_from_ui(element)
+            ui_value: int | list | str | None = self.extract_value_from_ui(element)
+            values[key] = ui_value
 
         # emit values to the parent widget
         self.signal_provider_values.emit(self, values)
@@ -94,7 +95,7 @@ class NewProviderWindow(QDialog):
         # Close the window
         # self.close()
 
-    def extract_value_from_ui(self, element):
+    def extract_value_from_ui(self, element) -> int | list | str | None:
 
         if isinstance(element, QLineEdit):
 
