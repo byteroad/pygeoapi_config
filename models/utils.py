@@ -58,9 +58,16 @@ def update_dataclass_from_dict(
 
                         new_value = InlineList(new_value)
 
-                    # Exception: remap to datetime
-                    if datetime in args or expected_type is datetime:
-                        new_value = datetime.strptime(new_value, "%Y-%m-%dT%H:%M:%SZ")
+                    # Exception: try remap to datetime
+                    if (datetime in args or expected_type is datetime) and isinstance(
+                        new_value, str
+                    ):
+                        try:
+                            new_value = datetime.strptime(
+                                new_value, "%Y-%m-%dT%H:%M:%SZ"
+                            )
+                        except:
+                            pass
 
                     # Exception: remap str to Enum
                     elif isinstance(expected_type, type) and issubclass(
@@ -112,6 +119,7 @@ def cast_element_to_type(value: Any, expected_type, prop_name: str):
     if type(expected_type) is UnionType:
         args = get_args(expected_type)
         for inner_type in args:
+
             if inner_type.__name__.startswith("Provider"):
                 # don't cast to wrong provider, even if properties match
                 if (
@@ -136,7 +144,6 @@ def cast_element_to_type(value: Any, expected_type, prop_name: str):
                     return int(value)
                 except ValueError:
                     pass
-
             elif _is_instance_of_type(value, inner_type):
                 return cast_element_to_type(value, inner_type, prop_name)
 
@@ -179,6 +186,7 @@ def cast_list_elements_to_expected_types(
 
     elif type(expected_type) is not UnionType and args and len(new_value) > 0:
         # e.g. '<ListTemplate>' or (ProviderPostgresql | ProviderMvtProxy | ProviderWmsFacade,)
+
         for val in new_value:
 
             value_casted = False

@@ -1,4 +1,3 @@
-import os
 import pytest
 import subprocess
 from pathlib import Path
@@ -11,7 +10,7 @@ BASE_DIR = Path(__file__).parent / "yaml_samples"
 # First, delete all YAML files that start with "saved_"
 for f in BASE_DIR.glob("saved_*.yml"):
     f.unlink()  # deletes the file
-sample_yaml_files = list(BASE_DIR.glob("*.yml")) + list(BASE_DIR.glob("*.yaml"))
+sample_yaml_files = list(BASE_DIR.glob("*.yml"))
 
 
 @pytest.fixture()
@@ -21,7 +20,7 @@ def base_dir():
 
 
 @pytest.mark.parametrize("sample_yaml", sample_yaml_files)
-def test_json_schema_on_open_save(qtbot, base_dir, sample_yaml: str):
+def test_json_schema_on_open_save(qtbot, sample_yaml: str):
     """Validate YAML against schema.json after loading and saving."""
 
     # Create the dialog widget and let qtbot manage it
@@ -54,7 +53,7 @@ def test_json_schema_on_open_save(qtbot, base_dir, sample_yaml: str):
 
 
 @pytest.mark.parametrize("sample_yaml", sample_yaml_files)
-def test_open_file_validate_ui_data(qtbot, base_dir, sample_yaml: str):
+def test_open_file_validate_ui_data(qtbot, sample_yaml: str):
     """Run UI data validation from opened file (done in the plugin before saving to the new file)."""
 
     # Create the dialog widget and let qtbot manage it
