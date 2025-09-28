@@ -39,6 +39,7 @@ def test_json_schema_on_open_save(qtbot, base_dir, sample_yaml: str):
     result = subprocess.run(
         [
             "check-jsonschema",
+            "--verbose",
             "--schemafile",
             "https://raw.githubusercontent.com/geopython/pygeoapi/refs/heads/master/pygeoapi/resources/schemas/config/pygeoapi-config-0.x.yml",
             abs_new_yaml_path,
@@ -49,7 +50,7 @@ def test_json_schema_on_open_save(qtbot, base_dir, sample_yaml: str):
     print(f"_______File saved as '{abs_new_yaml_path}'", flush=True)
     assert (
         result.returncode == 0
-    ), f"Validation failed:\n{result.stderr}, '{abs_new_yaml_path.name}'"
+    ), f"Validation failed:\n{result.stderr}, '{abs_new_yaml_path.name}', {result.stdout}"
 
 
 @pytest.mark.parametrize("sample_yaml", sample_yaml_files)

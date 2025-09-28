@@ -1,4 +1,5 @@
 from dataclasses import is_dataclass, fields, MISSING
+from datetime import datetime
 from enum import Enum
 from types import UnionType
 from typing import Any, get_origin, get_args, Union, get_type_hints
@@ -57,6 +58,10 @@ def update_dataclass_from_dict(
 
                         new_value = InlineList(new_value)
 
+                    # Exception: remap to datetime
+                    if datetime in args or expected_type is datetime:
+                        new_value = datetime.strptime(new_value, "%Y-%m-%dT%H:%M:%SZ")
+
                     # Exception: remap str to Enum
                     elif isinstance(expected_type, type) and issubclass(
                         expected_type, Enum
@@ -107,12 +112,31 @@ def cast_element_to_type(value: Any, expected_type, prop_name: str):
     if type(expected_type) is UnionType:
         args = get_args(expected_type)
         for inner_type in args:
+            if inner_type.__name__.startswith("Provider"):
+                # don't cast to wrong provider, even if properties match
+                if (
+                    (
+                        value.get("name") == "PostgreSQL"
+                        and not inner_type.__name__.endswith("ProviderPostgresql")
+                    )
+                    or (
+                        value.get("name") == "MVT-proxy"
+                        and not inner_type.__name__.endswith("ProviderMvtProxy")
+                    )
+                    or (
+                        value.get("name") == "WMSFacade"
+                        and not inner_type.__name__.endswith("ProviderWmsFacade")
+                    )
+                ):
+                    continue
+
             # handle the case when manual casting is required
             if type(value) is str and inner_type is int:
                 try:
                     return int(value)
                 except ValueError:
                     pass
+
             elif _is_instance_of_type(value, inner_type):
                 return cast_element_to_type(value, inner_type, prop_name)
 
@@ -155,7 +179,6 @@ def cast_list_elements_to_expected_types(
 
     elif type(expected_type) is not UnionType and args and len(new_value) > 0:
         # e.g. '<ListTemplate>' or (ProviderPostgresql | ProviderMvtProxy | ProviderWmsFacade,)
-
         for val in new_value:
 
             value_casted = False
@@ -239,6 +262,14 @@ def _is_instance_of_type(value, expected_type) -> bool:
     # Exception for when 'expected_type' is a custom dataclass and 'value' is dict
     if isinstance(value, dict) and is_dataclass(expected_type):
         return can_cast_to_dataclass(value, expected_type)
+
+    # Exception: try cast str to datetime manually
+    if expected_type is datetime:
+        try:
+            datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
+            return True
+        except:
+            pass
 
     # Fallback for normal types
     return isinstance(value, expected_type)

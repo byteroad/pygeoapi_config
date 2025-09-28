@@ -65,8 +65,8 @@ class ResourceSpatialConfig:
 class ResourceTemporalConfig:
 
     # optional
-    begin: str | datetime | None = None
-    end: str | datetime | None = None
+    begin: datetime | None = None
+    end: datetime | None = None
     trs: str | None = None
 
 
