@@ -125,17 +125,27 @@ def test_open_file_validate_ui_data_save_file(qtbot, sample_yaml: str):
     yaml1 = load_yaml(sample_yaml)
     yaml2 = load_yaml(abs_new_yaml_path)
 
-    diff = diff_yaml(yaml1, yaml2)
+    diff_data = diff_yaml(yaml1, yaml2)
+    diff_yaml_path = sample_yaml.with_name(f"saved_DIFF_{sample_yaml.name}")
 
-    if len(diff) == 0:
+    # save to file
+    with open(diff_yaml_path, "w", encoding="utf-8") as file:
+        yaml.dump(
+            diff_data,
+            file,
+            Dumper=dialog.dumper,
+            default_flow_style=False,
+            sort_keys=False,
+            allow_unicode=True,
+            indent=4,
+        )
+
+    if len(diff_data) == 0:
         assert True
 
-    print("__________________________", flush=True)
-    print(abs_new_yaml_path.name, flush=True)
-    print("Added: " + str(diff["added"]), flush=True)
-    print("Removed: " + str(diff["removed"]), flush=True)
-    print("Changed: " + str(diff["changed"]), flush=True)
-    assert False, f"YAML data changed after saving: '{sample_yaml.name}'"
+    assert (
+        False
+    ), f"YAML data changed after saving: '{sample_yaml.name}'. \nAdded: {len(diff_data['added'])} fields, changed: {len(diff_data['changed'])} fields, removed: {len(diff_data['removed'])} fields."
 
 
 def diff_yaml(obj1: Any, obj2: Any, path: str = "") -> dict:
