@@ -8,9 +8,10 @@ from .top_level import (
     MetadataConfig,
     ResourceConfigTemplate,
 )
-from .top_level.utils import InlineList, bbox_from_list
+from .top_level.utils import InlineList
 from .top_level.providers import ProviderTemplate
 from .top_level.providers.records import ProviderTypes
+from .top_level.ResourceConfigTemplate import ResourceTypesEnum
 
 
 @dataclass(kw_only=True)
@@ -23,7 +24,9 @@ class ConfigData:
     server: ServerConfig = field(default_factory=lambda: ServerConfig())
     logging: LoggingConfig = field(default_factory=lambda: LoggingConfig())
     metadata: MetadataConfig = field(default_factory=lambda: MetadataConfig())
-    resources: dict[str, ResourceConfigTemplate] = field(default_factory=lambda: {})
+    resources: dict[str, ResourceConfigTemplate | dict] = field(
+        default_factory=lambda: {}
+    )
 
     def set_data_from_yaml(self, dict_content: dict):
         """Parse YAML file content and overwride .config_data properties where available."""
@@ -69,30 +72,38 @@ class ConfigData:
                 resource_instance_name = next(iter(res_config))
                 resource_data = res_config[resource_instance_name]
 
-                # Create a new ResourceConfigTemplate instance and update with available values
-                new_resource_item = ResourceConfigTemplate(
-                    instance_name=resource_instance_name
-                )
-                defaults_resource, wrong_types_resource, all_missing_props_resource = (
-                    update_dataclass_from_dict(
+                # only cast to ResourceConfigTemplate, if it's supported Resource type (e.g. 'collection, stac-collection')
+                if resource_data.get("type") in [e.value for e in ResourceTypesEnum]:
+
+                    # Create a new ResourceConfigTemplate instance and update with available values
+                    new_resource_item = ResourceConfigTemplate(
+                        instance_name=resource_instance_name
+                    )
+                    (
+                        defaults_resource,
+                        wrong_types_resource,
+                        all_missing_props_resource,
+                    ) = update_dataclass_from_dict(
                         new_resource_item,
                         resource_data,
                         f"resources.{resource_instance_name}",
                     )
-                )
-                default_fields.extend(defaults_resource)
-                wrong_types.extend(wrong_types_resource)
-                all_missing_props.extend(all_missing_props_resource)
+                    default_fields.extend(defaults_resource)
+                    wrong_types.extend(wrong_types_resource)
+                    all_missing_props.extend(all_missing_props_resource)
 
-                # Exceptional check: verify that all list items of BBox are integers, and len(list)=4 or 6
-                if not new_resource_item.validate_reassign_bbox():
-                    wrong_types.append(
-                        f"resources.{resource_instance_name}.extents.spatial.bbox"
-                    )
+                    # Exceptional check: verify that all list items of BBox are integers, and len(list)=4 or 6
+                    if not new_resource_item.validate_reassign_bbox():
+                        wrong_types.append(
+                            f"resources.{resource_instance_name}.extents.spatial.bbox"
+                        )
 
-                # reorder providers to move read-only to the end of the list
-                # this is needed to not accidentally match read-only providers when deleting a provider
-                new_resource_item.providers.sort(key=lambda x: isinstance(x, dict))
+                    # reorder providers to move read-only to the end of the list
+                    # this is needed to not accidentally match read-only providers when deleting a provider
+                    new_resource_item.providers.sort(key=lambda x: isinstance(x, dict))
+                else:
+                    # keep as dict if unsopported resource type (e.g. 'process')
+                    new_resource_item = resource_data
 
                 self.resources[resource_instance_name] = new_resource_item
 
@@ -192,9 +203,11 @@ class ConfigData:
         invalid_props.extend(self.server.get_invalid_properties())
         invalid_props.extend(self.metadata.get_invalid_properties())
         for key, resource in self.resources.items():
-            invalid_res_props = [
-                f"resources.{key}.{prop}" for prop in resource.get_invalid_properties()
-            ]
-            invalid_props.extend(invalid_res_props)
+            if not isinstance(resource, dict):
+                invalid_res_props = [
+                    f"resources.{key}.{prop}"
+                    for prop in resource.get_invalid_properties()
+                ]
+                invalid_props.extend(invalid_res_props)
 
         return invalid_props
