@@ -22,7 +22,7 @@
  ***************************************************************************/
 """
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 import os
 import yaml
 import requests
@@ -79,6 +79,16 @@ headers = {
     'accept': '*/*',
     'Content-Type': 'application/json'
 }
+
+def preprocess_for_json(d):
+    """Recursively converts datetime/date objects in a dict to ISO strings."""
+    if isinstance(d, dict):
+        return {k: preprocess_for_json(v) for k, v in d.items()}
+    elif isinstance(d, list):
+        return [preprocess_for_json(i) for i in d]
+    elif isinstance(d, (datetime, date)):
+        return d.isoformat()
+    return d
 
 class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
@@ -142,423 +152,15 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def apply(self):
     # Apply configuration to pygeoapi through the admin API
 
-        # Sample data for testing
-        data = {
-                "server": {
-                    "bind": {
-                    "host": "0.0.0.0",
-                    "port": 5000
-                    },
-                    "url": "http://localhost:5000",
-                    "mimetype": "application/json; charset=UTF-8",
-                    "encoding": "utf-8",
-                    "gzip": False,
-                    "languages": [
-                    "en-US",
-                    "fr-CA"
-                    ],
-                    "pretty_print": True,
-                    "limits": {
-                    "default_items": 20,
-                    "max_items": 50
-                    },
-                    "map": {
-                    "url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                    "attribution": "&copy; <a href=\"https://openstreetmap.org/copyright\">OpenStreetMap contributors</a>"
-                    },
-                    "admin": True
-                },
-                "logging": {
-                    "level": "ERROR"
-                },
-                "metadata": {
-                    "identification": {
-                    "title": {
-                        "en": "pygeoapi TEST instance",
-                        "fr": "instance par défaut de pygeoapi"
-                    },
-                    "description": {
-                        "en": "pygeoapi provides an API to geospatial data",
-                        "fr": "pygeoapi fournit une API aux données géospatiales"
-                    },
-                    "keywords": {
-                        "en": [
-                        "geospatial",
-                        "data",
-                        "api"
-                        ],
-                        "fr": [
-                        "géospatiale",
-                        "données",
-                        "api"
-                        ]
-                    },
-                    "keywords_type": "theme",
-                    "terms_of_service": "https://creativecommons.org/licenses/by/4.0/",
-                    "url": "https://example.org"
-                    },
-                    "license": {
-                    "name": "CC-BY 4.0 license",
-                    "url": "https://creativecommons.org/licenses/by/4.0/"
-                    },
-                    "provider": {
-                    "name": "Organization Name",
-                    "url": "https://pygeoapi.io"
-                    },
-                    "contact": {
-                    "name": "Lastname, Firstname",
-                    "position": "Position Title",
-                    "address": "Mailing Address",
-                    "city": "City",
-                    "stateorprovince": "Administrative Area",
-                    "postalcode": "Zip or Postal Code",
-                    "country": "Country",
-                    "phone": "+xx-xxx-xxx-xxxx",
-                    "fax": "+xx-xxx-xxx-xxxx",
-                    "email": "you@example.org",
-                    "url": "Contact URL",
-                    "hours": "Mo-Fr 08:00-17:00",
-                    "instructions": "During hours of service. Off on weekends.",
-                    "role": "pointOfContact"
-                    }
-                },
-                "resources": {
-                    "obs": {
-                    "type": "collection",
-                    "title": "Observations",
-                    "description": "My cool observations",
-                    "keywords": [
-                        "observations",
-                        "monitoring"
-                    ],
-                    "linked-data": {
-                        "context": [
-                        {
-                            "datetime": "https://schema.org/DateTime"
-                        },
-                        {
-                            "vocab": "https://example.com/vocab#",
-                            "stn_id": "vocab:stn_id",
-                            "value": "vocab:value"
-                        }
-                        ]
-                    },
-                    "links": [
-                        {
-                        "type": "text/csv",
-                        "rel": "canonical",
-                        "title": "data",
-                        "href": "https://github.com/mapserver/mapserver/blob/branch-7-0/msautotest/wxs/data/obs.csv",
-                        "hreflang": "en-US"
-                        },
-                        {
-                        "type": "text/csv",
-                        "rel": "alternate",
-                        "title": "data",
-                        "href": "https://raw.githubusercontent.com/mapserver/mapserver/branch-7-0/msautotest/wxs/data/obs.csv",
-                        "hreflang": "en-US"
-                        }
-                    ],
-                    "extents": {
-                        "spatial": {
-                        "bbox": [
-                            -180,
-                            -90,
-                            180,
-                            90
-                        ],
-                        "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
-                        },
-                        "temporal": {
-                        "begin": "2000-10-30T18:24:39+00:00",
-                        "end": "2007-10-30T08:57:29+00:00"
-                        }
-                    },
-                    "providers": [
-                        {
-                        "type": "feature",
-                        "name": "CSV",
-                        "data": "tests/data/obs.csv",
-                        "id_field": "id",
-                        "geometry": {
-                            "x_field": "long",
-                            "y_field": "lat"
-                        }
-                        }
-                    ]
-                    },
-                    "lakes": {
-                    "type": "collection",
-                    "title": {
-                        "en": "Large Lakes",
-                        "fr": "Grands Lacs"
-                    },
-                    "description": {
-                        "en": "lakes of the world, public domain",
-                        "fr": "lacs du monde, domaine public"
-                    },
-                    "keywords": {
-                        "en": [
-                        "lakes",
-                        "water bodies"
-                        ],
-                        "fr": [
-                        "lacs",
-                        "plans d'eau"
-                        ]
-                    },
-                    "links": [
-                        {
-                        "type": "text/html",
-                        "rel": "canonical",
-                        "title": "information",
-                        "href": "http://www.naturalearthdata.com/",
-                        "hreflang": "en-US"
-                        }
-                    ],
-                    "extents": {
-                        "spatial": {
-                        "bbox": [
-                            -180,
-                            -90,
-                            180,
-                            90
-                        ],
-                        "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
-                        },
-                        "temporal": {
-                        "begin": "2011-11-11T11:11:11+00:00",
-                        "end": "2011-11-11T11:11:11+00:00"
-                        }
-                    },
-                    "providers": [
-                        {
-                        "type": "feature",
-                        "name": "GeoJSON",
-                        "data": "tests/data/ne_110m_lakes.geojson",
-                        "id_field": "id",
-                        "title_field": "name"
-                        }
-                    ]
-                    },
-                    "mapserver_world_map": {
-                    "type": "collection",
-                    "title": "MapServer demo WMS world map",
-                    "description": "MapServer demo WMS world map",
-                    "keywords": [
-                        "MapServer",
-                        "world map"
-                    ],
-                    "links": [
-                        {
-                        "type": "text/html",
-                        "rel": "canonical",
-                        "title": "information",
-                        "href": "https://demo.mapserver.org",
-                        "hreflang": "en-US"
-                        }
-                    ],
-                    "extents": {
-                        "spatial": {
-                        "bbox": [
-                            -180,
-                            -90,
-                            180,
-                            90
-                        ],
-                        "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
-                        }
-                    },
-                    "providers": [
-                        {
-                        "type": "map",
-                        "name": "WMSFacade",
-                        "data": "https://demo.mapserver.org/cgi-bin/msautotest",
-                        "options": {
-                            "layer": "world_latlong",
-                            "style": "default"
-                        },
-                        "format": {
-                            "name": "png",
-                            "mimetype": "image/png"
-                        }
-                        }
-                    ]
-                    },
-                    "gdps-temperature": {
-                    "type": "collection",
-                    "title": "Global Deterministic Prediction System sample",
-                    "description": "Global Deterministic Prediction System sample",
-                    "keywords": [
-                        "gdps",
-                        "global"
-                    ],
-                    "extents": {
-                        "spatial": {
-                        "bbox": [
-                            -180,
-                            -90,
-                            180,
-                            90
-                        ],
-                        "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
-                        }
-                    },
-                    "links": [
-                        {
-                        "type": "text/html",
-                        "rel": "canonical",
-                        "title": "information",
-                        "href": "https://eccc-msc.github.io/open-data/msc-data/nwp_gdps/readme_gdps_en",
-                        "hreflang": "en-CA"
-                        }
-                    ],
-                    "providers": [
-                        {
-                        "type": "coverage",
-                        "name": "rasterio",
-                        "data": "tests/data/CMC_glb_TMP_TGL_2_latlon.15x.15_2020081000_P000.grib2",
-                        "options": {
-                            "DATA_ENCODING": "COMPLEX_PACKING"
-                        },
-                        "format": {
-                            "name": "GRIB",
-                            "mimetype": "application/x-grib2"
-                        }
-                        }
-                    ]
-                    },
-                    "test-data": {
-                    "type": "stac-collection",
-                    "title": "pygeoapi test data",
-                    "description": "pygeoapi test data",
-                    "keywords": [
-                        "poi",
-                        "portugal"
-                    ],
-                    "links": [
-                        {
-                        "type": "text/html",
-                        "rel": "canonical",
-                        "title": "information",
-                        "href": "https://github.com/geopython/pygeoapi/tree/master/tests/data",
-                        "hreflang": "en-US"
-                        }
-                    ],
-                    "extents": {
-                        "spatial": {
-                        "bbox": [
-                            -180,
-                            -90,
-                            180,
-                            90
-                        ],
-                        "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
-                        }
-                    },
-                    "providers": [
-                        {
-                        "type": "stac",
-                        "name": "FileSystem",
-                        "data": "tests/data",
-                        "file_types": [
-                            ".gpkg",
-                            ".sqlite",
-                            ".csv",
-                            ".grib2",
-                            ".tif",
-                            ".shp"
-                        ]
-                        }
-                    ]
-                    },
-                    "canada-metadata": {
-                    "type": "collection",
-                    "title": {
-                        "en": "Open Canada sample data",
-                        "fr": "Exemple de donn\\u00e9es Canada Ouvert"
-                    },
-                    "description": {
-                        "en": "Sample metadata records from open.canada.ca",
-                        "fr": "Exemples d'enregistrements de m\\u00e9tadonn\\u00e9es sur ouvert.canada.ca"
-                    },
-                    "keywords": {
-                        "en": [
-                        "canada",
-                        "open data"
-                        ],
-                        "fr": [
-                        "canada",
-                        "donn\\u00e9es ouvertes"
-                        ]
-                    },
-                    "links": [
-                        {
-                        "type": "text/html",
-                        "rel": "canonical",
-                        "title": "information",
-                        "href": "https://open.canada.ca/en/open-data",
-                        "hreflang": "en-CA"
-                        },
-                        {
-                        "type": "text/html",
-                        "rel": "alternate",
-                        "title": "informations",
-                        "href": "https://ouvert.canada.ca/fr/donnees-ouvertes",
-                        "hreflang": "fr-CA"
-                        }
-                    ],
-                    "extents": {
-                        "spatial": {
-                        "bbox": [
-                            -180,
-                            -90,
-                            180,
-                            90
-                        ],
-                        "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84"
-                        }
-                    },
-                    "providers": [
-                        {
-                        "type": "record",
-                        "name": "TinyDBCatalogue",
-                        "data": "tests/data/open.canada.ca/sample-records.tinydb",
-                        "id_field": "externalId",
-                        "time_field": "created",
-                        "title_field": "title"
-                        }
-                    ]
-                    },
-                    "hello-world": {
-                    "type": "process",
-                    "processor": {
-                        "name": "HelloWorld"
-                    }
-                    }
-                }
-                }
+        config_dict = self.config_data.asdict_enum_safe(self.config_data)
 
-        QgsMessageLog.logMessage(f"data: {data}")
-
-        # config_dict = self.config_data.asdict_enum_safe(self.config_data)
-
-        # # Convert the dictionary to a JSON string
-        # json_data = json.dumps(
-        #     config_dict,
-        #     indent=4,
-        #     sort_keys=False,
-        #     ensure_ascii=False
-        # )
-
-        # QgsMessageLog.logMessage(
-        #     f"json_data: {json_data}"
-        # )
+        # Pre-process the dictionary to handle datetime objects
+        processed_config_dict = preprocess_for_json(config_dict)
 
         # TODO: support authentication through the QT framework
         try:
             # Send the PUT request to Admin API
-            response = requests.put(url, headers=headers, json=data)
+            response = requests.put(url, headers=headers, json=processed_config_dict)
             response.raise_for_status()
 
             QgsMessageLog.logMessage(
@@ -569,27 +171,27 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def save_to_file(self):
 
+        # Set and validate data from UI
+        try:
+            self.data_from_ui_setter.set_data_from_ui()
+            invalid_props = self.config_data.validate_config_data()
+            if len(invalid_props) > 0:
+                QgsMessageLog.logMessage(
+                    f"Properties are missing or have invalid values: {invalid_props}"
+                )
+                ReadOnlyTextDialog(
+                    self,
+                    "Warning",
+                    f"Properties are missing or have invalid values: {invalid_props}",
+                ).exec_()
+                return
+
+        except Exception as e:
+            QgsMessageLog.logMessage(f"Error deserializing: {e}")
+            QMessageBox.warning(f"Error deserializing: {e}")
+            return
+
         self.apply()
-
-        # # Set and validate data from UI
-        # try:
-        #     self.data_from_ui_setter.set_data_from_ui()
-        #     invalid_props = self.config_data.validate_config_data()
-        #     if len(invalid_props) > 0:
-        #         QgsMessageLog.logMessage(
-        #             f"Properties are missing or have invalid values: {invalid_props}"
-        #         )
-        #         ReadOnlyTextDialog(
-        #             self,
-        #             "Warning",
-        #             f"Properties are missing or have invalid values: {invalid_props}",
-        #         ).exec_()
-        #         return
-
-        # except Exception as e:
-        #     QgsMessageLog.logMessage(f"Error deserializing: {e}")
-        #     QMessageBox.warning(f"Error deserializing: {e}")
-        #     return
 
         # # Open dialog to set file path
         # file_path, _ = QFileDialog.getSaveFileName(
