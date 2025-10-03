@@ -150,7 +150,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.ui_setter.setup_map_widget()
 
     def push_to_server(self):
-        """Push configuration to pygeoapi through the admin API"""
+        """Push config to pygeoapi through the admin API"""
 
         config_dict = self.config_data.asdict_enum_safe(self.config_data)
 
@@ -195,6 +195,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             QApplication.restoreOverrideCursor()
 
     def save_to_file(self):
+        """Save config to file"""
 
         self.validate_from_ui
         self.push_to_server()
@@ -223,49 +224,99 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         #     finally:
         #         QApplication.restoreOverrideCursor()
 
-    def open_file(self):
-        file_name, _ = QFileDialog.getOpenFileName(
-            self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
-        )
+    def pull_from_server(self):
+        """Pull config from pygeoapi through the admin API"""
 
-        if not file_name:
-            return
-
+        # TODO: support authentication through the QT framework
         try:
-            # QApplication.setOverrideCursor(Qt.WaitCursor)
-            with open(file_name, "r", encoding="utf-8") as file:
-                file_content = file.read()
+            # Send the GET request to Admin API
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
 
-                # reset data
-                self.config_data = ConfigData()
-                self.config_data.set_data_from_yaml(yaml.safe_load(file_content))
-                self.ui_setter.set_ui_from_data()
+            QgsMessageLog.logMessage(
+                f"Success! Status Code: {response.status_code}")
 
-                # log messages about missing or mistyped values during deserialization
-                QgsMessageLog.logMessage(
-                    f"Errors during deserialization: {self.config_data.error_message}"
-                )
-                QgsMessageLog.logMessage(
-                    f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
-                )
+            QgsMessageLog.logMessage(
+                f"Response: {response.text}")
 
-                # summarize all properties missing/overwitten with defaults
-                # atm, warning with the full list of properties
-                all_missing_props = self.config_data.all_missing_props
-                QgsMessageLog.logMessage(
-                    f"All missing or replaced properties: {self.config_data.all_missing_props}"
-                )
-                if len(all_missing_props) > 0:
-                    ReadOnlyTextDialog(
-                        self,
-                        "Warning",
-                        f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
-                    ).exec_()
+            # #TODO: convert json to yaml
+            # content=''
+            # # reset data
+            # self.config_data = ConfigData()
+            # self.config_data.set_data_from_yaml(yaml.safe_load(content))
+            # self.ui_setter.set_ui_from_data()
 
-        except Exception as e:
-            QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
-        # finally:
-        #     QApplication.restoreOverrideCursor()
+            # # log messages about missing or mistyped values during deserialization
+            # QgsMessageLog.logMessage(
+            #     f"Errors during deserialization: {self.config_data.error_message}"
+            # )
+            # QgsMessageLog.logMessage(
+            #     f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
+            # )
+
+            # # summarize all properties missing/overwitten with defaults
+            # # atm, warning with the full list of properties
+            # all_missing_props = self.config_data.all_missing_props
+            # QgsMessageLog.logMessage(
+            #     f"All missing or replaced properties: {self.config_data.all_missing_props}"
+            # )
+            # if len(all_missing_props) > 0:
+            #     ReadOnlyTextDialog(
+            #         self,
+            #         "Warning",
+            #         f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
+            #     ).exec_()
+
+
+        except requests.exceptions.RequestException as e:
+            QgsMessageLog.logMessage(f"An error occurred: {e}")
+
+    def open_file(self):
+
+        self.pull_from_server()
+
+        # file_name, _ = QFileDialog.getOpenFileName(
+        #     self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
+        # )
+
+        # if not file_name:
+        #     return
+
+        # try:
+        #     # QApplication.setOverrideCursor(Qt.WaitCursor)
+        #     with open(file_name, "r", encoding="utf-8") as file:
+        #         file_content = file.read()
+
+        #         # reset data
+        #         self.config_data = ConfigData()
+        #         self.config_data.set_data_from_yaml(yaml.safe_load(file_content))
+        #         self.ui_setter.set_ui_from_data()
+
+        #         # log messages about missing or mistyped values during deserialization
+        #         QgsMessageLog.logMessage(
+        #             f"Errors during deserialization: {self.config_data.error_message}"
+        #         )
+        #         QgsMessageLog.logMessage(
+        #             f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
+        #         )
+
+        #         # summarize all properties missing/overwitten with defaults
+        #         # atm, warning with the full list of properties
+        #         all_missing_props = self.config_data.all_missing_props
+        #         QgsMessageLog.logMessage(
+        #             f"All missing or replaced properties: {self.config_data.all_missing_props}"
+        #         )
+        #         if len(all_missing_props) > 0:
+        #             ReadOnlyTextDialog(
+        #                 self,
+        #                 "Warning",
+        #                 f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
+        #             ).exec_()
+
+        # except Exception as e:
+        #     QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
+        # # finally:
+        # #     QApplication.restoreOverrideCursor()
 
     def on_button_clicked(self, button):
 
