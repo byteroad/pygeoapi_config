@@ -172,6 +172,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def save_to_file(self):
 
         # Set and validate data from UI
+        QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
             self.data_from_ui_setter.set_data_from_ui()
             invalid_props = self.config_data.validate_config_data()
@@ -190,6 +191,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             QgsMessageLog.logMessage(f"Error deserializing: {e}")
             QMessageBox.warning(f"Error deserializing: {e}")
             return
+        finally:
+            QApplication.restoreOverrideCursor()
 
         self.push()
 
