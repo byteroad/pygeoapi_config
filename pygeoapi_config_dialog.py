@@ -149,8 +149,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.ui_setter.set_ui_from_data()
         self.ui_setter.setup_map_widget()
 
-    def apply(self):
-    # Apply configuration to pygeoapi through the admin API
+    def push(self):
+    # Push configuration to pygeoapi through the admin API
 
         config_dict = self.config_data.asdict_enum_safe(self.config_data)
 
@@ -191,7 +191,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             QMessageBox.warning(f"Error deserializing: {e}")
             return
 
-        self.apply()
+        self.push()
 
         # # Open dialog to set file path
         # file_path, _ = QFileDialog.getSaveFileName(
