@@ -149,8 +149,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.ui_setter.set_ui_from_data()
         self.ui_setter.setup_map_widget()
 
-    def push(self):
-    # Push configuration to pygeoapi through the admin API
+    def push_to_server(self):
+        """Push configuration to pygeoapi through the admin API"""
 
         config_dict = self.config_data.asdict_enum_safe(self.config_data)
 
@@ -169,9 +169,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         except requests.exceptions.RequestException as e:
             QgsMessageLog.logMessage(f"An error occurred: {e}")
 
-    def save_to_file(self):
+    def validate_from_ui(self):
+        """Set and validate data from UI"""
 
-        # Set and validate data from UI
         QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
             self.data_from_ui_setter.set_data_from_ui()
@@ -194,7 +194,10 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         finally:
             QApplication.restoreOverrideCursor()
 
-        self.push()
+    def save_to_file(self):
+
+        self.validate_from_ui
+        self.push_to_server()
 
         # # Open dialog to set file path
         # file_path, _ = QFileDialog.getSaveFileName(
