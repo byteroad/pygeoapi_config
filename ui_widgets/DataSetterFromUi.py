@@ -90,12 +90,27 @@ class DataSetterFromUi:
         # url
         config_data.server.url = dialog.lineEditUrl.text()
 
-        # language
-        config_data.server.languages = []
-        for i in range(dialog.listWidgetLang.count()):
-            item = dialog.listWidgetLang.item(i)
+        # language single (if selected)
+        for i in range(dialog.listWidgetLangSingle.count()):
+            item = dialog.listWidgetLangSingle.item(i)
             if item.isSelected():
-                config_data.server.languages.append(item.text())
+                config_data.server.language = item.text()
+                break
+
+        # languages
+        # config_data.server.languages = []
+        # for i in range(dialog.listWidgetLang.count()):
+        #    item = dialog.listWidgetLang.item(i)
+        #    if item.isSelected():
+        #        config_data.server.languages.append(item.text())
+
+        config_data.server.languages = []
+        languages_lists = unpack_listwidget_values_to_sublists(
+            dialog.listWidgetServerLangs
+        )
+        for lang in languages_lists:
+            if is_valid_string(lang[0]):
+                config_data.server.languages.append(lang[0])
 
         # limits
         config_data.server.limits.default_items = dialog.spinBoxDefault.value()

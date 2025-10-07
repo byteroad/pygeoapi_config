@@ -7,6 +7,7 @@ from ..models.top_level.ResourceConfigTemplate import (
     ResourceTypesEnum,
     ResourceVisibilityEnum,
 )
+from ..models.top_level.ServerConfig import ServerOnExceedEnum
 from ..models.top_level.providers.records import (
     CrsAuthorities,
     Languages,
@@ -103,24 +104,50 @@ class UiSetter:
             self.dialog.lineEditTemplatesPath.setText("")
             self.dialog.lineEditTemplatesStatic.setText("")
 
+        # manager (only for display, data is kept without changes)
+        if config_data.server.manager:
+            self.dialog.lineEditManagerName.setText(config_data.server.manager.name)
+            self.dialog.lineEditManagerConnection.setText(
+                config_data.server.manager.connection
+            )
+            self.dialog.lineEditManagerOutputDir.setText(
+                config_data.server.manager.output_dir
+            )
+        else:
+            self.dialog.lineEditManagerName.setText("")
+            self.dialog.lineEditManagerConnection.setText("")
+            self.dialog.lineEditManagerOutputDir.setText("")
+
         # map
         self.dialog.lineEditMapUrl.setText(config_data.server.map.url)
         self.dialog.lineEditAttribution.setText(config_data.server.map.attribution)
 
         self.dialog.lineEditUrl.setText(config_data.server.url)
 
-        # language
-        select_list_widget_items_by_texts(
-            list_widget=self.dialog.listWidgetLang,
-            texts_to_select=config_data.server.languages,
-        )
+        # language single
+        if config_data.server.language is not None:
+            select_list_widget_items_by_texts(
+                list_widget=self.dialog.listWidgetLangSingle,
+                texts_to_select=config_data.server.language,
+            )
+
+        # languages
+        # select_list_widget_items_by_texts(
+        #    list_widget=self.dialog.listWidgetLang,
+        #    texts_to_select=config_data.server.languages,
+        # )
+        if config_data.server.languages is not None:
+            pack_list_data_into_list_widget(
+                [l for l in config_data.server.languages],
+                self.dialog.listWidgetServerLangs,
+            )
 
         # limits
         self.dialog.spinBoxDefault.setValue(config_data.server.limits.default_items)
         self.dialog.spinBoxMax.setValue(config_data.server.limits.max_items)
 
         set_combo_box_value_from_data(
-            combo_box=self.dialog.comboBoxExceed,
+            combo_box=self.dialog.comboBoxExceed or ServerOnExceedEnum.NONE,
             value=config_data.server.limits.on_exceed,
         )
 
@@ -388,7 +415,7 @@ class UiSetter:
         config_data: ConfigData = dialog.config_data
 
         # add default values to the main UI
-        fill_combo_box(dialog.comboBoxExceed, config_data.server.limits.on_exceed)
+        fill_combo_box(dialog.comboBoxExceed, ServerOnExceedEnum.NONE)
         fill_combo_box(dialog.comboBoxLog, config_data.logging.level)
         fill_combo_box(
             dialog.comboBoxMetadataIdKeywordsType,
@@ -532,15 +559,27 @@ class UiSetter:
                 dialog.listViewCollection.setCurrentIndex(index)
                 break
 
-    def _lang_entry_exists_in_list_widget(self, list_widget, locale) -> bool:
+    def _lang_entry_exists_in_list_widget(
+        self, list_widget, locale, punctuation=True
+    ) -> bool:
         for i in range(list_widget.count()):
-            if list_widget.item(i).text().startswith(f"{locale}: "):
-                QMessageBox.warning(
-                    self.dialog,
-                    "Message",
-                    f"Data entry in selected language already exists: {locale}",
-                )
-                return True
+            if punctuation:
+                if list_widget.item(i).text().startswith(f"{locale}: "):
+                    QMessageBox.warning(
+                        self.dialog,
+                        "Message",
+                        f"Data entry in selected language already exists: {locale}",
+                    )
+                    return True
+            else:
+                if list_widget.item(i).text().startswith(locale):
+                    QMessageBox.warning(
+                        self.dialog,
+                        "Message",
+                        f"Data entry in selected language already exists: {locale}",
+                    )
+                    return True
+
         return False
 
     def add_listwidget_element_from_lineedit(
@@ -555,11 +594,11 @@ class UiSetter:
         """Take the content of LineEdit and add it as a new List entry."""
 
         dialog = self.dialog
-        text = line_edit_widget.text().strip()
-        if text:
+        text = line_edit_widget.text().strip() if line_edit_widget else ""
+        if (line_edit_widget and text) or not line_edit_widget:
 
             text_to_print = text
-            if locale_combobox:
+            if locale_combobox and line_edit_widget:
                 # get text with locale
                 locale = locale_combobox.currentText()
                 text_to_print = f"{locale}: {text}"
@@ -570,6 +609,18 @@ class UiSetter:
                 ):
                     list_widget.addItem(text_to_print)
                     line_edit_widget.clear()
+
+            elif (
+                locale_combobox and not line_edit_widget
+            ):  # if locale box is the only text to use: don't wrap in extra punctuation
+                locale = locale_combobox.currentText()
+                text_to_print = locale
+
+                # check if repeated language entries are allowed
+                if allow_repeated_locale or not self._lang_entry_exists_in_list_widget(
+                    list_widget, locale, False
+                ):
+                    list_widget.addItem(text_to_print)
 
             else:
                 list_widget.addItem(text_to_print)

@@ -133,6 +133,9 @@ def test_open_file_validate_ui_data_save_file(qtbot, sample_yaml: str):
 
 
 def diff_yaml(obj1: Any, obj2: Any, path: str = "") -> dict:
+    """Returns all added, removed or changed elements between 2 YAML files.
+    Ignores diff in dict keys order. For lists, order is checked."""
+
     diff = {"added": {}, "removed": {}, "changed": {}}
 
     if isinstance(obj1, dict) and isinstance(obj2, dict):
