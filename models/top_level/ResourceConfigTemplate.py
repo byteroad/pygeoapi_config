@@ -54,7 +54,11 @@ class ResourceSpatialConfig:
             -1
         ]  # OGC/1.3/CRS84
         auth_string = "/".join(crs_auth_id.split("/")[:-1])
-        return get_enum_value_from_string(CrsAuthorities, auth_string)
+        try:
+            return get_enum_value_from_string(CrsAuthorities, auth_string)
+        except ValueError:
+            # 'swallow' the error, as we technically accept any strings
+            return CrsAuthorities.OGC13
 
     @property
     def crs_id(self):

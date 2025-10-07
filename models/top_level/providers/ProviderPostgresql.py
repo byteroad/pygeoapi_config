@@ -154,9 +154,7 @@ class ProviderPostgresql(ProviderTemplate):
             values[7].split(",") if is_valid_string(values[7]) else None
         )
         self.geom_field: str | None = values[8] if is_valid_string(values[8]) else None
-        self.storage_crs: str | None = (
-            values[9] if is_valid_string(values[79]) else None
-        )
+        self.storage_crs: str | None = values[9] if is_valid_string(values[9]) else None
         self.data.password: str | None = (
             values[10] if is_valid_string(values[10]) else None
         )

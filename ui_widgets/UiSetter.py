@@ -372,13 +372,14 @@ class UiSetter:
             )
 
         # links
-        pack_list_data_into_list_widget(
-            [
-                [l.type, l.rel, l.href, l.title, l.hreflang, l.length]
-                for l in res_data.links
-            ],
-            dialog.listWidgetResLinks,
-        )
+        if res_data.links is not None:
+            pack_list_data_into_list_widget(
+                [
+                    [l.type, l.rel, l.href, l.title, l.hreflang, l.length]
+                    for l in res_data.links
+                ],
+                dialog.listWidgetResLinks,
+            )
 
         # providers
         self.set_providers_ui_from_data(res_data)

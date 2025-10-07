@@ -23,6 +23,8 @@ Modify the user interface by opening pygeoapiconfig_dialog_base.ui in [Qt Creato
  ## Run unit tests locally
  Run the following command from the root folder: 
  `python tests\run_tests_locally.py` 
+ 
+ The YAML files to test against are stored under tests/yaml_samples and names as follows: 'organisation_repository_commit_filename'. 
 
  ## Screenshot
 
