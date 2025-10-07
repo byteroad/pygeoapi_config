@@ -77,8 +77,18 @@ def update_dataclass_from_dict(
 
                     # Exception: remap str to Enum (when one of possible classes is Enum)
                     elif type(expected_type) is UnionType:
+
                         subtype = next((t for t in args if t is not type(None)), None)
-                        if isinstance(subtype, type) and issubclass(subtype, Enum):
+                        # check for list type, run cast for every element
+                        if isinstance(new_value, list):
+                            new_value, more_wrong_types = (
+                                cast_list_elements_to_expected_types(
+                                    new_value, subtype, f"{prop_name}.{field_name}"
+                                )
+                            )
+                            wrong_types.extend(more_wrong_types)
+
+                        elif isinstance(subtype, type) and issubclass(subtype, Enum):
                             new_value = get_enum_value_from_string(subtype, new_value)
 
                     # Exception with 'expected_type' 'list[some dataclass]'
