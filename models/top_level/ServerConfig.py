@@ -6,6 +6,7 @@ from .utils import is_valid_string
 
 # records
 class ServerOnExceedEnum(Enum):
+    NONE = ""
     THROTTLE = "throttle"
     ERROR = "error"
 
@@ -21,9 +22,7 @@ class ServerBindConfig:
 class ServerLimitsConfig:
     default_items: int = field(default=20)
     max_items: int = field(default=50)
-    on_exceed: ServerOnExceedEnum = field(
-        default_factory=lambda: ServerOnExceedEnum.THROTTLE
-    )
+    on_exceed: ServerOnExceedEnum | None = None
 
 
 @dataclass(kw_only=True)
@@ -50,6 +49,13 @@ class ServerApiRulesConfig:
 
 
 @dataclass(kw_only=True)
+class ServerManagerConfig:
+    name: str = ""
+    connection: str = ""
+    output_dir: str = ""
+
+
+@dataclass(kw_only=True)
 class ServerConfig:
     """Placeholder class for Server configuration data."""
 
@@ -61,12 +67,14 @@ class ServerConfig:
 
     # optional fields:
     gzip: bool = field(default=False)
-    languages: list = field(default_factory=lambda: ["en-US"])  # to format with " - "
+    language: str | None = None
+    languages: list | None = None
     cors: bool = field(default=False)
     pretty_print: bool = field(default=False)
     limits: ServerLimitsConfig = field(default_factory=lambda: ServerLimitsConfig())
     admin: bool = field(default=False)
     templates: ServerTemplatesConfig | None = None
+    manager: ServerManagerConfig | None = None
 
     # Not currently used in the UI
     # api_rules: ServerApiRulesConfig | None = None
@@ -77,9 +85,17 @@ class ServerConfig:
 
         if not is_valid_string(self.bind.host):
             all_invalid_fields.append("server.bind.host")
+        if not is_valid_string(self.bind.port):
+            all_invalid_fields.append("server.bind.port")
         if not is_valid_string(self.url):
             all_invalid_fields.append("server.url")
-        if len(self.languages) == 0:
-            all_invalid_fields.append("server.languages")
+        if not is_valid_string(self.mimetype):
+            all_invalid_fields.append("server.mimetype")
+        if not is_valid_string(self.encoding):
+            all_invalid_fields.append("server.encoding")
+        if not is_valid_string(self.map.url):
+            all_invalid_fields.append("server.map.url")
+        if not is_valid_string(self.map.attribution):
+            all_invalid_fields.append("server.map.attribution")
 
         return all_invalid_fields

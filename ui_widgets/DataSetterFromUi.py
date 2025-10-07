@@ -90,12 +90,27 @@ class DataSetterFromUi:
         # url
         config_data.server.url = dialog.lineEditUrl.text()
 
-        # language
-        config_data.server.languages = []
-        for i in range(dialog.listWidgetLang.count()):
-            item = dialog.listWidgetLang.item(i)
+        # language single (if selected)
+        for i in range(dialog.listWidgetLangSingle.count()):
+            item = dialog.listWidgetLangSingle.item(i)
             if item.isSelected():
-                config_data.server.languages.append(item.text())
+                config_data.server.language = item.text()
+                break
+
+        # languages
+        # config_data.server.languages = []
+        # for i in range(dialog.listWidgetLang.count()):
+        #    item = dialog.listWidgetLang.item(i)
+        #    if item.isSelected():
+        #        config_data.server.languages.append(item.text())
+
+        config_data.server.languages = []
+        languages_lists = unpack_listwidget_values_to_sublists(
+            dialog.listWidgetServerLangs
+        )
+        for lang in languages_lists:
+            if is_valid_string(lang[0]):
+                config_data.server.languages.append(lang[0])
 
         # limits
         config_data.server.limits.default_items = dialog.spinBoxDefault.value()
@@ -288,19 +303,19 @@ class DataSetterFromUi:
         config_data.resources[res_name].providers = []
 
         # add editable providers from a widget
-        providers_data_lists: list[list] = unpack_listwidget_values_to_sublists(
+        providers_data_lists: list[list[str]] = unpack_listwidget_values_to_sublists(
             dialog.listWidgetResProvider
         )
 
         for pr in providers_data_lists:
             provider_type = get_enum_value_from_string(ProviderTypes, pr[0])
             new_pr = ProviderTemplate.init_provider_from_type(provider_type)
-            new_pr.assign_value_list_to_provider_data(pr)
+            new_pr.assign_value_list_to_provider_data_on_read(pr)
 
             config_data.resources[res_name].providers.append(new_pr)
 
         # add read-only providers from another widget
-        read_only_providers_data_lists: list[list] = (
+        read_only_providers_data_lists: list[list[str]] = (
             unpack_listwidget_values_to_sublists(
                 dialog.listWidgetResReadOnlyProviders, 1
             )

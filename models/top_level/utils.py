@@ -22,7 +22,7 @@ def get_enum_value_from_string(enum_type: Enum, text: str):
         for member in enum_type:
             if text == member.value:
                 return member
-    raise AttributeError(f"Unexpected attribute type '{text}'", name="text")
+    raise ValueError(f"Unexpected value '{text}', expected type: '{enum_type}'")
 
 
 def bbox_from_list(raw_bbox_list: list):

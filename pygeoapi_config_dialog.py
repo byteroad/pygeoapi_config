@@ -287,6 +287,16 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     ################## methods that are called from .ui file:
     #################################################################
 
+    def add_server_lang(self):
+        """Add language to Server Languages list, called from .ui file."""
+        self.ui_setter.add_listwidget_element_from_lineedit(
+            line_edit_widget=None,
+            list_widget=self.listWidgetServerLangs,
+            locale_combobox=self.comboBoxServerLangs,
+            allow_repeated_locale=False,
+            sort=False,
+        )
+
     def add_metadata_id_title(self):
         """Add title to metadata, called from .ui file."""
         self.ui_setter.add_listwidget_element_from_lineedit(
@@ -410,6 +420,10 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         """Called from .ui file."""
         url = self.data_from_ui_setter.get_extents_crs_from_ui(self)
         get_url_status(url, self)
+
+    def delete_server_lang(self):
+        """Delete Server language from list, called from .ui file."""
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetServerLangs)
 
     def delete_metadata_id_title(self):
         """Delete keyword from metadata, called from .ui file."""

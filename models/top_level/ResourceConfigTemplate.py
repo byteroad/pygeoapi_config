@@ -36,7 +36,7 @@ class ResourceLinkTemplate:
 
     # optional
     title: str | None = None
-    hreflang: Languages | None = None
+    hreflang: str | None = None
     length: int | None = None
 
 
@@ -54,7 +54,11 @@ class ResourceSpatialConfig:
             -1
         ]  # OGC/1.3/CRS84
         auth_string = "/".join(crs_auth_id.split("/")[:-1])
-        return get_enum_value_from_string(CrsAuthorities, auth_string)
+        try:
+            return get_enum_value_from_string(CrsAuthorities, auth_string)
+        except ValueError:
+            # 'swallow' the error, as we technically accept any strings
+            return CrsAuthorities.OGC13
 
     @property
     def crs_id(self):
@@ -65,8 +69,8 @@ class ResourceSpatialConfig:
 class ResourceTemporalConfig:
 
     # optional
-    begin: str | datetime | None = None
-    end: str | datetime | None = None
+    begin: datetime | None = None
+    end: datetime | None = None
     trs: str | None = None
 
 
@@ -94,7 +98,6 @@ class ResourceConfigTemplate:
     title: str | dict = field(default="")
     description: str | dict = field(default="")
     keywords: list | dict = field(default_factory=lambda: [])
-    links: list[ResourceLinkTemplate] = field(default_factory=lambda: [])
     extents: ResourceExtentsConfig = field(
         default_factory=lambda: ResourceExtentsConfig()
     )
@@ -104,6 +107,7 @@ class ResourceConfigTemplate:
     ] = field(default_factory=lambda: [])
 
     # optional
+    links: list[ResourceLinkTemplate] | None = None
     visibility: ResourceVisibilityEnum | None = None
     # limits, linked-data: ignored for now
 
@@ -117,7 +121,7 @@ class ResourceConfigTemplate:
         title: str = "",
         description: str = "",
         keywords: dict = None,
-        links: list[ResourceLinkTemplate] = None,
+        links: list[ResourceLinkTemplate] | None = None,
         extents: ResourceExtentsConfig = None,
         providers: list[
             ProviderPostgresql | ProviderMvtProxy | ProviderWmsFacade
@@ -133,10 +137,6 @@ class ResourceConfigTemplate:
         if keywords is None:
             keywords = ResourceConfigTemplate.__dataclass_fields__[
                 "keywords"
-            ].default_factory()
-        if links is None:
-            links = ResourceConfigTemplate.__dataclass_fields__[
-                "links"
             ].default_factory()
         if extents is None:
             extents = ResourceConfigTemplate.__dataclass_fields__[
