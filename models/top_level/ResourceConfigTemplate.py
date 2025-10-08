@@ -43,12 +43,15 @@ class ResourceLinkTemplate:
 class ResourceSpatialConfig:
     bbox: InlineList = field(default_factory=lambda: InlineList([-180, -90, 180, 90]))
 
-    # optional, but with assumed default value:
-    crs: str = field(default="http://www.opengis.net/def/crs/OGC/1.3/CRS84")
+    # optional
+    crs: str | None = None
 
     # we need these as separate properties so that Enum class values can be set&selected in the UI
     @property
     def crs_authority(self):
+        if self.crs is None:
+            return CrsAuthorities.OGC13
+
         crs_auth_id = self.crs.split("http://www.opengis.net/def/crs/")[
             -1
         ]  # OGC/1.3/CRS84
@@ -61,6 +64,8 @@ class ResourceSpatialConfig:
 
     @property
     def crs_id(self):
+        if self.crs is None:
+            return ""
         return self.crs.split("/")[-1]
 
 
@@ -109,51 +114,17 @@ class ResourceConfigTemplate:
     links: list[ResourceLinkTemplate] | None = None
     visibility: ResourceVisibilityEnum | None = None
     linked__data: dict | None = (
-        None  # intentionally with double undersore to not confuse with any reserved word
+        None  # intentionally with double undersore to not confuse with any reserved keyword
     )
     # limits: ignored for now
 
     # Overwriding __init__ method to pass 'instance_name' as an input but not make it an instance property
     # This will allow to have a clean 'asdict(class)' output without 'instance_name' in it
-    def __init__(
-        self,
-        *,
-        instance_name: str,
-        type: ResourceTypesEnum = ResourceTypesEnum.COLLECTION,
-        title: str = "",
-        description: str = "",
-        keywords: dict = None,
-        links: list[ResourceLinkTemplate] | None = None,
-        extents: ResourceExtentsConfig = None,
-        providers: list[
-            ProviderPostgresql | ProviderMvtProxy | ProviderWmsFacade
-        ] = None,
-        visibility: ResourceVisibilityEnum | None = None
-    ):
-        self._instance_name = instance_name
-        self.type = type
-        self.title = title
-        self.description = description
-
-        # using full class name here instead of type(self), because "type" is used here as a property name
-        if keywords is None:
-            keywords = ResourceConfigTemplate.__dataclass_fields__[
-                "keywords"
-            ].default_factory()
-        if extents is None:
-            extents = ResourceConfigTemplate.__dataclass_fields__[
-                "extents"
-            ].default_factory()
-        if providers is None:
-            providers = ResourceConfigTemplate.__dataclass_fields__[
-                "providers"
-            ].default_factory()
-
-        self.keywords = keywords
-        self.links = links
-        self.extents = extents
-        self.providers = providers
-        self.visibility = visibility
+    @classmethod
+    def init_with_name(cls, *, instance_name: str):
+        obj = cls()
+        obj._instance_name = instance_name
+        return obj
 
     @property
     def instance_name(self):
@@ -182,9 +153,7 @@ class ResourceConfigTemplate:
             all_invalid_fields.append("keywords")
         if len(self.providers) == 0:
             all_invalid_fields.append("providers")
-        if not is_valid_string(self.extents.spatial.crs):
-            all_invalid_fields.append("extents.spatial.crs")
-        if len(self.extents.spatial.bbox) < 4:
+        if len(self.extents.spatial.bbox) < 4 or len(self.extents.spatial.bbox) > 6:
             all_invalid_fields.append("extents.spatial.bbox")
 
         return all_invalid_fields

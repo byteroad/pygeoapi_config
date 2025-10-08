@@ -68,10 +68,11 @@ class ProviderMvtProxy(ProviderTemplate):
         # Mandatory to align the fields order with data packing and assigning.
         # label, data_type, default, special_widget_type, placeholder
         return [
-            (*cls.get_field_info(cls, "name"), "QComboBox", ["MVT-proxy"]),
-            (*cls.get_field_info(cls, "data"), None, ""),
-            (*cls.get_field_info(cls, "format.name"), None, ""),
-            (*cls.get_field_info(cls, "format.mimetype"), None, ""),
+            (*cls.get_field_info(cls, "name*"), "QComboBox", ["MVT-proxy"]),
+            (*cls.get_field_info(cls, "data*"), None, ""),
+            (*cls.get_field_info(cls, "format.name*"), None, ""),
+            (*cls.get_field_info(cls, "format.mimetype*"), None, ""),
+            # non-mandatory
             (*cls.get_field_info(cls, "crs"), None, ""),
             (*cls.get_field_info(cls, "options.zoom.min"), None, ""),
             (*cls.get_field_info(cls, "options.zoom.max"), None, ""),

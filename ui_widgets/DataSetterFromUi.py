@@ -65,25 +65,21 @@ class DataSetterFromUi:
             config_data.server.bind.port = dialog.lineEditPort.text()
 
         # gzip
-        # config_data.server.gzip = dialog.checkBoxGzip.isChecked()
         config_data.server.gzip = get_enum_value_from_string(
             ServerOptionalBoolsEnum, dialog.comboBoxGzip.currentText()
         )
 
         # pretty print
-        # config_data.server.pretty_print = dialog.checkBoxPretty.isChecked()
         config_data.server.pretty_print = get_enum_value_from_string(
             ServerOptionalBoolsEnum, dialog.comboBoxPretty.currentText()
         )
 
         # admin
-        # config_data.server.admin = dialog.lineEditAdmin.text()
         config_data.server.admin = get_enum_value_from_string(
             ServerOptionalBoolsEnum, dialog.comboBoxAdmin.currentText()
         )
 
         # cors
-        # config_data.server.cors = dialog.checkBoxCors.isChecked()
         config_data.server.cors = get_enum_value_from_string(
             ServerOptionalBoolsEnum, dialog.comboBoxCors.currentText()
         )
@@ -113,12 +109,6 @@ class DataSetterFromUi:
         )
 
         # languages
-        # config_data.server.languages = []
-        # for i in range(dialog.listWidgetLang.count()):
-        #    item = dialog.listWidgetLang.item(i)
-        #    if item.isSelected():
-        #        config_data.server.languages.append(item.text())
-
         config_data.server.languages = []
         languages_lists = unpack_listwidget_values_to_sublists(
             dialog.listWidgetServerLangs
@@ -175,52 +165,75 @@ class DataSetterFromUi:
             )
         )
 
-        config_data.metadata.identification.keywords_type = get_enum_value_from_string(
+        keywords_type = get_enum_value_from_string(
             MetadataKeywordTypeEnum, dialog.comboBoxMetadataIdKeywordsType.currentText()
         )
+        config_data.metadata.identification.keywords_type = (
+            keywords_type if is_valid_string(keywords_type) else None
+        )
+
         config_data.metadata.identification.terms_of_service = (
-            dialog.lineEditMetadataIdTerms.text()
+            self.valid_string_or_none(dialog.lineEditMetadataIdTerms)
         )
         config_data.metadata.identification.url = dialog.lineEditMetadataIdUrl.text()
 
         # metadata license
         config_data.metadata.license.name = dialog.lineEditMetadataLicenseName.text()
-        config_data.metadata.license.url = dialog.lineEditMetadataLicenseUrl.text()
+        config_data.metadata.license.url = self.valid_string_or_none(
+            dialog.lineEditMetadataLicenseUrl
+        )
 
         # metadata provider
         config_data.metadata.provider.name = dialog.lineEditMetadataProviderName.text()
-        config_data.metadata.provider.url = dialog.lineEditMetadataProviderUrl.text()
+        config_data.metadata.provider.url = self.valid_string_or_none(
+            dialog.lineEditMetadataProviderUrl
+        )
 
         # metadata contact
         config_data.metadata.contact.name = dialog.lineEditMetadataContactName.text()
-        config_data.metadata.contact.position = (
-            dialog.lineEditMetadataContactPosition.text()
+        config_data.metadata.contact.position = self.valid_string_or_none(
+            dialog.lineEditMetadataContactPosition
         )
-        config_data.metadata.contact.address = (
-            dialog.lineEditMetadataContactAddress.text()
+        config_data.metadata.contact.address = self.valid_string_or_none(
+            dialog.lineEditMetadataContactAddress
         )
         config_data.metadata.contact.city = dialog.lineEditMetadataContactCity.text()
-        config_data.metadata.contact.stateorprovince = (
-            dialog.lineEditMetadataContactState.text()
+        config_data.metadata.contact.stateorprovince = self.valid_string_or_none(
+            dialog.lineEditMetadataContactState
         )
-        config_data.metadata.contact.postalcode = (
-            dialog.lineEditMetadataContactPostal.text()
+        config_data.metadata.contact.postalcode = self.valid_string_or_none(
+            dialog.lineEditMetadataContactPostal
         )
-        config_data.metadata.contact.country = (
-            dialog.lineEditMetadataContactCountry.text()
+        config_data.metadata.contact.country = self.valid_string_or_none(
+            dialog.lineEditMetadataContactCountry
         )
-        config_data.metadata.contact.phone = dialog.lineEditMetadataContactPhone.text()
-        config_data.metadata.contact.fax = dialog.lineEditMetadataContactFax.text()
-        config_data.metadata.contact.email = dialog.lineEditMetadataContactEmail.text()
-        config_data.metadata.contact.url = dialog.lineEditMetadataContactUrl.text()
-        config_data.metadata.contact.hours = dialog.lineEditMetadataContactHours.text()
-        config_data.metadata.contact.instructions = (
-            dialog.lineEditMetadataContactInstructions.text()
+        config_data.metadata.contact.phone = self.valid_string_or_none(
+            dialog.lineEditMetadataContactPhone
         )
-        config_data.metadata.contact.role = get_enum_value_from_string(
+        config_data.metadata.contact.fax = self.valid_string_or_none(
+            dialog.lineEditMetadataContactFax
+        )
+        config_data.metadata.contact.email = self.valid_string_or_none(
+            dialog.lineEditMetadataContactEmail
+        )
+        config_data.metadata.contact.url = self.valid_string_or_none(
+            dialog.lineEditMetadataContactUrl
+        )
+        config_data.metadata.contact.hours = self.valid_string_or_none(
+            dialog.lineEditMetadataContactHours
+        )
+        config_data.metadata.contact.instructions = self.valid_string_or_none(
+            dialog.lineEditMetadataContactInstructions
+        )
+        role = get_enum_value_from_string(
             MetadataRoleEnum,
             dialog.comboBoxMetadataContactRole.currentText(),
         )
+        config_data.metadata.contact.role = role if is_valid_string(role) else None
+
+    def valid_string_or_none(self, line_edit):
+        text_value = line_edit.text()
+        return text_value if is_valid_string(text_value) else None
 
     def set_resource_data_from_ui(self):
         """Collect data from Resource UI and add to ConfigData."""
@@ -259,7 +272,7 @@ class DataSetterFromUi:
                 dialog.lineEditResExtentsSpatialYMax,
             ]
         ]
-        # this loop is to not add empty decimals unnecessarily
+        # this loop is to not add empty decimals to int unnecessarily
         config_data.resources[res_name].extents.spatial.bbox = InlineList(
             bbox_from_list(raw_bbox_list)
         )
@@ -267,6 +280,8 @@ class DataSetterFromUi:
         # spatial crs
         config_data.resources[res_name].extents.spatial.crs = (
             self.get_extents_crs_from_ui(dialog)
+            if is_valid_string(dialog.lineEditResExtentsSpatialCrs)
+            else None
         )
 
         # temporal: only initialize if any of the values are present, otherwise leave as default None
@@ -419,11 +434,8 @@ class DataSetterFromUi:
                 ]
             ]
             bbox_from_list(raw_bbox_list)
-        except Exception as e:
+        except:
             invalid_fields.append("spatial extents (bbox)")
-
-        if not is_valid_string(dialog.lineEditResExtentsSpatialCrs.text()):
-            invalid_fields.append("spatial extents (crs)")
 
         if (
             dialog.listWidgetResProvider.count() == 0
@@ -431,7 +443,7 @@ class DataSetterFromUi:
         ):
             invalid_fields.append("providers")
 
-        # optional fields, but can cause crash if wrong format
+        # optional fields, but can cause crash if wrong format, so we need to warn about them already here
         if is_valid_string(dialog.lineEditResExtentsTemporalBegin.text()):
             try:
                 datetime.strptime(

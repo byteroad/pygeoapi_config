@@ -91,9 +91,6 @@ class ServerConfig:
     locale_dir: str | None = None
     api_rules: dict | None = None
 
-    # Not currently used in the UI
-    # api_rules: ServerApiRulesConfig | None = None
-
     def get_invalid_properties(self):
         """Checks the values of mandatory fields: bind (host), url, languages."""
         all_invalid_fields = []

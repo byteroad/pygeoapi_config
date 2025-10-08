@@ -8,6 +8,7 @@ from ..models.top_level.ResourceConfigTemplate import (
     ResourceVisibilityEnum,
 )
 from ..models.top_level.ServerConfig import ServerOnExceedEnum, ServerOptionalBoolsEnum
+from ..models.top_level.MetadataConfig import MetadataKeywordTypeEnum, MetadataRoleEnum
 from ..models.top_level.providers.records import (
     CrsAuthorities,
     Languages,
@@ -27,14 +28,12 @@ from .ui_setter_utils import (
     fill_combo_box,
     pack_locales_data_into_list,
     pack_list_data_into_list_widget,
-    select_list_widget_items_by_texts,
 )
 from .utils import get_widget_text_value, reset_widget
 
 
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtCore import (
-    QRegularExpression,
     Qt,
 )
 from PyQt5.QtWidgets import QMessageBox
@@ -71,28 +70,24 @@ class UiSetter:
         self.dialog.lineEditPort.setText(str(config_data.server.bind.port))
 
         # gzip
-        # self.dialog.checkBoxGzip.setChecked(config_data.server.gzip)
         set_combo_box_value_from_data(
             combo_box=self.dialog.comboBoxGzip,
             value=str(config_data.server.gzip),
         )
 
         # pretty print
-        # self.dialog.checkBoxPretty.setChecked(config_data.server.pretty_print)
         set_combo_box_value_from_data(
             combo_box=self.dialog.comboBoxPretty,
             value=str(config_data.server.pretty_print),
         )
 
         # admin
-        # self.dialog.checkBoxAdmin.setChecked(config_data.server.admin)
         set_combo_box_value_from_data(
             combo_box=self.dialog.comboBoxAdmin,
             value=str(config_data.server.admin),
         )
 
         # cors
-        # self.dialog.checkBoxCors.setChecked(config_data.server.cors)
         set_combo_box_value_from_data(
             combo_box=self.dialog.comboBoxCors,
             value=str(config_data.server.cors),
@@ -171,10 +166,6 @@ class UiSetter:
         )
 
         # languages
-        # select_list_widget_items_by_texts(
-        #    list_widget=self.dialog.listWidgetLang,
-        #    texts_to_select=config_data.server.languages,
-        # )
         if config_data.server.languages is not None:
             pack_list_data_into_list_widget(
                 [l for l in config_data.server.languages],
@@ -501,11 +492,11 @@ class UiSetter:
         fill_combo_box(dialog.comboBoxLog, config_data.logging.level)
         fill_combo_box(
             dialog.comboBoxMetadataIdKeywordsType,
-            config_data.metadata.identification.keywords_type,
+            MetadataKeywordTypeEnum.NONE,
         )
         fill_combo_box(
             dialog.comboBoxMetadataContactRole,
-            config_data.metadata.contact.role,
+            MetadataRoleEnum.NONE,
         )
         fill_combo_box(dialog.comboBoxGzip, ServerOptionalBoolsEnum.NONE)
         fill_combo_box(dialog.comboBoxPretty, ServerOptionalBoolsEnum.NONE)

@@ -56,9 +56,10 @@ class ProviderWmsFacade(ProviderTemplate):
         # Mandatory to align the fields order with data packing and assigning.
         # label, data_type, default, special_widget_type, placeholder
         return [
-            (*cls.get_field_info(cls, "name"), "QComboBox", ["WMSFacade"]),
-            (*cls.get_field_info(cls, "data"), None, ""),
-            (*cls.get_field_info(cls, "options.layer"), None, ""),
+            (*cls.get_field_info(cls, "name*"), "QComboBox", ["WMSFacade"]),
+            (*cls.get_field_info(cls, "data*"), None, ""),
+            (*cls.get_field_info(cls, "options.layer*"), None, ""),
+            # non-mandatory
             (*cls.get_field_info(cls, "crs"), None, ""),
             (*cls.get_field_info(cls, "options.style"), None, ""),
             (*cls.get_field_info(cls, "options.version"), None, ""),

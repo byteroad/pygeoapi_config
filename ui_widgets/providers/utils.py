@@ -94,9 +94,10 @@ def add_widgets_to_grid_by_specs(
             data_widget.setEnabled(False)
 
         # add to list of data widgets and fill with data if available
-        all_data_widgets[label] = {}
-        all_data_widgets[label]["widget"] = data_widget
-        all_data_widgets[label]["data_type"] = data_type
+        original_label_value = label.replace("*", "")
+        all_data_widgets[original_label_value] = {}
+        all_data_widgets[original_label_value]["widget"] = data_widget
+        all_data_widgets[original_label_value]["data_type"] = data_type
         if data_list:  # e.g. for dropdown
             assign_value_to_field(data_widget, data_list[i])
 

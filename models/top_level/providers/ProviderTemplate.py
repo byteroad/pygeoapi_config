@@ -31,7 +31,7 @@ class ProviderTemplate(ABC):
         Inspect a (possibly nested) dataclass field on `cls` and return (type, default_value).
         If no default is defined, default_value is None.
         """
-        parts = field_path.split(".")
+        parts = field_path.replace("*", "").split(".")
         default = None
         field_type = None
         # type_hints = get_type_hints(current_cls)

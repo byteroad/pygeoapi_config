@@ -76,7 +76,7 @@ class ConfigData:
                 if resource_data.get("type") in [e.value for e in ResourceTypesEnum]:
 
                     # Create a new ResourceConfigTemplate instance and update with available values
-                    new_resource_item = ResourceConfigTemplate(
+                    new_resource_item = ResourceConfigTemplate.init_with_name(
                         instance_name=resource_instance_name
                     )
                     (
@@ -170,7 +170,9 @@ class ConfigData:
     def add_new_resource(self) -> str:
         """Add a placeholder resource."""
         new_name = "new_resource"
-        self.resources[new_name] = ResourceConfigTemplate(instance_name=new_name)
+        self.resources[new_name] = ResourceConfigTemplate.init_with_name(
+            instance_name=new_name
+        )
         return new_name
 
     def delete_resource(self, dialog):
