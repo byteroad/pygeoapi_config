@@ -134,13 +134,32 @@ class UiSetter:
             self.dialog.lineEditManagerConnection.setText("")
             self.dialog.lineEditManagerOutputDir.setText("")
 
-        # ogc schemas location lineEditServerOgcSchemasLocation
-        if config_data.server.ogc_schemas_location:
-            self.dialog.lineEditServerOgcSchemasLocation.setText(
-                config_data.server.ogc_schemas_location
-            )
-        else:
-            self.dialog.lineEditServerOgcSchemasLocation.setText("")
+        # ogc schemas location
+        ogc_schemas_location = config_data.server.ogc_schemas_location or ""
+        self.dialog.lineEditServerOgcSchemasLocation.setText(ogc_schemas_location)
+
+        # icon
+        icon = config_data.server.icon or ""
+        self.dialog.lineEditServerIcon.setText(icon)
+
+        # logo
+        logo = config_data.server.logo or ""
+        self.dialog.lineEditServerLogo.setText(logo)
+
+        # locale_dir
+        locale_dir = config_data.server.locale_dir or ""
+        self.dialog.lineEditServerLocaleDir.setText(locale_dir)
+
+        # api_rules
+        config_data_server_api_rules = config_data.server.api_rules or {}
+        pack_list_data_into_list_widget(
+            (
+                [str(json.dumps(config_data_server_api_rules))]
+                if len(config_data_server_api_rules) > 0
+                else []
+            ),
+            self.dialog.listWidgetApiRules,
+        )
 
         # map
         self.dialog.lineEditMapUrl.setText(config_data.server.map.url)
@@ -172,6 +191,15 @@ class UiSetter:
         self.dialog.spinBoxDefault.setValue(config_data.server.limits.default_items)
         self.dialog.spinBoxMax.setValue(config_data.server.limits.max_items)
 
+        max_distance_x = config_data.server.limits.max_distance_x or ""
+        self.dialog.lineEditServerLimitsMaxDistX.setText(str(max_distance_x))
+
+        max_distance_y = config_data.server.limits.max_distance_y or ""
+        self.dialog.lineEditServerLimitsMaxDistY.setText(str(max_distance_y))
+
+        max_distance_units = config_data.server.limits.max_distance_units or ""
+        self.dialog.lineEditServerLimitsMaxDistUnits.setText(str(max_distance_units))
+
         set_combo_box_value_from_data(
             combo_box=self.dialog.comboBoxExceed or ServerOnExceedEnum.NONE,
             value=config_data.server.limits.on_exceed,
@@ -183,20 +211,27 @@ class UiSetter:
             value=config_data.logging.level,
         )
 
-        if config_data.logging.logfile:
-            self.dialog.lineEditLogfile.setText(config_data.logging.logfile)
-        else:
-            self.dialog.lineEditLogfile.setText("")
+        # logfile
+        logfile = config_data.logging.logfile or ""
+        self.dialog.lineEditLogfile.setText(logfile)
 
-        if config_data.logging.logformat:
-            self.dialog.lineEditLogformat.setText(config_data.logging.logformat)
-        else:
-            self.dialog.lineEditLogformat.setText("")
+        # logformat
+        logformat = config_data.logging.logformat or ""
+        self.dialog.lineEditLogformat.setText(logformat)
 
-        if config_data.logging.dateformat:
-            self.dialog.lineEditDateformat.setText(config_data.logging.dateformat)
-        else:
-            self.dialog.lineEditDateformat.setText("")
+        # dateformat
+        dateformat = config_data.logging.dateformat or ""
+        self.dialog.lineEditDateformat.setText(dateformat)
+
+        config_data_logging_rotation = config_data.logging.rotation or {}
+        pack_list_data_into_list_widget(
+            (
+                [str(json.dumps(config_data_logging_rotation))]
+                if len(config_data_logging_rotation) > 0
+                else []
+            ),
+            self.dialog.listWidgetLogRotation,
+        )
 
         # metadata identification
 
@@ -396,23 +431,38 @@ class UiSetter:
                 combo_box=dialog.comboBoxResExtentsTemporalTrs,
                 value=res_data.extents.temporal.trs,
             )
+        else:
+            dialog.lineEditResExtentsTemporalBegin.setText("")
+            dialog.lineEditResExtentsTemporalEnd.setText("")
 
         # links
-        if res_data.links is not None:
-            pack_list_data_into_list_widget(
+        res_data_links = (
+            res_data.links or []
+        )  # make sure to set UI even if it's an empty value
+        pack_list_data_into_list_widget(
+            (
                 [
                     [l.type, l.rel, l.href, l.title, l.hreflang, l.length]
-                    for l in res_data.links
-                ],
-                dialog.listWidgetResLinks,
-            )
+                    for l in res_data_links
+                ]
+                if len(res_data_links) > 0
+                else []
+            ),
+            dialog.listWidgetResLinks,
+        )
 
         # linked-data
-        if res_data.linked__data is not None:
-            pack_list_data_into_list_widget(
-                [str(json.dumps(res_data.linked__data))],
-                dialog.listWidgetResLinkedData,
-            )
+        res_data_linked__data = (
+            res_data.linked__data or {}
+        )  # make sure to set UI even if it's an empty value
+        pack_list_data_into_list_widget(
+            (
+                [str(json.dumps(res_data_linked__data))]
+                if len(res_data_linked__data) > 0
+                else []
+            ),
+            dialog.listWidgetResLinkedData,
+        )
 
         # providers
         self.set_providers_ui_from_data(res_data)

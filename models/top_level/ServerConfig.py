@@ -30,6 +30,9 @@ class ServerLimitsConfig:
     default_items: int = field(default=10)
     max_items: int = field(default=10)
     on_exceed: ServerOnExceedEnum | None = None
+    max_distance_x : int | None = None
+    max_distance_y : int | None = None
+    max_distance_units : int | None = None
 
 
 @dataclass(kw_only=True)
@@ -83,6 +86,10 @@ class ServerConfig:
     templates: ServerTemplatesConfig | None = None
     manager: ServerManagerConfig | None = None
     ogc_schemas_location: str | None = None
+    icon: str | None = None
+    logo: str | None = None
+    locale_dir: str | None = None
+    api_rules: dict | None = None
 
     # Not currently used in the UI
     # api_rules: ServerApiRulesConfig | None = None
