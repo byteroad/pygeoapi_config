@@ -146,8 +146,12 @@ class ConfigData:
             result = {}
             for f in fields(obj):
                 value = getattr(obj, f.name)
+
+                key = f.name
+                if key == "linked__data":
+                    key = "linked-data"
                 if value is not None:
-                    result[f.name] = self.asdict_enum_safe(value)
+                    result[key] = self.asdict_enum_safe(value)
             return result
         elif isinstance(obj, Enum):
             return obj.value

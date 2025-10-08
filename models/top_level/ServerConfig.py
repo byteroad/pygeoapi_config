@@ -75,6 +75,7 @@ class ServerConfig:
     admin: bool = field(default=False)
     templates: ServerTemplatesConfig | None = None
     manager: ServerManagerConfig | None = None
+    ogc_schemas_location: str | None = None
 
     # Not currently used in the UI
     # api_rules: ServerApiRulesConfig | None = None

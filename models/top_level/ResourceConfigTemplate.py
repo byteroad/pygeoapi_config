@@ -10,7 +10,6 @@ from .utils import (
     is_valid_string,
 )
 from .providers.records import CrsAuthorities
-from .providers.records import Languages
 
 
 # records
@@ -109,7 +108,10 @@ class ResourceConfigTemplate:
     # optional
     links: list[ResourceLinkTemplate] | None = None
     visibility: ResourceVisibilityEnum | None = None
-    # limits, linked-data: ignored for now
+    linked__data: dict | None = (
+        None  # intentionally with double undersore to not confuse with any reserved word
+    )
+    # limits: ignored for now
 
     # Overwriding __init__ method to pass 'instance_name' as an input but not make it an instance property
     # This will allow to have a clean 'asdict(class)' output without 'instance_name' in it

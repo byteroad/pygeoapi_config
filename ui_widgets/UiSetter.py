@@ -118,6 +118,14 @@ class UiSetter:
             self.dialog.lineEditManagerConnection.setText("")
             self.dialog.lineEditManagerOutputDir.setText("")
 
+        # ogc schemas location lineEditServerOgcSchemasLocation
+        if config_data.server.ogc_schemas_location:
+            self.dialog.lineEditServerOgcSchemasLocation.setText(
+                config_data.server.ogc_schemas_location
+            )
+        else:
+            self.dialog.lineEditServerOgcSchemasLocation.setText("")
+
         # map
         self.dialog.lineEditMapUrl.setText(config_data.server.map.url)
         self.dialog.lineEditAttribution.setText(config_data.server.map.attribution)
@@ -379,6 +387,13 @@ class UiSetter:
                     for l in res_data.links
                 ],
                 dialog.listWidgetResLinks,
+            )
+
+        # linked-data
+        if res_data.linked__data is not None:
+            pack_list_data_into_list_widget(
+                [str(json.dumps(res_data.linked__data))],
+                dialog.listWidgetResLinkedData,
             )
 
         # providers

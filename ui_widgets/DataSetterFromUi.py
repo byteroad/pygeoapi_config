@@ -299,6 +299,13 @@ class DataSetterFromUi:
 
             config_data.resources[res_name].links.append(new_link)
 
+        # linked-data
+        read_only_linked_data_lists: list[list[str]] = (
+            unpack_listwidget_values_to_sublists(dialog.listWidgetResLinkedData, 1)
+        )
+        new_linked_data = read_only_linked_data_lists[0][0]
+        config_data.resources[res_name].linked__data = json.loads(new_linked_data)
+
         # providers
         config_data.resources[res_name].providers = []
 
@@ -400,7 +407,10 @@ class DataSetterFromUi:
         if not is_valid_string(dialog.lineEditResExtentsSpatialCrs.text()):
             invalid_fields.append("spatial extents (crs)")
 
-        if dialog.listWidgetResProvider.count() == 0:
+        if (
+            dialog.listWidgetResProvider.count() == 0
+            and dialog.listWidgetResReadOnlyProviders.count() == 0
+        ):
             invalid_fields.append("providers")
 
         # optional fields, but can cause crash if wrong format

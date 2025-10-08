@@ -19,6 +19,11 @@ def update_dataclass_from_dict(
     for fld in fields(instance):
         field_name = fld.name
 
+        # handle exception for resource 'linked-data'
+        if field_name == "linked__data":
+            if "linked-data" in new_dict:
+                new_dict["linked__data"] = new_dict["linked-data"]
+
         # try overwrite instance property with new dictionary value
         if field_name in new_dict:
             new_value = new_dict[field_name]
