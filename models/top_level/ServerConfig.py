@@ -80,7 +80,7 @@ class ServerConfig:
     languages: list | None = None
     gzip: ServerOptionalBoolsEnum | None = None
     pretty_print: ServerOptionalBoolsEnum | None = None
-    admin: str | None = None
+    admin: ServerOptionalBoolsEnum | None = None
     cors: ServerOptionalBoolsEnum | None = None
     limits: ServerLimitsConfig | None = None
     templates: ServerTemplatesConfig | None = None

@@ -77,7 +77,10 @@ class DataSetterFromUi:
         )
 
         # admin
-        config_data.server.admin = dialog.lineEditAdmin.text()
+        # config_data.server.admin = dialog.lineEditAdmin.text()
+        config_data.server.admin = get_enum_value_from_string(
+            ServerOptionalBoolsEnum, dialog.comboBoxAdmin.currentText()
+        )
 
         # cors
         # config_data.server.cors = dialog.checkBoxCors.isChecked()

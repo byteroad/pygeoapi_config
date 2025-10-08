@@ -85,7 +85,11 @@ class UiSetter:
         )
 
         # admin
-        self.dialog.lineEditAdmin.setText(config_data.server.admin)
+        # self.dialog.checkBoxAdmin.setChecked(config_data.server.admin)
+        set_combo_box_value_from_data(
+            combo_box=self.dialog.comboBoxAdmin,
+            value=str(config_data.server.admin),
+        )
 
         # cors
         # self.dialog.checkBoxCors.setChecked(config_data.server.cors)
@@ -508,6 +512,7 @@ class UiSetter:
         )
         fill_combo_box(dialog.comboBoxGzip, ServerOptionalBoolsEnum.NONE)
         fill_combo_box(dialog.comboBoxPretty, ServerOptionalBoolsEnum.NONE)
+        fill_combo_box(dialog.comboBoxAdmin, ServerOptionalBoolsEnum.NONE)
         fill_combo_box(dialog.comboBoxCors, ServerOptionalBoolsEnum.NONE)
 
         # add default values to the Resource UI

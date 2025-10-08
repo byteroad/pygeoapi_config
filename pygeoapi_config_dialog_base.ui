@@ -296,7 +296,7 @@
                 </widget>
                 </item>
                 <item>
-                <widget class="QLineEdit" name="lineEditAdmin"/>
+                <widget class="QComboBox" name="comboBoxAdmin"/>
                 </item>
               </layout>
           </item>
