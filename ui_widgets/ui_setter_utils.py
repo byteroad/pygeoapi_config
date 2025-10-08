@@ -22,7 +22,7 @@ def fill_combo_box(combo_box, enum_class):
 
     combo_box.clear()
     for item in type(enum_class):
-        combo_box.addItem(item.value)
+        combo_box.addItem(str(item.value) if item.value is not None else "")
 
 
 def clear_layout(layout):

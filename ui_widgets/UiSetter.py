@@ -7,7 +7,7 @@ from ..models.top_level.ResourceConfigTemplate import (
     ResourceTypesEnum,
     ResourceVisibilityEnum,
 )
-from ..models.top_level.ServerConfig import ServerOnExceedEnum
+from ..models.top_level.ServerConfig import ServerOnExceedEnum, ServerOptionalBoolsEnum
 from ..models.top_level.providers.records import (
     CrsAuthorities,
     Languages,
@@ -71,7 +71,32 @@ class UiSetter:
         self.dialog.spinBoxPort.setValue(config_data.server.bind.port)
 
         # gzip
-        self.dialog.checkBoxGzip.setChecked(config_data.server.gzip)
+        # self.dialog.checkBoxGzip.setChecked(config_data.server.gzip)
+        set_combo_box_value_from_data(
+            combo_box=self.dialog.comboBoxGzip,
+            value=str(config_data.server.gzip),
+        )
+
+        # pretty print
+        #self.dialog.checkBoxPretty.setChecked(config_data.server.pretty_print)
+        set_combo_box_value_from_data(
+            combo_box=self.dialog.comboBoxPretty,
+            value=str(config_data.server.pretty_print),
+        )
+
+        # admin
+        #self.dialog.checkBoxAdmin.setChecked(config_data.server.admin)
+        set_combo_box_value_from_data(
+            combo_box=self.dialog.comboBoxAdmin,
+            value=str(config_data.server.admin),
+        )
+
+        # cors
+        #self.dialog.checkBoxCors.setChecked(config_data.server.cors)
+        set_combo_box_value_from_data(
+            combo_box=self.dialog.comboBoxCors,
+            value=str(config_data.server.cors),
+        )
 
         # mimetype
         set_combo_box_value_from_data(
@@ -84,15 +109,6 @@ class UiSetter:
             combo_box=self.dialog.comboBoxEncoding,
             value=config_data.server.encoding,
         )
-
-        # pretty print
-        self.dialog.checkBoxPretty.setChecked(config_data.server.pretty_print)
-
-        # admin
-        self.dialog.checkBoxAdmin.setChecked(config_data.server.admin)
-
-        # cors
-        self.dialog.checkBoxCors.setChecked(config_data.server.cors)
 
         # templates
         if config_data.server.templates:
@@ -441,6 +457,10 @@ class UiSetter:
             dialog.comboBoxMetadataContactRole,
             config_data.metadata.contact.role,
         )
+        fill_combo_box(dialog.comboBoxGzip, ServerOptionalBoolsEnum.NONE)
+        fill_combo_box(dialog.comboBoxPretty, ServerOptionalBoolsEnum.NONE)
+        fill_combo_box(dialog.comboBoxAdmin, ServerOptionalBoolsEnum.NONE)
+        fill_combo_box(dialog.comboBoxCors, ServerOptionalBoolsEnum.NONE)
 
         # add default values to the Resource UI
         fill_combo_box(

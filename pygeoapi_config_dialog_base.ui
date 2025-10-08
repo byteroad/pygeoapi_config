@@ -322,38 +322,72 @@
          </layout>
         </widget>
        </item>
+
        <item row="6" column="0" rowspan="1">
         <layout class="QVBoxLayout" name="horizontalLayout_7">
-         <item>
-          <widget class="QCheckBox" name="checkBoxGzip">
-           <property name="text">
-            <string>gzip</string>
-           </property>
-          </widget>
+         <item>    
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+              <widget class="QLabel" name="label_4">
+                <property name="text">
+                <string>gzip</string>
+                </property>
+              </widget>
+              </item>
+              <item>
+              <widget class="QComboBox" name="comboBoxGzip">
+              </widget>
+              </item>
+            </layout>
          </item>
-         <item>
-          <widget class="QCheckBox" name="checkBoxPretty">
-           <property name="text">
-            <string>pretty print</string>
-           </property>
-          </widget>
+         
+         <item>    
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+              <widget class="QLabel" name="label_4">
+                <property name="text">
+                <string>pretty print</string>
+                </property>
+              </widget>
+              </item>
+              <item>
+              <widget class="QComboBox" name="comboBoxPretty"/>
+              </item>
+            </layout>
          </item>
-         <item>
-          <widget class="QCheckBox" name="checkBoxAdmin">
-           <property name="text">
-            <string>admin</string>
-           </property>
-          </widget>
+
+         <item>    
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+              <widget class="QLabel" name="label_4">
+                <property name="text">
+                <string>admin</string>
+                </property>
+              </widget>
+              </item>
+              <item>
+              <widget class="QComboBox" name="comboBoxAdmin"/>
+              </item>
+            </layout>
          </item>
-         <item>
-          <widget class="QCheckBox" name="checkBoxCors">
-           <property name="text">
-            <string>cors</string>
-           </property>
-          </widget>
+
+         <item>    
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+              <widget class="QLabel" name="label_4">
+                <property name="text">
+                <string>cors</string>
+                </property>
+              </widget>
+              </item>
+              <item>
+              <widget class="QComboBox" name="comboBoxCors"/>
+              </item>
+            </layout>
          </item>
-        </layout>
-       </item>
+            </layout>
+         </item>
+
        <item row="2" column="0" rowspan="1">
         <widget class="QFrame" name="frame_3">
          <property name="frameShape">

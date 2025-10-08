@@ -22,6 +22,11 @@ def get_enum_value_from_string(enum_type: Enum, text: str):
         for member in enum_type:
             if text == member.value:
                 return member
+        # handle case with non-string enums
+        for member in enum_type:
+            if text == str(member.value) or (text == "" and member.value is None):
+                return member
+
     raise ValueError(f"Unexpected value '{text}', expected type: '{enum_type}'")
 
 

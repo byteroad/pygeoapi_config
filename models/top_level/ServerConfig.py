@@ -11,6 +11,12 @@ class ServerOnExceedEnum(Enum):
     ERROR = "error"
 
 
+class ServerOptionalBoolsEnum(Enum):
+    NONE = None
+    TRUE = True
+    FALSE = False
+
+
 # data classes
 @dataclass(kw_only=True)
 class ServerBindConfig:
@@ -66,13 +72,13 @@ class ServerConfig:
     map: ServerMapConfig = field(default_factory=lambda: ServerMapConfig())
 
     # optional fields:
-    gzip: bool = field(default=False)
     language: str | None = None
     languages: list | None = None
-    cors: bool = field(default=False)
-    pretty_print: bool = field(default=False)
+    gzip: ServerOptionalBoolsEnum | None = None
+    pretty_print: ServerOptionalBoolsEnum | None = None
+    admin: ServerOptionalBoolsEnum | None = None
+    cors: ServerOptionalBoolsEnum | None = None
     limits: ServerLimitsConfig = field(default_factory=lambda: ServerLimitsConfig())
-    admin: bool = field(default=False)
     templates: ServerTemplatesConfig | None = None
     manager: ServerManagerConfig | None = None
     ogc_schemas_location: str | None = None

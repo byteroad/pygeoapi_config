@@ -21,6 +21,7 @@ from ..models.top_level import (
     MetadataKeywordTypeEnum,
     MetadataRoleEnum,
     ServerOnExceedEnum,
+    ServerOptionalBoolsEnum,
     ServerTemplatesConfig,
 )
 from ..models.top_level.providers import ProviderTemplate
@@ -60,16 +61,28 @@ class DataSetterFromUi:
         config_data.server.bind.port = dialog.spinBoxPort.value()
 
         # gzip
-        config_data.server.gzip = dialog.checkBoxGzip.isChecked()
+        #config_data.server.gzip = dialog.checkBoxGzip.isChecked()
+        config_data.server.gzip = get_enum_value_from_string(
+            ServerOptionalBoolsEnum, dialog.comboBoxGzip.currentText()
+        )
 
         # pretty print
-        config_data.server.pretty_print = dialog.checkBoxPretty.isChecked()
+        #config_data.server.pretty_print = dialog.checkBoxPretty.isChecked()
+        config_data.server.pretty_print = get_enum_value_from_string(
+            ServerOptionalBoolsEnum, dialog.comboBoxPretty.currentText()
+        )
 
         # admin
-        config_data.server.admin = dialog.checkBoxAdmin.isChecked()
+        #config_data.server.admin = dialog.checkBoxAdmin.isChecked()
+        config_data.server.admin = get_enum_value_from_string(
+            ServerOptionalBoolsEnum, dialog.comboBoxAdmin.currentText()
+        )
 
         # cors
-        config_data.server.cors = dialog.checkBoxCors.isChecked()
+        #config_data.server.cors = dialog.checkBoxCors.isChecked()
+        config_data.server.cors = get_enum_value_from_string(
+            ServerOptionalBoolsEnum, dialog.comboBoxCors.currentText()
+        )
 
         # templates
         if is_valid_string(dialog.lineEditTemplatesPath.text()) or is_valid_string(
