@@ -156,37 +156,7 @@
            </widget>
           </item>
           <item>
-           
-                    <widget class="QComboBox" name="comboBoxLangSingle">
-                      <item>
-                      <property name="text">
-                        <string></string>
-                      </property>
-                      <property name="text">
-                        <string>en-US</string>
-                      </property>
-                      </item>
-                      <item>
-                      <property name="text">
-                        <string>en-GB</string>
-                      </property>
-                      </item>
-                      <item>
-                      <property name="text">
-                        <string>fr-CA</string>
-                      </property>
-                      </item>
-                      <item>
-                      <property name="text">
-                        <string>fr-FR</string>
-                      </property>
-                      </item>
-                      <item>
-                      <property name="text">
-                        <string>pt-PT</string>
-                      </property>
-                      </item>
-                    </widget>
+              <widget class="QComboBox" name="comboBoxLangSingle"/>
           </item>
          </layout>
         </widget>
@@ -585,7 +555,7 @@
        <item row="5" column="1" rowspan="1">
         <widget class="QGroupBox" name="groupBox">
             <property name="title">
-              <string>logging</string>
+              <string>logging*</string>
             </property>
           <layout class="QGridLayout" name="gridLayoutLogSettings">
   
@@ -593,7 +563,7 @@
                 <item row="0" column="0">
                   <widget class="QLabel" name="label_13">
                     <property name="text">
-                      <string>level</string>
+                      <string>level*</string>
                     </property>
                   </widget>
                 </item>
@@ -817,14 +787,14 @@
        <item row="0" column="0" rowspan="2">
         <widget class="QGroupBox" name="groupBoxBind">
          <property name="title">
-          <string>identification</string>
+          <string>identification*</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
 
           <item row="0" column="0">
            <widget class="QLabel">
             <property name="text">
-             <string>title</string>
+             <string>title*</string>
             </property>
            </widget>
           </item>
@@ -927,7 +897,7 @@
           <item row="1" column="0">
            <widget class="QLabel">
             <property name="text">
-             <string>description</string>
+             <string>description*</string>
             </property>
            </widget>
           </item>
@@ -1029,7 +999,7 @@
           <item row="2" column="0">
            <widget class="QLabel">
             <property name="text">
-             <string>keywords</string>
+             <string>keywords*</string>
             </property>
            </widget>
           </item>
@@ -1155,7 +1125,7 @@
           <item row="5" column="0">
            <widget class="QLabel">
             <property name="text">
-             <string>url</string>
+             <string>url*</string>
             </property>
            </widget>
           </item>
@@ -1173,14 +1143,14 @@
        <item row="2" column="0" rowspan="1">
           <widget class="QGroupBox" name="groupBoxBind">
           <property name="title">
-            <string>license</string>
+            <string>license*</string>
           </property>
           <layout class="QGridLayout" name="gridLayout">
 
             <item row="0" column="0">
             <widget class="QLabel">
               <property name="text">
-              <string>name</string>
+              <string>name*</string>
               </property>
             </widget>
             </item>
@@ -1210,14 +1180,14 @@
        <item row="3" column="0" rowspan="1">
           <widget class="QGroupBox" name="groupBoxBind">
           <property name="title">
-            <string>provider</string>
+            <string>provider*</string>
           </property>
           <layout class="QGridLayout" name="gridLayout">
 
             <item row="0" column="0">
             <widget class="QLabel">
               <property name="text">
-              <string>name</string>
+              <string>name*</string>
               </property>
             </widget>
             </item>
@@ -1247,14 +1217,14 @@
        <item row="0" column="1" rowspan="4">
           <widget class="QGroupBox" name="groupBoxBind">
           <property name="title">
-            <string>contact</string>
+            <string>contact*</string>
           </property>
           <layout class="QGridLayout" name="gridLayout">
 
             <item row="0" column="0">
             <widget class="QLabel">
               <property name="text">
-              <string>name</string>
+              <string>name*</string>
               </property>
             </widget>
             </item>
@@ -1552,7 +1522,7 @@
                     <item row="0" column="0">
                       <widget class="QLabel">
                         <property name="text">
-                        <string>alias</string>
+                        <string>alias*</string>
                         </property>
                       </widget>
                     </item>
@@ -1564,7 +1534,7 @@
                     <item row="1" column="0" >
                       <widget class="QLabel">
                         <property name="text">
-                        <string>type</string>
+                        <string>type*</string>
                         </property>
                       </widget>
                     </item>
@@ -1593,7 +1563,7 @@
               
                 <widget class="QGroupBox">
                   <property name="title">
-                    <string>title</string>
+                    <string>title*</string>
                   </property>
 
                   <layout class="QGridLayout">
@@ -1694,7 +1664,7 @@
               
                 <widget class="QGroupBox">
                   <property name="title">
-                    <string>description</string>
+                    <string>description*</string>
                   </property>
 
                   <layout class="QGridLayout">
@@ -1796,7 +1766,7 @@
               
                 <widget class="QGroupBox">
                   <property name="title">
-                    <string>keywords</string>
+                    <string>keywords*</string>
                   </property>
 
                   <layout class="QGridLayout">
@@ -2067,7 +2037,7 @@
               <item row="2" column="0" rowspan="1">
                 <widget class="QGroupBox" name="groupBoxMap">
                   <property name="title">
-                    <string>providers</string>
+                    <string>providers*</string>
                   </property>
                   <layout class="QGridLayout" name="gridLayout_2">
                     <item row="0" column="0">
@@ -2191,7 +2161,7 @@
               
                 <widget class="QGroupBox">
                   <property name="title">
-                    <string>spatial extents</string>
+                    <string>spatial extents*</string>
                   </property>
 
                   <layout class="QGridLayout">
