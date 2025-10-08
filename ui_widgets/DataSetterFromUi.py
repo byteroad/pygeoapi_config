@@ -23,6 +23,7 @@ from ..models.top_level import (
     ServerOnExceedEnum,
     ServerOptionalBoolsEnum,
     ServerTemplatesConfig,
+    ServerLimitsConfig,
 )
 from ..models.top_level.providers import ProviderTemplate
 from ..models.top_level.providers.records import (
@@ -61,25 +62,25 @@ class DataSetterFromUi:
         config_data.server.bind.port = dialog.spinBoxPort.value()
 
         # gzip
-        #config_data.server.gzip = dialog.checkBoxGzip.isChecked()
+        # config_data.server.gzip = dialog.checkBoxGzip.isChecked()
         config_data.server.gzip = get_enum_value_from_string(
             ServerOptionalBoolsEnum, dialog.comboBoxGzip.currentText()
         )
 
         # pretty print
-        #config_data.server.pretty_print = dialog.checkBoxPretty.isChecked()
+        # config_data.server.pretty_print = dialog.checkBoxPretty.isChecked()
         config_data.server.pretty_print = get_enum_value_from_string(
             ServerOptionalBoolsEnum, dialog.comboBoxPretty.currentText()
         )
 
         # admin
-        #config_data.server.admin = dialog.checkBoxAdmin.isChecked()
+        # config_data.server.admin = dialog.checkBoxAdmin.isChecked()
         config_data.server.admin = get_enum_value_from_string(
             ServerOptionalBoolsEnum, dialog.comboBoxAdmin.currentText()
         )
 
         # cors
-        #config_data.server.cors = dialog.checkBoxCors.isChecked()
+        # config_data.server.cors = dialog.checkBoxCors.isChecked()
         config_data.server.cors = get_enum_value_from_string(
             ServerOptionalBoolsEnum, dialog.comboBoxCors.currentText()
         )
@@ -103,12 +104,10 @@ class DataSetterFromUi:
         # url
         config_data.server.url = dialog.lineEditUrl.text()
 
-        # language single (if selected)
-        for i in range(dialog.listWidgetLangSingle.count()):
-            item = dialog.listWidgetLangSingle.item(i)
-            if item.isSelected():
-                config_data.server.language = item.text()
-                break
+        # language single
+        config_data.server.language = get_enum_value_from_string(
+            Languages, dialog.comboBoxLangSingle.currentText()
+        )
 
         # languages
         # config_data.server.languages = []
@@ -126,12 +125,17 @@ class DataSetterFromUi:
                 config_data.server.languages.append(lang[0])
 
         # limits
-        config_data.server.limits.default_items = dialog.spinBoxDefault.value()
-        config_data.server.limits.max_items = dialog.spinBoxMax.value()
+        default_items = dialog.spinBoxDefault.value()
+        max_items = dialog.spinBoxMax.value()
 
-        config_data.server.limits.on_exceed = get_enum_value_from_string(
+        on_exceed = get_enum_value_from_string(
             ServerOnExceedEnum, dialog.comboBoxExceed.currentText()
         )
+        if default_items or max_items or on_exceed:
+            config_data.server.limits = ServerLimitsConfig()
+            config_data.server.limits.default_items = default_items
+            config_data.server.limits.max_items = max_items
+            config_data.server.limits.on_exceed = on_exceed
 
         # logging
         config_data.logging.level = get_enum_value_from_string(

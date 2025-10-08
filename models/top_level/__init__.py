@@ -3,6 +3,7 @@ from .ServerConfig import (
     ServerOnExceedEnum,
     ServerOptionalBoolsEnum,
     ServerTemplatesConfig,
+    ServerLimitsConfig,
 )
 from .LoggingConfig import LoggingConfig, LoggingLevel
 from .MetadataConfig import MetadataConfig, MetadataKeywordTypeEnum, MetadataRoleEnum
@@ -19,6 +20,7 @@ __all__ = [
     "ServerOnExceedEnum",
     "ServerOptionalBoolsEnum",
     "ServerTemplatesConfig",
+    "ServerLimitsConfig",
     "LoggingConfig",
     "LoggingLevel",
     "MetadataConfig",

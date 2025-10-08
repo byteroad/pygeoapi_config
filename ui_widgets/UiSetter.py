@@ -2,7 +2,7 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
-from ..models.top_level import ResourceConfigTemplate
+from ..models.top_level import ResourceConfigTemplate, ServerLimitsConfig
 from ..models.top_level.ResourceConfigTemplate import (
     ResourceTypesEnum,
     ResourceVisibilityEnum,
@@ -78,21 +78,21 @@ class UiSetter:
         )
 
         # pretty print
-        #self.dialog.checkBoxPretty.setChecked(config_data.server.pretty_print)
+        # self.dialog.checkBoxPretty.setChecked(config_data.server.pretty_print)
         set_combo_box_value_from_data(
             combo_box=self.dialog.comboBoxPretty,
             value=str(config_data.server.pretty_print),
         )
 
         # admin
-        #self.dialog.checkBoxAdmin.setChecked(config_data.server.admin)
+        # self.dialog.checkBoxAdmin.setChecked(config_data.server.admin)
         set_combo_box_value_from_data(
             combo_box=self.dialog.comboBoxAdmin,
             value=str(config_data.server.admin),
         )
 
         # cors
-        #self.dialog.checkBoxCors.setChecked(config_data.server.cors)
+        # self.dialog.checkBoxCors.setChecked(config_data.server.cors)
         set_combo_box_value_from_data(
             combo_box=self.dialog.comboBoxCors,
             value=str(config_data.server.cors),
@@ -149,11 +149,10 @@ class UiSetter:
         self.dialog.lineEditUrl.setText(config_data.server.url)
 
         # language single
-        if config_data.server.language is not None:
-            select_list_widget_items_by_texts(
-                list_widget=self.dialog.listWidgetLangSingle,
-                texts_to_select=config_data.server.language,
-            )
+        set_combo_box_value_from_data(
+            combo_box=self.dialog.comboBoxLangSingle,
+            value=config_data.server.language,
+        )
 
         # languages
         # select_list_widget_items_by_texts(
@@ -167,6 +166,9 @@ class UiSetter:
             )
 
         # limits
+        if config_data.server.limits is None:
+            config_data.server.limits = ServerLimitsConfig()
+
         self.dialog.spinBoxDefault.setValue(config_data.server.limits.default_items)
         self.dialog.spinBoxMax.setValue(config_data.server.limits.max_items)
 
@@ -447,6 +449,7 @@ class UiSetter:
         config_data: ConfigData = dialog.config_data
 
         # add default values to the main UI
+        fill_combo_box(dialog.comboBoxLangSingle, Languages.NONE)
         fill_combo_box(dialog.comboBoxExceed, ServerOnExceedEnum.NONE)
         fill_combo_box(dialog.comboBoxLog, config_data.logging.level)
         fill_combo_box(

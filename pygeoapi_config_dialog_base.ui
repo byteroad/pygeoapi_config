@@ -53,7 +53,7 @@
        <item row="0" column="0" rowspan="1">
         <widget class="QGroupBox" name="groupBoxBind">
          <property name="title">
-          <string>bind</string>
+          <string>bind*</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="1">
@@ -66,14 +66,14 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label">
             <property name="text">
-             <string>host</string>
+             <string>host*</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>port</string>
+             <string>port*</string>
             </property>
            </widget>
           </item>
@@ -99,7 +99,7 @@
           <item>
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>url</string>
+             <string>url*</string>
             </property>
            </widget>
           </item>
@@ -112,7 +112,7 @@
        <item row="0" column="1" rowspan="1">
         <widget class="QGroupBox" name="groupBoxMap">
          <property name="title">
-          <string>map</string>
+          <string>map*</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="1">
@@ -121,7 +121,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_9">
             <property name="text">
-             <string>attribution</string>
+             <string>attribution*</string>
             </property>
            </widget>
           </item>
@@ -131,7 +131,7 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label_8">
             <property name="text">
-             <string>url</string>
+             <string>url*</string>
             </property>
            </widget>
           </item>
@@ -156,41 +156,37 @@
            </widget>
           </item>
           <item>
-           <widget class="QListWidget" name="listWidgetLangSingle">
            
-            <property name="maximumSize">
-              <size>
-              <width>1000</width>
-              <height>100</height>
-              </size>
-            </property>
-
-            <item>
-             <property name="text">
-              <string>en-US</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>en-GB</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>fr-CA</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>fr-FR</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>pt-PT</string>
-             </property>
-            </item>
-           </widget>
+                    <widget class="QComboBox" name="comboBoxLangSingle">
+                      <item>
+                      <property name="text">
+                        <string></string>
+                      </property>
+                      <property name="text">
+                        <string>en-US</string>
+                      </property>
+                      </item>
+                      <item>
+                      <property name="text">
+                        <string>en-GB</string>
+                      </property>
+                      </item>
+                      <item>
+                      <property name="text">
+                        <string>fr-CA</string>
+                      </property>
+                      </item>
+                      <item>
+                      <property name="text">
+                        <string>fr-FR</string>
+                      </property>
+                      </item>
+                      <item>
+                      <property name="text">
+                        <string>pt-PT</string>
+                      </property>
+                      </item>
+                    </widget>
           </item>
          </layout>
         </widget>
@@ -263,7 +259,7 @@
                         <string>pt-PT</string>
                       </property>
                       </item>
-                      </widget>
+                    </widget>
 
                     </item>
 
@@ -400,7 +396,7 @@
           <item>
            <widget class="QLabel" name="label_5">
             <property name="text">
-             <string>encoding</string>
+             <string>encoding*</string>
             </property>
            </widget>
           </item>
@@ -495,7 +491,7 @@
           <item>
            <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>mimetype</string>
+             <string>mimetype*</string>
             </property>
            </widget>
           </item>

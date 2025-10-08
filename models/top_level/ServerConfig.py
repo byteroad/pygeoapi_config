@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from .utils import is_valid_string
+from ..top_level.providers.records import Languages
 
 
 # records
@@ -26,8 +27,8 @@ class ServerBindConfig:
 
 @dataclass(kw_only=True)
 class ServerLimitsConfig:
-    default_items: int = field(default=20)
-    max_items: int = field(default=50)
+    default_items: int = field(default=10)
+    max_items: int = field(default=10)
     on_exceed: ServerOnExceedEnum | None = None
 
 
@@ -72,13 +73,13 @@ class ServerConfig:
     map: ServerMapConfig = field(default_factory=lambda: ServerMapConfig())
 
     # optional fields:
-    language: str | None = None
+    language: Languages | None = None
     languages: list | None = None
     gzip: ServerOptionalBoolsEnum | None = None
     pretty_print: ServerOptionalBoolsEnum | None = None
     admin: ServerOptionalBoolsEnum | None = None
     cors: ServerOptionalBoolsEnum | None = None
-    limits: ServerLimitsConfig = field(default_factory=lambda: ServerLimitsConfig())
+    limits: ServerLimitsConfig | None = None
     templates: ServerTemplatesConfig | None = None
     manager: ServerManagerConfig | None = None
     ogc_schemas_location: str | None = None
