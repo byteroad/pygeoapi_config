@@ -78,6 +78,7 @@ FORM_CLASS, _ = uic.loadUiType(
 class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     config_data: ConfigData
+    yaml_original_data: dict
     ui_setter: UiSetter
     data_from_ui_setter: DataSetterFromUi
     current_res_name = ""
@@ -176,7 +177,12 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
                 # reset data
                 self.config_data = ConfigData()
-                self.config_data.set_data_from_yaml(yaml.safe_load(file_content))
+
+                # set data and .all_missing_props:
+                self.yaml_original_data = yaml.safe_load(file_content)
+                self.config_data.set_data_from_yaml(self.yaml_original_data)
+
+                # set UI from data
                 self.ui_setter.set_ui_from_data()
 
                 # log messages about missing or mistyped values during deserialization

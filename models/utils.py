@@ -136,6 +136,10 @@ def cast_element_to_type(value: Any, expected_type, prop_name: str):
         for inner_type in args:
 
             if inner_type.__name__.startswith("Provider"):
+                # don't cast anything except supported providers
+                if value.get("name") not in ["PostgreSQL", "MVT-proxy", "WMSFacade"]:
+                    continue
+
                 # don't cast to wrong provider, even if properties match
                 if (
                     (

@@ -133,7 +133,6 @@ class ProviderPostgresql(ProviderTemplate):
         ]
 
     def assign_value_list_to_provider_data_on_read(self, values: list):
-        print("_______assign_value_list_to_provider_data_on_read")
         if len(values) != 16:
             raise ValueError(
                 f"Unexpected number of value to unpack: {len(values)}. Expected: 16"
