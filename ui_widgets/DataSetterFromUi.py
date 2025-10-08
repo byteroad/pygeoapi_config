@@ -366,8 +366,14 @@ class DataSetterFromUi:
 
         # change resource key to a new alias
         new_alias = dialog.lineEditResAlias.text()
-        if res_name in config_data.resources:
-            config_data.resources[new_alias] = config_data.resources.pop(res_name)
+
+        new_resources = {}
+        for k, v in config_data.resources.items():
+            if k == res_name:
+                new_resources[new_alias] = v
+            else:
+                new_resources[k] = v
+        config_data.resources = new_resources
 
     def delete_selected_provider_type_and_name(self, list_widget):
         """Find and remove first matching resource provider with specified type and name."""
