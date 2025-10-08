@@ -121,18 +121,15 @@ class UiSetter:
             self.dialog.lineEditTemplatesStatic.setText("")
 
         # manager (only for display, data is kept without changes)
-        if config_data.server.manager:
-            self.dialog.lineEditManagerName.setText(config_data.server.manager.name)
-            self.dialog.lineEditManagerConnection.setText(
-                config_data.server.manager.connection
-            )
-            self.dialog.lineEditManagerOutputDir.setText(
-                config_data.server.manager.output_dir
-            )
-        else:
-            self.dialog.lineEditManagerName.setText("")
-            self.dialog.lineEditManagerConnection.setText("")
-            self.dialog.lineEditManagerOutputDir.setText("")
+        config_data_server_manager = config_data.server.manager or {}
+        pack_list_data_into_list_widget(
+            (
+                [str(json.dumps(config_data_server_manager))]
+                if len(config_data_server_manager) > 0
+                else []
+            ),
+            self.dialog.listWidgetServerManager,
+        )
 
         # ogc schemas location
         ogc_schemas_location = config_data.server.ogc_schemas_location or ""

@@ -84,7 +84,7 @@ class ServerConfig:
     cors: ServerOptionalBoolsEnum | None = None
     limits: ServerLimitsConfig | None = None
     templates: ServerTemplatesConfig | None = None
-    manager: ServerManagerConfig | None = None
+    manager: dict | None = None
     ogc_schemas_location: str | None = None
     icon: str | None = None
     logo: str | None = None

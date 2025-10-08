@@ -13,6 +13,7 @@ class MetadataKeywordTypeEnum(Enum):
 
 
 class MetadataRoleEnum(Enum):
+    NONE = ""
     AUTHOR = "author"
     COAUTHOR = "coAuthor"
     COLLABORATOR = "collaborator"
@@ -77,9 +78,7 @@ class MetadataContactConfig:
     url: str = field(default="Contact URL")
     hours: str = field(default="Mo-Fr 08:00-17:00")
     instructions: str = field(default="During hours of service. Off on weekends.")
-    role: MetadataRoleEnum = field(
-        default_factory=lambda: MetadataRoleEnum.POINTOFCONTACT
-    )
+    role: MetadataRoleEnum = field(default_factory=lambda: MetadataRoleEnum.NONE)
 
 
 @dataclass(kw_only=True)

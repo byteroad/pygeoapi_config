@@ -58,6 +58,19 @@
          <property name="title">
           <string>bind*</string>
          </property>
+        
+          <property name="styleSheet">
+            <string notr="true">
+              QGroupBox {
+                background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                border: 0px solid #ffffffff;     /* optional: border styling */
+                border-radius: 6px;         /* optional: rounded corners */
+                margin-top: 1.5em; /* reserve space for the title */
+                padding: 10px; 
+              }
+            </string>
+          </property>
+
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="1">
            <widget class="QLineEdit" name="lineEditHost">
@@ -85,13 +98,21 @@
         </widget>
        </item>
        <item row="1" column="0" rowspan="1">
-        <widget class="QFrame" name="frame">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+        <widget class="QGroupBox" name="frame">
+         <property name="title">
+          <string></string>
          </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
+          <property name="styleSheet">
+            <string notr="true">
+              QGroupBox {
+                background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                border: 0px solid #ffffffff;     /* optional: border styling */
+                border-radius: 6px;         /* optional: rounded corners */
+                margin-top: 1.5em; /* reserve space for the title */
+                padding: 10px; 
+              }
+            </string>
+          </property>
           <layout class="QVBoxLayout" name="horizontalLayout">
             <item>
 
@@ -168,6 +189,17 @@
          <property name="title">
           <string>map*</string>
          </property>
+          <property name="styleSheet">
+            <string notr="true">
+              QGroupBox {
+                background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                border: 0px solid #ffffffff;     /* optional: border styling */
+                border-radius: 6px;         /* optional: rounded corners */
+                margin-top: 1.5em; /* reserve space for the title */
+                padding: 10px; 
+              }
+            </string>
+          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="1">
            <widget class="QLineEdit" name="lineEditMapUrl"/>
@@ -193,15 +225,159 @@
         </widget>
        </item>
        
+       
+       <item row="5" column="0" rowspan="1">
+        <widget class="QGroupBox" name="groupBox">
+          <property name="title">
+            <string>logging*</string>
+          </property>
+          <property name="styleSheet">
+            <string notr="true">
+              QGroupBox {
+                background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                border: 0px solid #ffffffff;     /* optional: border styling */
+                border-radius: 6px;         /* optional: rounded corners */
+                margin-top: 1.5em; /* reserve space for the title */
+                padding: 10px; 
+              }
+            </string>
+          </property>
+          <layout class="QGridLayout" name="gridLayoutLogSettings">
+  
+                <!-- Row 0: level -->
+                <item row="0" column="0">
+                  <widget class="QLabel" name="label_13">
+                    <property name="text">
+                      <string>level*</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="0" column="1">
+                  <layout class="QHBoxLayout">
+                    <item>
+                      <widget class="QComboBox" name="comboBoxLog"/>
+                    </item>
+                  </layout>
+                </item>
+
+                <item row="1" column="0">
+                  <widget class="QLabel" name="label_14">
+                    <property name="text">
+                      <string>logfile</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="1" column="1">
+                  <layout class="QHBoxLayout">
+                    <item>
+                      <widget class="QLineEdit" name="lineEditLogfile"/>
+                    </item>
+                    <item>
+                      <widget class="QPushButton" name="pushButtonBrowse">
+                        <property name="text">
+                          <string>📂</string>
+                        </property>
+                        <property name="icon">
+                          <iconset theme="folder-open">
+                            <normaloff></normaloff>
+                          </iconset>
+                        </property>
+                        <property name="maximumSize">
+                          <size>
+                            <width>50</width>
+                            <height>100</height>
+                          </size>
+                        </property>
+                      </widget>
+                    </item>
+                  </layout>
+                </item>
+
+                <item row="2" column="0">
+                  <widget class="QLabel" name="label_15">
+                    <property name="text">
+                      <string>logformat</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="2" column="1">
+                  <layout class="QHBoxLayout">
+                    <item>
+                      <widget class="QLineEdit" name="lineEditLogformat"/>
+                    </item>
+                  </layout>
+                </item>
+
+                <item row="3" column="0">
+                  <widget class="QLabel" name="label_16">
+                    <property name="text">
+                      <string>dateformat</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="3" column="1">
+                  <layout class="QHBoxLayout">
+                    <item>
+                      <widget class="QLineEdit" name="lineEditDateformat"/>
+                    </item>
+                  </layout>
+                </item>
+
+                <item row="4" column="0">
+                  <widget class="QLabel" name="label_16">
+                    <property name="text">
+                      <string>rotation</string>
+                    </property>
+                    <property name="enabled">
+                      <bool>false</bool>
+                    </property>
+                  </widget>
+                </item>
+                <item row="4" column="1">
+                  <layout class="QHBoxLayout">
+                    <item>
+                
+                            <widget class="QListWidget" name="listWidgetLogRotation">
+                              <property name="maximumSize">
+                                <size>
+                                <width>1000</width>
+                                <height>40</height>
+                                </size>
+                              </property>
+                              <property name="editTriggers">
+                                <set>QAbstractItemView::NoEditTriggers</set>
+                              </property>
+                              <property name="enabled">
+                                <bool>false</bool>
+                              </property>
+                            </widget>
+
+                    </item>
+                  </layout>
+                </item>
+
+              </layout>
+
+        </widget>
+       </item>
+       
 
        <item row="6" column="0" rowspan="1">
-        <widget class="QFrame" name="frame_5">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+        <widget class="QGroupBox" name="groupBoxBind">
+         <property name="title">
+          <string></string>
          </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
+          <property name="styleSheet">
+            <string notr="true">
+              QGroupBox {
+                background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                border: 0px solid #ffffffff;     /* optional: border styling */
+                border-radius: 6px;         /* optional: rounded corners */
+                margin-top: 1.5em; /* reserve space for the title */
+                padding: 10px; 
+              }
+            </string>
+          </property>
          <layout class="QGridLayout" name="gridLayout">
 
          
@@ -332,11 +508,22 @@
         </widget>
        </item>
        
-       <item row="0" column="1" rowspan="2">
+       <item row="1" column="1" rowspan="2">
         <widget class="QGroupBox" name="groupBoxLimits">
          <property name="title">
           <string>limits</string>
          </property>
+          <property name="styleSheet">
+            <string notr="true">
+              QGroupBox {
+                background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                border: 0px solid #ffffffff;     /* optional: border styling */
+                border-radius: 6px;         /* optional: rounded corners */
+                margin-top: 1.5em; /* reserve space for the title */
+                padding: 10px; 
+              }
+            </string>
+          </property>
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="0" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -455,11 +642,22 @@
        </item>
 
        
-       <item row="2" column="1" rowspan="1">
+       <item row="0" column="1" rowspan="1">
           <widget class="QGroupBox">
             <property name="title">
               <string>templates</string>
             </property>
+          <property name="styleSheet">
+            <string notr="true">
+              QGroupBox {
+                background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                border: 0px solid #ffffffff;     /* optional: border styling */
+                border-radius: 6px;         /* optional: rounded corners */
+                margin-top: 1.5em; /* reserve space for the title */
+                padding: 10px; 
+              }
+            </string>
+          </property>
             <layout class="QGridLayout" name="gridLayout_9">
             
                 <item row="0" column="0">
@@ -527,215 +725,22 @@
           </widget>
        </item>
 
-
-       <item row="5" column="0" rowspan="1">
-        <widget class="QGroupBox" name="groupBox">
-            <property name="title">
-              <string>logging*</string>
-            </property>
-          <layout class="QGridLayout" name="gridLayoutLogSettings">
-  
-                <!-- Row 0: level -->
-                <item row="0" column="0">
-                  <widget class="QLabel" name="label_13">
-                    <property name="text">
-                      <string>level*</string>
-                    </property>
-                  </widget>
-                </item>
-                <item row="0" column="1">
-                  <layout class="QHBoxLayout">
-                    <item>
-                      <widget class="QComboBox" name="comboBoxLog"/>
-                    </item>
-                  </layout>
-                </item>
-
-                <item row="1" column="0">
-                  <widget class="QLabel" name="label_14">
-                    <property name="text">
-                      <string>logfile</string>
-                    </property>
-                  </widget>
-                </item>
-                <item row="1" column="1">
-                  <layout class="QHBoxLayout">
-                    <item>
-                      <widget class="QLineEdit" name="lineEditLogfile"/>
-                    </item>
-                    <item>
-                      <widget class="QPushButton" name="pushButtonBrowse">
-                        <property name="text">
-                          <string>📂</string>
-                        </property>
-                        <property name="icon">
-                          <iconset theme="folder-open">
-                            <normaloff></normaloff>
-                          </iconset>
-                        </property>
-                        <property name="maximumSize">
-                          <size>
-                            <width>50</width>
-                            <height>100</height>
-                          </size>
-                        </property>
-                      </widget>
-                    </item>
-                  </layout>
-                </item>
-
-                <item row="2" column="0">
-                  <widget class="QLabel" name="label_15">
-                    <property name="text">
-                      <string>logformat</string>
-                    </property>
-                  </widget>
-                </item>
-                <item row="2" column="1">
-                  <layout class="QHBoxLayout">
-                    <item>
-                      <widget class="QLineEdit" name="lineEditLogformat"/>
-                    </item>
-                  </layout>
-                </item>
-
-                <item row="3" column="0">
-                  <widget class="QLabel" name="label_16">
-                    <property name="text">
-                      <string>dateformat</string>
-                    </property>
-                  </widget>
-                </item>
-                <item row="3" column="1">
-                  <layout class="QHBoxLayout">
-                    <item>
-                      <widget class="QLineEdit" name="lineEditDateformat"/>
-                    </item>
-                  </layout>
-                </item>
-
-                <item row="4" column="0">
-                  <widget class="QLabel" name="label_16">
-                    <property name="text">
-                      <string>rotation</string>
-                    </property>
-                    <property name="enabled">
-                      <bool>false</bool>
-                    </property>
-                  </widget>
-                </item>
-                <item row="4" column="1">
-                  <layout class="QHBoxLayout">
-                    <item>
-                
-                            <widget class="QListWidget" name="listWidgetLogRotation">
-                              <property name="maximumSize">
-                                <size>
-                                <width>1000</width>
-                                <height>40</height>
-                                </size>
-                              </property>
-                              <property name="editTriggers">
-                                <set>QAbstractItemView::NoEditTriggers</set>
-                              </property>
-                              <property name="enabled">
-                                <bool>false</bool>
-                              </property>
-                            </widget>
-
-                    </item>
-                  </layout>
-                </item>
-
-              </layout>
-
-        </widget>
-       </item>
-       
-       <item row="7" column="1" rowspan="1">
-        <widget class="QGroupBox" name="groupBox">
-            <property name="title">
-              <string>manager</string>
-            </property>
-            <property name="enabled">
-              <bool>false</bool>
-            </property>
-          <layout class="QGridLayout" name="gridLayoutLogSettings">
-  
-                <item row="0" column="0">
-                  <widget class="QLabel" name="label_14">
-                    <property name="text">
-                      <string>name</string>
-                    </property>
-                        <property name="enabled">
-                          <bool>false</bool>
-                        </property>
-                  </widget>
-                </item>
-                <item row="0" column="1">
-                  <layout class="QHBoxLayout">
-                    <item>
-                      <widget class="QLineEdit" name="lineEditManagerName">
-                        <property name="enabled">
-                          <bool>false</bool>
-                        </property>
-                      </widget>
-                    </item>
-                  </layout>
-                </item>
-
-                <item row="1" column="0">
-                  <widget class="QLabel" name="label_15">
-                    <property name="text">
-                      <string>connection</string>
-                    </property>
-                        <property name="enabled">
-                          <bool>false</bool>
-                        </property>
-                  </widget>
-                </item>
-                <item row="1" column="1">
-                  <layout class="QHBoxLayout">
-                    <item>
-                      <widget class="QLineEdit" name="lineEditManagerConnection">
-                        <property name="enabled">
-                          <bool>false</bool>
-                        </property>
-                      </widget>
-                    </item>
-                  </layout>
-                </item>
-
-                <item row="2" column="0">
-                  <widget class="QLabel" name="label_16">
-                    <property name="text">
-                      <string>output_dir</string>
-                    </property>
-                        <property name="enabled">
-                          <bool>false</bool>
-                        </property>
-                  </widget>
-                </item>
-                <item row="2" column="1">
-                  <layout class="QHBoxLayout">
-                    <item>
-                      <widget class="QLineEdit" name="lineEditManagerOutputDir">
-                        <property name="enabled">
-                          <bool>false</bool>
-                        </property>
-                      </widget>
-                    </item>
-                  </layout>
-                </item>
-
-              </layout>
-
-        </widget>
-       </item>
-
-
        <item row="5" column="1" rowspan="2">
         <widget class="QGroupBox" name="groupBox">
+            <property name="title">
+              <string></string>
+            </property>
+          <property name="styleSheet">
+            <string notr="true">
+              QGroupBox {
+                background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                border: 0px solid #ffffffff;     /* optional: border styling */
+                border-radius: 6px;         /* optional: rounded corners */
+                margin-top: 1.5em; /* reserve space for the title */
+                padding: 10px; 
+              }
+            </string>
+          </property>
           <layout class="QGridLayout" name="gridLayoutLogSettings">
           
                 <item row="0" column="0">
@@ -904,10 +909,41 @@
                                 <bool>false</bool>
                               </property>
                             </widget>
-
+                          </item>
+                        </layout>
                       </item>
-                    </layout>
-                  </item>
+
+                      <item row="9" column="0">
+                        <widget class="QLabel" name="label_16">
+                          <property name="text">
+                            <string>manager</string>
+                          </property>
+                          <property name="enabled">
+                            <bool>false</bool>
+                          </property>
+                        </widget>
+                      </item>
+                      <item row="9" column="1">
+                        <layout class="QHBoxLayout">
+                          <item>
+                
+                            <widget class="QListWidget" name="listWidgetServerManager">
+                              <property name="maximumSize">
+                                <size>
+                                <width>1000</width>
+                                <height>40</height>
+                                </size>
+                              </property>
+                              <property name="editTriggers">
+                                <set>QAbstractItemView::NoEditTriggers</set>
+                              </property>
+                              <property name="enabled">
+                                <bool>false</bool>
+                              </property>
+                            </widget>
+                          </item>
+                        </layout>
+                      </item>
 
               </layout>
 
@@ -915,20 +951,6 @@
        </item>
 
 
-
-       <item row="12" column="1">
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
       </layout>
      </widget>
 
@@ -948,6 +970,17 @@
          <property name="title">
           <string>identification*</string>
          </property>
+          <property name="styleSheet">
+            <string notr="true">
+              QGroupBox {
+                background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                border: 0px solid #ffffffff;     /* optional: border styling */
+                border-radius: 6px;         /* optional: rounded corners */
+                margin-top: 1.5em; /* reserve space for the title */
+                padding: 10px; 
+              }
+            </string>
+          </property>
          <layout class="QGridLayout" name="gridLayout">
 
           <item row="0" column="0">
@@ -1304,6 +1337,17 @@
           <property name="title">
             <string>license*</string>
           </property>
+          <property name="styleSheet">
+            <string notr="true">
+              QGroupBox {
+                background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                border: 0px solid #ffffffff;     /* optional: border styling */
+                border-radius: 6px;         /* optional: rounded corners */
+                margin-top: 1.5em; /* reserve space for the title */
+                padding: 10px; 
+              }
+            </string>
+          </property>
           <property name="maximumSize">
             <size>
               <width>800</width>  <!-- keep width unlimited -->
@@ -1346,6 +1390,17 @@
           <widget class="QGroupBox" name="groupBoxBind">
           <property name="title">
             <string>provider*</string>
+          </property>
+          <property name="styleSheet">
+            <string notr="true">
+              QGroupBox {
+                background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                border: 0px solid #ffffffff;     /* optional: border styling */
+                border-radius: 6px;         /* optional: rounded corners */
+                margin-top: 1.5em; /* reserve space for the title */
+                padding: 10px; 
+              }
+            </string>
           </property>
           <property name="maximumSize">
             <size>
@@ -1390,12 +1445,23 @@
           <property name="title">
             <string>contact*</string>
           </property>
-            <property name="minimumSize">
-              <size>
-              <width>300</width>
-              <height>500</height>
-              </size>
-            </property>
+          <property name="styleSheet">
+            <string notr="true">
+              QGroupBox {
+                background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                border: 0px solid #ffffffff;     /* optional: border styling */
+                border-radius: 6px;         /* optional: rounded corners */
+                margin-top: 1.5em; /* reserve space for the title */
+                padding: 10px; 
+              }
+            </string>
+          </property>
+          <property name="minimumSize">
+            <size>
+            <width>300</width>
+            <height>500</height>
+            </size>
+          </property>
           <layout class="QGridLayout" name="gridLayout">
 
             <item row="0" column="0">
@@ -1586,6 +1652,17 @@
          <property name="title">
           <string>select collection</string>
          </property>
+          <property name="styleSheet">
+            <string notr="true">
+              QGroupBox {
+                background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                border: 0px solid #ffffffff;     /* optional: border styling */
+                border-radius: 6px;         /* optional: rounded corners */
+                margin-top: 1.5em; /* reserve space for the title */
+                padding: 10px; 
+              }
+            </string>
+          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
            <widget class="QLineEdit" name="lineEditCollection">
@@ -1630,6 +1707,17 @@
          <property name="title">
           <string>collection details</string>
          </property>
+          <property name="styleSheet">
+            <string notr="true">
+              QGroupBox {
+                background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                border: 0px solid #ffffffff;     /* optional: border styling */
+                border-radius: 6px;         /* optional: rounded corners */
+                margin-top: 1.5em; /* reserve space for the title */
+                padding: 10px; 
+              }
+            </string>
+          </property>
          <layout class="QGridLayout" name="gridLayoutCollectionDetails">
           <item row="0" column="0">
            <widget class="QLabel" name="label_15">
@@ -1697,6 +1785,23 @@
               <item row="0" column="0">
               
                 <widget class="QGroupBox">
+                  <property name="styleSheet">
+                    <string notr="true">
+                      QGroupBox {
+                        background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                        border: 0px solid #ffffffff;     /* optional: border styling */
+                        border-radius: 6px;         /* optional: rounded corners */
+                        margin-top: 1.5em; /* reserve space for the title */
+                        padding: 10px; 
+                      }
+                    </string>
+                  </property>
+                  <property name="minimumSize">
+                    <size>
+                    <width>400</width>
+                    <height>150</height>
+                    </size>
+                  </property>
 
                   <layout class="QGridLayout">
                     <item row="0" column="0">
@@ -1744,6 +1849,17 @@
                 <widget class="QGroupBox">
                   <property name="title">
                     <string>title*</string>
+                  </property>
+                  <property name="styleSheet">
+                    <string notr="true">
+                      QGroupBox {
+                        background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                        border: 0px solid #ffffffff;     /* optional: border styling */
+                        border-radius: 6px;         /* optional: rounded corners */
+                        margin-top: 1.5em; /* reserve space for the title */
+                        padding: 10px; 
+                      }
+                    </string>
                   </property>
 
                   <layout class="QGridLayout">
@@ -1840,11 +1956,22 @@
 
 
             
-              <item row="2" column="0" columnspan="1">
+              <item row="0" column="1" columnspan="1">
               
                 <widget class="QGroupBox">
                   <property name="title">
                     <string>description*</string>
+                  </property>
+                  <property name="styleSheet">
+                    <string notr="true">
+                      QGroupBox {
+                        background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                        border: 0px solid #ffffffff;     /* optional: border styling */
+                        border-radius: 6px;         /* optional: rounded corners */
+                        margin-top: 1.5em; /* reserve space for the title */
+                        padding: 10px; 
+                      }
+                    </string>
                   </property>
 
                   <layout class="QGridLayout">
@@ -1942,11 +2069,22 @@
 
 
 
-              <item row="3" column="0" columnspan="1">
+              <item row="1" column="1" columnspan="1">
               
                 <widget class="QGroupBox">
                   <property name="title">
                     <string>keywords*</string>
+                  </property>
+                  <property name="styleSheet">
+                    <string notr="true">
+                      QGroupBox {
+                        background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                        border: 0px solid #ffffffff;     /* optional: border styling */
+                        border-radius: 6px;         /* optional: rounded corners */
+                        margin-top: 1.5em; /* reserve space for the title */
+                        padding: 10px; 
+                      }
+                    </string>
                   </property>
 
                   <layout class="QGridLayout">
@@ -2044,10 +2182,21 @@
               </item>
 
 
-              <item row="2" column="1" rowspan="2" >
+              <item row="2" column="1" rowspan="1" >
                 <widget class="QGroupBox" name="groupBoxMap">
                   <property name="title">
                     <string>links</string>
+                  </property>
+                  <property name="styleSheet">
+                    <string notr="true">
+                      QGroupBox {
+                        background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                        border: 0px solid #ffffffff;     /* optional: border styling */
+                        border-radius: 6px;         /* optional: rounded corners */
+                        margin-top: 1.5em; /* reserve space for the title */
+                        padding: 10px; 
+                      }
+                    </string>
                   </property>
                   <layout class="QGridLayout" name="gridLayout_2">
                     <item row="0" column="0">
@@ -2214,10 +2363,21 @@
               </item>
 
 
-              <item row="0" column="1" rowspan="2">
+              <item row="2" column="0" rowspan="1">
                 <widget class="QGroupBox" name="groupBoxMap">
                   <property name="title">
                     <string>providers*</string>
+                  </property>
+                  <property name="styleSheet">
+                    <string notr="true">
+                      QGroupBox {
+                        background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                        border: 0px solid #ffffffff;     /* optional: border styling */
+                        border-radius: 6px;         /* optional: rounded corners */
+                        margin-top: 1.5em; /* reserve space for the title */
+                        padding: 10px; 
+                      }
+                    </string>
                   </property>
                   <layout class="QGridLayout" name="gridLayout_2">
                     <item row="0" column="0">
@@ -2337,11 +2497,22 @@
               </item>
 
 
-              <item row="4" column="0" rowspan="1">
+              <item row="3" column="0" rowspan="1">
               
                 <widget class="QGroupBox">
                   <property name="title">
                     <string>spatial extents*</string>
+                  </property>
+                  <property name="styleSheet">
+                    <string notr="true">
+                      QGroupBox {
+                        background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                        border: 0px solid #ffffffff;     /* optional: border styling */
+                        border-radius: 6px;         /* optional: rounded corners */
+                        margin-top: 1.5em; /* reserve space for the title */
+                        padding: 10px; 
+                      }
+                    </string>
                   </property>
 
                   <layout class="QGridLayout">
@@ -2349,7 +2520,7 @@
                     <item row="0" column="0">
                       <widget class="QLabel">
                         <property name="text">
-                        <string>bbox</string>
+                        <string>bbox*</string>
                         </property>
                       </widget>
                     </item>
@@ -2478,11 +2649,22 @@
               
               
 
-              <item row="5" column="0" >
+              <item row="3" column="1" >
               
                 <widget class="QGroupBox">
                   <property name="title">
                     <string>temporal extents</string>
+                  </property>
+                  <property name="styleSheet">
+                    <string notr="true">
+                      QGroupBox {
+                        background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                        border: 0px solid #ffffffff;     /* optional: border styling */
+                        border-radius: 6px;         /* optional: rounded corners */
+                        margin-top: 1.5em; /* reserve space for the title */
+                        padding: 10px; 
+                      }
+                    </string>
                   </property>
 
                   <layout class="QGridLayout">
@@ -2531,11 +2713,22 @@
               </item>
 
               
-              <item row="4" column="1" >
+              <item row="4" column="0" >
               
                 <widget class="QGroupBox">
                   <property name="title">
                     <string>linked-data</string>
+                  </property>
+                  <property name="styleSheet">
+                    <string notr="true">
+                      QGroupBox {
+                        background-color: rgba(240, 240, 240, 1);  /* change to your desired color */
+                        border: 0px solid #ffffffff;     /* optional: border styling */
+                        border-radius: 6px;         /* optional: rounded corners */
+                        margin-top: 1.5em; /* reserve space for the title */
+                        padding: 10px; 
+                      }
+                    </string>
                   </property>
                   <property name="enabled">
                     <bool>false</bool>
@@ -2561,7 +2754,7 @@
               </item>
 
 
-              <item row="5" column="1">
+              <item row="4" column="1">
                 <layout class="QHBoxLayout" name="horizontalLayout">
                   <item>
                     <widget class="QPushButton" name="pushSaveAndPreviewResource">
