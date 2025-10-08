@@ -59,7 +59,10 @@ class DataSetterFromUi:
 
         # bind
         config_data.server.bind.host = dialog.lineEditHost.text()
-        config_data.server.bind.port = dialog.spinBoxPort.value()
+        try:
+            config_data.server.bind.port = int(dialog.lineEditPort.text())
+        except ValueError:
+            config_data.server.bind.port = dialog.lineEditPort.text()
 
         # gzip
         # config_data.server.gzip = dialog.checkBoxGzip.isChecked()
@@ -74,10 +77,7 @@ class DataSetterFromUi:
         )
 
         # admin
-        # config_data.server.admin = dialog.checkBoxAdmin.isChecked()
-        config_data.server.admin = get_enum_value_from_string(
-            ServerOptionalBoolsEnum, dialog.comboBoxAdmin.currentText()
-        )
+        config_data.server.admin = dialog.lineEditAdmin.text()
 
         # cors
         # config_data.server.cors = dialog.checkBoxCors.isChecked()

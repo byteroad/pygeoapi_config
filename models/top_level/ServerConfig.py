@@ -22,7 +22,7 @@ class ServerOptionalBoolsEnum(Enum):
 @dataclass(kw_only=True)
 class ServerBindConfig:
     host: str = field(default="0.0.0.0")
-    port: int = field(default=5000)
+    port: int | str = field(default=5000)
 
 
 @dataclass(kw_only=True)
@@ -30,9 +30,9 @@ class ServerLimitsConfig:
     default_items: int = field(default=10)
     max_items: int = field(default=10)
     on_exceed: ServerOnExceedEnum | None = None
-    max_distance_x : int | None = None
-    max_distance_y : int | None = None
-    max_distance_units : int | None = None
+    max_distance_x: int | None = None
+    max_distance_y: int | None = None
+    max_distance_units: int | None = None
 
 
 @dataclass(kw_only=True)
@@ -80,7 +80,7 @@ class ServerConfig:
     languages: list | None = None
     gzip: ServerOptionalBoolsEnum | None = None
     pretty_print: ServerOptionalBoolsEnum | None = None
-    admin: ServerOptionalBoolsEnum | None = None
+    admin: str | None = None
     cors: ServerOptionalBoolsEnum | None = None
     limits: ServerLimitsConfig | None = None
     templates: ServerTemplatesConfig | None = None

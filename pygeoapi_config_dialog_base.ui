@@ -58,9 +58,6 @@
          <layout class="QGridLayout" name="gridLayout">
           <item row="0" column="1">
            <widget class="QLineEdit" name="lineEditHost">
-            <property name="inputMask">
-             <string>000.0.0.0</string>
-            </property>
            </widget>
           </item>
           <item row="0" column="0">
@@ -78,10 +75,7 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QSpinBox" name="spinBoxPort">
-            <property name="maximum">
-             <number>9999</number>
-            </property>
+           <widget class="QLineEdit" name="lineEditPort">
            </widget>
           </item>
          </layout>
@@ -290,6 +284,24 @@
 
        <item row="6" column="0" rowspan="1">
         <layout class="QVBoxLayout" name="horizontalLayout_7">
+
+        
+          <item>    
+              <layout class="QHBoxLayout" name="horizontalLayout_2">
+                <item>
+                <widget class="QLabel" name="label_4">
+                  <property name="text">
+                  <string>admin</string>
+                  </property>
+                </widget>
+                </item>
+                <item>
+                <widget class="QLineEdit" name="lineEditAdmin"/>
+                </item>
+              </layout>
+          </item>
+
+
           <item>    
               <layout class="QHBoxLayout" name="horizontalLayout_2">
                 <item>
@@ -317,21 +329,6 @@
                 </item>
                 <item>
                 <widget class="QComboBox" name="comboBoxPretty"/>
-                </item>
-              </layout>
-          </item>
-
-          <item>    
-              <layout class="QHBoxLayout" name="horizontalLayout_2">
-                <item>
-                <widget class="QLabel" name="label_4">
-                  <property name="text">
-                  <string>admin</string>
-                  </property>
-                </widget>
-                </item>
-                <item>
-                <widget class="QComboBox" name="comboBoxAdmin"/>
                 </item>
               </layout>
           </item>
