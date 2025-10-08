@@ -50,6 +50,9 @@
        <string>Server</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
+        <property name="horizontalSpacing">
+          <number>50</number>
+        </property>
        <item row="0" column="0" rowspan="1">
         <widget class="QGroupBox" name="groupBoxBind">
          <property name="title">
@@ -328,75 +331,6 @@
          </layout>
         </widget>
        </item>
-
-       <item row="7" column="0" rowspan="1">
-        <layout class="QVBoxLayout" name="horizontalLayout_7">
-
-          <item>    
-              <layout class="QHBoxLayout" name="horizontalLayout_2">
-                <item>
-                <widget class="QLabel" name="label_4">
-                  <property name="text">
-                  <string>admin</string>
-                  </property>
-                </widget>
-                </item>
-                <item>
-                <widget class="QComboBox" name="comboBoxAdmin"/>
-                </item>
-              </layout>
-          </item>
-
-
-          <item>    
-              <layout class="QHBoxLayout" name="horizontalLayout_2">
-                <item>
-                <widget class="QLabel" name="label_4">
-                  <property name="text">
-                  <string>gzip</string>
-                  </property>
-                </widget>
-                </item>
-                <item>
-                <widget class="QComboBox" name="comboBoxGzip">
-                </widget>
-                </item>
-              </layout>
-          </item>
-          
-          <item>    
-              <layout class="QHBoxLayout" name="horizontalLayout_2">
-                <item>
-                <widget class="QLabel" name="label_4">
-                  <property name="text">
-                  <string>pretty print</string>
-                  </property>
-                </widget>
-                </item>
-                <item>
-                <widget class="QComboBox" name="comboBoxPretty"/>
-                </item>
-              </layout>
-          </item>
-
-          <item>    
-              <layout class="QHBoxLayout" name="horizontalLayout_2">
-                <item>
-                <widget class="QLabel" name="label_4">
-                  <property name="text">
-                  <string>cors</string>
-                  </property>
-                </widget>
-                </item>
-                <item>
-                <widget class="QComboBox" name="comboBoxCors"/>
-                </item>
-              </layout>
-          </item>
-
-        </layout>
-      </item>
-
        
        <item row="0" column="1" rowspan="2">
         <widget class="QGroupBox" name="groupBoxLimits">
@@ -718,7 +652,7 @@
         </widget>
        </item>
        
-       <item row="6" column="1" rowspan="1">
+       <item row="7" column="1" rowspan="1">
         <widget class="QGroupBox" name="groupBox">
             <property name="title">
               <string>manager</string>
@@ -800,14 +734,72 @@
        </item>
 
 
-       <item row="7" column="1" rowspan="1">
+       <item row="5" column="1" rowspan="2">
         <widget class="QGroupBox" name="groupBox">
-            <property name="enabled">
-              <bool>false</bool>
-            </property>
           <layout class="QGridLayout" name="gridLayoutLogSettings">
-  
+          
                 <item row="0" column="0">
+                  <widget class="QLabel" name="label_14">
+                    <property name="text">
+                      <string>admin</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="0" column="1">     
+                    <layout class="QHBoxLayout" name="horizontalLayout_2">
+                      <item>
+                      <widget class="QComboBox" name="comboBoxAdmin"/>
+                      </item>
+                    </layout>
+                </item>
+                
+                <item row="1" column="0">
+                  <widget class="QLabel" name="label_14">
+                    <property name="text">
+                      <string>gzip</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="1" column="1">        
+                    <layout class="QHBoxLayout" name="horizontalLayout_2">
+                      <item>
+                      <widget class="QComboBox" name="comboBoxGzip">
+                      </widget>
+                      </item>
+                    </layout>
+                </item>
+                
+                <item row="2" column="0">
+                  <widget class="QLabel" name="label_14">
+                    <property name="text">
+                      <string>pretty print</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="2" column="1">      
+                    <layout class="QHBoxLayout" name="horizontalLayout_2">
+                      <item>
+                      <widget class="QComboBox" name="comboBoxPretty"/>
+                      </item>
+                    </layout>
+                </item>
+
+                <item row="3" column="0">
+                  <widget class="QLabel" name="label_14">
+                    <property name="text">
+                      <string>cors</string>
+                    </property>
+                  </widget>
+                </item>
+                <item row="3" column="1">    
+                    <layout class="QHBoxLayout" name="horizontalLayout_2">
+                      <item>
+                      <widget class="QComboBox" name="comboBoxCors"/>
+                      </item>
+                    </layout>
+                </item>
+  
+                <item row="4" column="0">
                   <widget class="QLabel" name="label_14">
                     <property name="text">
                       <string>ogc_schemas_location</string>
@@ -817,7 +809,7 @@
                         </property>
                   </widget>
                 </item>
-                <item row="0" column="1">
+                <item row="4" column="1">
                   <layout class="QHBoxLayout">
                     <item>
                       <widget class="QLineEdit" name="lineEditServerOgcSchemasLocation">
@@ -830,7 +822,7 @@
                 </item>
 
                 
-                      <item row="1" column="0">
+                      <item row="5" column="0">
                         <widget class="QLabel" name="label_4">
                           <property name="text">
                             <string>icon</string>
@@ -840,7 +832,7 @@
                           </property>
                         </widget>
                       </item>
-                      <item row="1" column="1">
+                      <item row="5" column="1">
                         <widget class="QLineEdit" name="lineEditServerIcon">
                           <property name="enabled">
                             <bool>false</bool>
@@ -848,7 +840,7 @@
                         </widget>
                       </item>
 
-                      <item row="2" column="0">
+                      <item row="6" column="0">
                         <widget class="QLabel" name="label_4">
                           <property name="text">
                             <string>logo</string>
@@ -858,7 +850,7 @@
                           </property>
                         </widget>
                       </item>
-                      <item row="2" column="1">
+                      <item row="6" column="1">
                         <widget class="QLineEdit" name="lineEditServerLogo">
                           <property name="enabled">
                             <bool>false</bool>
@@ -866,7 +858,7 @@
                         </widget>
                       </item>
                       
-                      <item row="3" column="0">
+                      <item row="7" column="0">
                         <widget class="QLabel" name="label_4">
                           <property name="text">
                             <string>locale_dir</string>
@@ -876,7 +868,7 @@
                           </property>
                         </widget>
                       </item>
-                      <item row="3" column="1">
+                      <item row="7" column="1">
                         <widget class="QLineEdit" name="lineEditServerLocaleDir">
                           <property name="enabled">
                             <bool>false</bool>
@@ -884,19 +876,19 @@
                         </widget>
                       </item>
                       
-                <item row="4" column="0">
-                  <widget class="QLabel" name="label_16">
-                    <property name="text">
-                      <string>api_rules</string>
-                    </property>
-                    <property name="enabled">
-                      <bool>false</bool>
-                    </property>
-                  </widget>
-                </item>
-                <item row="4" column="1">
-                  <layout class="QHBoxLayout">
-                    <item>
+                      <item row="8" column="0">
+                        <widget class="QLabel" name="label_16">
+                          <property name="text">
+                            <string>api_rules</string>
+                          </property>
+                          <property name="enabled">
+                            <bool>false</bool>
+                          </property>
+                        </widget>
+                      </item>
+                      <item row="8" column="1">
+                        <layout class="QHBoxLayout">
+                          <item>
                 
                             <widget class="QListWidget" name="listWidgetApiRules">
                               <property name="maximumSize">
@@ -913,9 +905,9 @@
                               </property>
                             </widget>
 
-                    </item>
-                  </layout>
-                </item>
+                      </item>
+                    </layout>
+                  </item>
 
               </layout>
 
@@ -947,6 +939,9 @@
       </attribute>
 
       <layout class="QGridLayout" name="gridLayout_20">
+        <property name="horizontalSpacing">
+          <number>50</number>
+        </property>
 
        <item row="0" column="0" rowspan="2">
         <widget class="QGroupBox" name="groupBoxBind">
@@ -1039,7 +1034,7 @@
                     <property name="maximumSize">
                       <size>
                       <width>1000</width>
-                      <height>80</height>
+                      <height>200</height>
                       </size>
                     </property>
                     </widget>
@@ -1142,7 +1137,7 @@
                     <property name="maximumSize">
                       <size>
                       <width>1000</width>
-                      <height>80</height>
+                      <height>200</height>
                       </size>
                     </property>
                     </widget>
@@ -1244,7 +1239,7 @@
                     <property name="maximumSize">
                       <size>
                       <width>1000</width>
-                      <height>80</height>
+                      <height>200</height>
                       </size>
                     </property>
                     </widget>
@@ -1309,6 +1304,12 @@
           <property name="title">
             <string>license*</string>
           </property>
+          <property name="maximumSize">
+            <size>
+              <width>800</width>  <!-- keep width unlimited -->
+              <height>100</height>     <!-- set your desired max height -->
+            </size>
+          </property>
           <layout class="QGridLayout" name="gridLayout">
 
             <item row="0" column="0">
@@ -1346,6 +1347,12 @@
           <property name="title">
             <string>provider*</string>
           </property>
+          <property name="maximumSize">
+            <size>
+              <width>800</width>  <!-- keep width unlimited -->
+              <height>100</height>     <!-- set your desired max height -->
+            </size>
+          </property>
           <layout class="QGridLayout" name="gridLayout">
 
             <item row="0" column="0">
@@ -1378,11 +1385,17 @@
        </item>
 
        
-       <item row="0" column="1" rowspan="4">
+       <item row="0" column="1" rowspan="2">
           <widget class="QGroupBox" name="groupBoxBind">
           <property name="title">
             <string>contact*</string>
           </property>
+            <property name="minimumSize">
+              <size>
+              <width>300</width>
+              <height>500</height>
+              </size>
+            </property>
           <layout class="QGridLayout" name="gridLayout">
 
             <item row="0" column="0">
@@ -1676,6 +1689,9 @@
               <string>collection details</string>
             </property>
             <layout class="QGridLayout" name="gridLayoutCollectionLoaded">
+              <property name="horizontalSpacing">
+                <number>50</number>
+              </property>
             
               
               <item row="0" column="0">
@@ -1723,7 +1739,7 @@
               </item>
 
 
-              <item row="0" column="1" >
+              <item row="1" column="0" >
               
                 <widget class="QGroupBox">
                   <property name="title">
@@ -1824,7 +1840,7 @@
 
 
             
-              <item row="1" column="1" columnspan="1">
+              <item row="2" column="0" columnspan="1">
               
                 <widget class="QGroupBox">
                   <property name="title">
@@ -1926,7 +1942,7 @@
 
 
 
-              <item row="1" column="0" columnspan="1">
+              <item row="3" column="0" columnspan="1">
               
                 <widget class="QGroupBox">
                   <property name="title">
@@ -2028,7 +2044,7 @@
               </item>
 
 
-              <item row="2" column="1" rowspan="1" >
+              <item row="2" column="1" rowspan="2" >
                 <widget class="QGroupBox" name="groupBoxMap">
                   <property name="title">
                     <string>links</string>
@@ -2198,7 +2214,7 @@
               </item>
 
 
-              <item row="2" column="0" rowspan="1">
+              <item row="0" column="1" rowspan="2">
                 <widget class="QGroupBox" name="groupBoxMap">
                   <property name="title">
                     <string>providers*</string>
@@ -2321,7 +2337,7 @@
               </item>
 
 
-              <item row="3" column="0" rowspan="1">
+              <item row="4" column="0" rowspan="1">
               
                 <widget class="QGroupBox">
                   <property name="title">
@@ -2462,7 +2478,7 @@
               
               
 
-              <item row="4" column="0" >
+              <item row="5" column="0" >
               
                 <widget class="QGroupBox">
                   <property name="title">
@@ -2515,11 +2531,14 @@
               </item>
 
               
-              <item row="3" column="1" >
+              <item row="4" column="1" >
               
                 <widget class="QGroupBox">
                   <property name="title">
-                    <string>linked-data (read-only)</string>
+                    <string>linked-data</string>
+                  </property>
+                  <property name="enabled">
+                    <bool>false</bool>
                   </property>
 
                   <layout class="QGridLayout">
