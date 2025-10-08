@@ -307,10 +307,7 @@ class DataSetterFromUi:
             if is_valid_string(link[3]):
                 new_link.title = link[3]
             if is_valid_string(link[4]):
-                new_link.hreflang = get_enum_value_from_string(
-                    Languages,
-                    link[4],
-                )
+                new_link.hreflang = link[4]
             if is_valid_string(link[5]):
                 new_link.length = int(link[5])
 
@@ -320,8 +317,9 @@ class DataSetterFromUi:
         read_only_linked_data_lists: list[list[str]] = (
             unpack_listwidget_values_to_sublists(dialog.listWidgetResLinkedData, 1)
         )
-        new_linked_data = read_only_linked_data_lists[0][0]
-        config_data.resources[res_name].linked__data = json.loads(new_linked_data)
+        if len(read_only_linked_data_lists) > 0:
+            new_linked_data = read_only_linked_data_lists[0][0]
+            config_data.resources[res_name].linked__data = json.loads(new_linked_data)
 
         # providers
         config_data.resources[res_name].providers = []
