@@ -11,9 +11,6 @@ server:
     limits:
         default_items: 10
         max_items: 10
-        max_distance_x: 10
-        max_distance_y: 20
-        max_distance_units: 10
     # templates: /path/to/templates
     map:
         url: https://tile.openstreetmap.org/{z}/{x}/{y}.png
@@ -22,24 +19,10 @@ server:
         name: TinyDB
         connection: /tmp/pygeoapi-process-manager.db
         output_dir: /tmp/
-    api_rules:
-        api_version: string
-        strict_slashes: True
-        url_prefix: string
-        version_header: string
-    logo: string
-    icon: string
-    locale_dir: dir
 
 logging:
     level: ERROR
     #logfile: /tmp/pygeoapi.log
-    rotation:
-        mode: string
-        when: string
-        interval: 10
-        max_bytes: 20
-        backup_count: 30
 
 metadata:
     identification:
