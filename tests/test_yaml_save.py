@@ -4,7 +4,7 @@ import pytest
 import subprocess
 from pathlib import Path
 
-from ..utils.data_diff import diff_yaml_dict
+from ..utils.data_diff import diff_yaml_dict_remove_known_faulty_fields
 from ..pygeoapi_config_dialog import PygeoapiConfigDialog
 
 BASE_DIR = Path(__file__).parent / "yaml_samples"
@@ -109,7 +109,9 @@ def test_open_file_validate_ui_data_save_file(qtbot, sample_yaml: str):
     yaml2_data = deepcopy(dialog.yaml_original_data)
 
     # get diff between old and new data
-    diff_data = diff_yaml_dict(yaml1_data, yaml2_data, yaml1_missing_props)
+    diff_data = diff_yaml_dict_remove_known_faulty_fields(
+        yaml1_data, yaml2_data, yaml1_missing_props
+    )
 
     # save to file
     diff_yaml_path = sample_yaml.with_name(f"saved_DIFF_{sample_yaml.name}")

@@ -1,28 +1,42 @@
-from copy import deepcopy
 from typing import Any
 
 
-def diff_yaml_dict(obj1: dict, obj2: dict, missing_props=[]) -> dict:
+def diff_yaml_dict(obj1: dict, obj2: dict) -> dict:
     """Returns all added, removed or changed elements between 2 dictionaries."""
 
     diff_data = {"added": {}, "removed": {}, "changed": {}}
     diff_obj(obj1, obj2, diff_data, "")
 
-    # run diff through several conditions
-    # 1. Exclude removed values that are None - not important
-    # 2. Exclude values that already triggered warning on opening: .all_missing_props
+    # Exclude removed values that are None - not important
     new_removed_dict = {}
     for k, v in diff_data["removed"].items():
-        if v is not None and k not in missing_props:
+        if v is not None:
+            new_removed_dict[k] = v
+    diff_data["removed"] = new_removed_dict
+
+    return diff_data
+
+
+def diff_yaml_dict_remove_known_faulty_fields(
+    obj1: dict, obj2: dict, missing_props=[]
+) -> dict:
+    """Returns all added, removed or changed elements between 2 dictionaries."""
+
+    diff_data = diff_yaml_dict(obj1, obj2)
+
+    # run diff through several conditions
+    # 1. Exclude values that already triggered warning on opening: .all_missing_props
+    new_removed_dict = {}
+    for k, v in diff_data["removed"].items():
+        if k not in missing_props:
             new_removed_dict[k] = v
     diff_data["removed"] = new_removed_dict
 
     # 3. Exclude changed values, originally warned about
     new_changed_dict = {}
     for k, v in diff_data["changed"].items():
-        if v is None and k in missing_props:
-            continue
-        new_changed_dict[k] = v
+        if k not in missing_props:
+            new_changed_dict[k] = v
     diff_data["changed"] = new_changed_dict
 
     return diff_data

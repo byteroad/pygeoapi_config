@@ -283,7 +283,6 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         diff_data = diff_yaml_dict(
             self.yaml_original_data,
             self.config_data.asdict_enum_safe(self.config_data),
-            self.config_data.all_missing_props,
         )
 
         if (
