@@ -294,7 +294,7 @@ class DataSetterFromUi:
         # spatial crs
         config_data.resources[res_name].extents.spatial.crs = (
             self.get_extents_crs_from_ui(dialog)
-            if is_valid_string(dialog.lineEditResExtentsSpatialCrs)
+            if is_valid_string(dialog.lineEditResExtentsSpatialCrs.text())
             else None
         )
 

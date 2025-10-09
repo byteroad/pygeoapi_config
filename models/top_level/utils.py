@@ -12,7 +12,7 @@ class InlineList(list):
 
 
 def is_valid_string(text):
-    if len(str(text)) >= 1:
+    if len(str(text).replace(" ", "")) >= 1:
         return True
     return False
 
