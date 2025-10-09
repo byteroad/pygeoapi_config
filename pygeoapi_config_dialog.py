@@ -153,7 +153,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 )
 
                 # before saving, show diff with "Procced" and "Cancel" options
-                if self._diff_original_and_current_data():
+                if file_path and self._diff_original_and_current_data():
                     self.save_to_file(file_path)
 
         elif button == self.buttonBox.button(QDialogButtonBox.Open):

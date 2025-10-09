@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 from PyQt5.QtWidgets import (
     QDialog,
@@ -7,6 +8,13 @@ from PyQt5.QtWidgets import (
     QDialogButtonBox,
 )
 from PyQt5.QtCore import Qt
+
+
+def default_serializer(obj):
+    """Convert unsupported objects to serializable types."""
+    if isinstance(obj, datetime):
+        return obj.strftime("%Y-%m-%dT%H:%M:%SZ")
+    return str(obj)  # fallback for anything else
 
 
 class ReadOnlyTextDialog(QDialog):
@@ -26,7 +34,9 @@ class ReadOnlyTextDialog(QDialog):
         text_edit.setMinimumSize(200, 200)  # adjust size as needed
 
         if isinstance(text, dict):
-            formatted = json.dumps(text, indent=4, ensure_ascii=False)
+            formatted = json.dumps(
+                text, indent=4, ensure_ascii=False, default=default_serializer
+            )
         else:
             formatted = str(text)
 
