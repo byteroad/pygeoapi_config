@@ -530,7 +530,7 @@ class UiSetter:
         )
         fill_combo_box(
             dialog.comboBoxResExtentsTemporalTrs,
-            TrsAuthorities.ISO8601,
+            TrsAuthorities.NONE,
         )
 
         fill_combo_box(

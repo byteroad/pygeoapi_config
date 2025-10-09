@@ -318,11 +318,12 @@ class DataSetterFromUi:
 
             config_data.resources[res_name].extents.temporal.begin = temporal_begin
             config_data.resources[res_name].extents.temporal.end = temporal_end
+            trs = get_enum_value_from_string(
+                TrsAuthorities,
+                get_widget_text_value(dialog.comboBoxResExtentsTemporalTrs),
+            )
             config_data.resources[res_name].extents.temporal.trs = (
-                get_enum_value_from_string(
-                    TrsAuthorities,
-                    get_widget_text_value(dialog.comboBoxResExtentsTemporalTrs),
-                )
+                trs if trs != TrsAuthorities.NONE else None
             )
 
         # links
