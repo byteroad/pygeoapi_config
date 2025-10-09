@@ -283,22 +283,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         diff_data = diff_yaml_dict(
             self.yaml_original_data,
             self.config_data.asdict_enum_safe(self.config_data),
+            self.config_data.all_missing_props,
         )
-
-        # remove from diff removed nulls, and originally missing props
-        new_removed_dict = {}
-        for k, v in diff_data["removed"].items():
-            if v is not None and k not in self.config_data.all_missing_props:
-                new_removed_dict[k] = v
-        diff_data["removed"] = new_removed_dict
-
-        # remove from diff changed values, originally warned about
-        new_changed_dict = {}
-        for k, v in diff_data["changed"].items():
-            if v is None and k in self.config_data.all_missing_props:
-                continue
-            new_changed_dict[k] = v
-        diff_data["changed"] = new_changed_dict
 
         if (
             len(diff_data["added"])

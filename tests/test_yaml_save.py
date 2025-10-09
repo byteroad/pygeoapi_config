@@ -109,24 +109,7 @@ def test_open_file_validate_ui_data_save_file(qtbot, sample_yaml: str):
     yaml2_data = deepcopy(dialog.yaml_original_data)
 
     # get diff between old and new data
-    diff_data = diff_yaml_dict(yaml1_data, yaml2_data)
-
-    # run diff through several conditions
-    # 1. Exclude removed values that are None - not important
-    # 2. Exclude values that already triggered warning on opening: .all_missing_props
-    new_removed_dict = {}
-    for k, v in diff_data["removed"].items():
-        if v is not None and k not in yaml1_missing_props:
-            new_removed_dict[k] = v
-    diff_data["removed"] = new_removed_dict
-
-    # 3. Exclude changed values, originally warned about
-    new_changed_dict = {}
-    diff_data["changed"] = new_changed_dict
-    for k, v in diff_data["changed"].items():
-        if k not in yaml1_missing_props:
-            new_changed_dict[k] = v
-    diff_data["changed"] = new_changed_dict
+    diff_data = diff_yaml_dict(yaml1_data, yaml2_data, yaml1_missing_props)
 
     # save to file
     diff_yaml_path = sample_yaml.with_name(f"saved_DIFF_{sample_yaml.name}")
