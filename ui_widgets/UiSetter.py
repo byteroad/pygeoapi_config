@@ -72,25 +72,37 @@ class UiSetter:
         # gzip
         set_combo_box_value_from_data(
             combo_box=self.dialog.comboBoxGzip,
-            value=str(config_data.server.gzip),
+            value=(
+                str(config_data.server.gzip.value) if config_data.server.gzip else None
+            ),
         )
 
         # pretty print
         set_combo_box_value_from_data(
             combo_box=self.dialog.comboBoxPretty,
-            value=str(config_data.server.pretty_print),
+            value=(
+                str(config_data.server.pretty_print.value)
+                if config_data.server.pretty_print
+                else None
+            ),
         )
 
         # admin
         set_combo_box_value_from_data(
             combo_box=self.dialog.comboBoxAdmin,
-            value=str(config_data.server.admin),
+            value=(
+                str(config_data.server.admin.value)
+                if config_data.server.admin
+                else None
+            ),
         )
 
         # cors
         set_combo_box_value_from_data(
             combo_box=self.dialog.comboBoxCors,
-            value=str(config_data.server.cors),
+            value=(
+                str(config_data.server.cors.value) if config_data.server.cors else None
+            ),
         )
 
         # mimetype

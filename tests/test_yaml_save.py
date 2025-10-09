@@ -1,9 +1,10 @@
 from copy import deepcopy
 import yaml
-from typing import Any
 import pytest
 import subprocess
 from pathlib import Path
+
+from ..utils.data_diff import diff_yaml_dict
 from ..pygeoapi_config_dialog import PygeoapiConfigDialog
 
 BASE_DIR = Path(__file__).parent / "yaml_samples"
@@ -114,11 +115,18 @@ def test_open_file_validate_ui_data_save_file(qtbot, sample_yaml: str):
     # 1. Exclude removed values that are None - not important
     # 2. Exclude values that already triggered warning on opening: .all_missing_props
     new_removed_dict = {}
-
     for k, v in diff_data["removed"].items():
         if v is not None and k not in yaml1_missing_props:
             new_removed_dict[k] = v
     diff_data["removed"] = new_removed_dict
+
+    # 3. Exclude changed values, originally warned about
+    new_changed_dict = {}
+    diff_data["changed"] = new_changed_dict
+    for k, v in diff_data["changed"].items():
+        if k not in yaml1_missing_props:
+            new_changed_dict[k] = v
+    diff_data["changed"] = new_changed_dict
 
     # save to file
     diff_yaml_path = sample_yaml.with_name(f"saved_DIFF_{sample_yaml.name}")
@@ -143,47 +151,3 @@ def test_open_file_validate_ui_data_save_file(qtbot, sample_yaml: str):
     assert (
         False
     ), f"YAML data changed after saving: '{sample_yaml.name}'. \nAdded: {len(diff_data['added'])} fields, changed: {len(diff_data['changed'])} fields, removed: {len(diff_data['removed'])} fields."
-
-
-def diff_yaml_dict(obj1: Any, obj2: Any) -> dict:
-    """Returns all added, removed or changed elements between 2 dictionaries."""
-
-    diff = {"added": {}, "removed": {}, "changed": {}}
-    return diff_obj(obj1, obj2, diff, "")
-
-
-def diff_obj(obj1: Any, obj2: Any, diff: dict, path: str = "") -> dict:
-    """Returns all added, removed or changed elements between 2 objects.
-    Ignores diff in dict keys order. For lists, order is checked."""
-
-    if isinstance(obj1, dict) and isinstance(obj2, dict):
-        all_keys = set(obj1.keys()) | set(obj2.keys())
-        for key in all_keys:
-            new_path = f"{path}.{key}" if path else key
-            if key not in obj1:
-                diff["added"][new_path] = obj2[key]
-            elif key not in obj2:
-                diff["removed"][new_path] = obj1[key]
-            else:
-                nested = diff_obj(obj1[key], obj2[key], diff, new_path)
-                for k in diff:
-                    diff[k].update(nested[k])
-
-    elif isinstance(obj1, list) and isinstance(obj2, list):
-        max_len = max(len(obj1), len(obj2))
-        for i in range(max_len):
-            new_path = f"{path}[{i}]"
-            if i >= len(obj1):
-                diff["added"][new_path] = obj2[i]
-            elif i >= len(obj2):
-                diff["removed"][new_path] = obj1[i]
-            else:
-                nested = diff_obj(obj1[i], obj2[i], diff, new_path)
-                for k in diff:
-                    diff[k].update(nested[k])
-
-    else:
-        if obj1 != obj2:
-            diff["changed"][path] = {"old": obj1, "new": obj2}
-
-    return diff

@@ -68,21 +68,29 @@ class DataSetterFromUi:
         config_data.server.gzip = get_enum_value_from_string(
             ServerOptionalBoolsEnum, dialog.comboBoxGzip.currentText()
         )
+        if config_data.server.gzip == ServerOptionalBoolsEnum.NONE:
+            config_data.server.gzip = None
 
         # pretty print
         config_data.server.pretty_print = get_enum_value_from_string(
             ServerOptionalBoolsEnum, dialog.comboBoxPretty.currentText()
         )
+        if config_data.server.pretty_print == ServerOptionalBoolsEnum.NONE:
+            config_data.server.pretty_print = None
 
         # admin
         config_data.server.admin = get_enum_value_from_string(
             ServerOptionalBoolsEnum, dialog.comboBoxAdmin.currentText()
         )
+        if config_data.server.admin == ServerOptionalBoolsEnum.NONE:
+            config_data.server.admin = None
 
         # cors
         config_data.server.cors = get_enum_value_from_string(
             ServerOptionalBoolsEnum, dialog.comboBoxCors.currentText()
         )
+        if config_data.server.cors == ServerOptionalBoolsEnum.NONE:
+            config_data.server.cors = None
 
         # templates
         if is_valid_string(dialog.lineEditTemplatesPath.text()) or is_valid_string(
@@ -107,6 +115,8 @@ class DataSetterFromUi:
         config_data.server.language = get_enum_value_from_string(
             Languages, dialog.comboBoxLangSingle.currentText()
         )
+        if config_data.server.language == Languages.NONE:
+            config_data.server.language = None
 
         # languages
         config_data.server.languages = []
@@ -116,6 +126,8 @@ class DataSetterFromUi:
         for lang in languages_lists:
             if is_valid_string(lang[0]):
                 config_data.server.languages.append(lang[0])
+        if len(config_data.server.languages) == 0:
+            config_data.server.languages = None
 
         # limits
         default_items = dialog.spinBoxDefault.value()
@@ -124,6 +136,8 @@ class DataSetterFromUi:
         on_exceed = get_enum_value_from_string(
             ServerOnExceedEnum, dialog.comboBoxExceed.currentText()
         )
+        if on_exceed == ServerOnExceedEnum.NONE:
+            on_exceed = None
         if default_items or max_items or on_exceed:
             config_data.server.limits = ServerLimitsConfig()
             config_data.server.limits.default_items = default_items
@@ -169,7 +183,7 @@ class DataSetterFromUi:
             MetadataKeywordTypeEnum, dialog.comboBoxMetadataIdKeywordsType.currentText()
         )
         config_data.metadata.identification.keywords_type = (
-            keywords_type if is_valid_string(keywords_type) else None
+            keywords_type if keywords_type != MetadataKeywordTypeEnum.NONE else None
         )
 
         config_data.metadata.identification.terms_of_service = (
