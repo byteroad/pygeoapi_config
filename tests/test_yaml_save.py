@@ -1,9 +1,10 @@
-from dataclasses import asdict, is_dataclass
+from copy import deepcopy
 import yaml
-from typing import Any
 import pytest
 import subprocess
 from pathlib import Path
+
+from ..utils.data_diff import diff_yaml_dict_remove_known_faulty_fields
 from ..pygeoapi_config_dialog import PygeoapiConfigDialog
 
 BASE_DIR = Path(__file__).parent / "yaml_samples"
@@ -16,8 +17,7 @@ for f in BASE_DIR.glob("saved_*.yml"):
 sample_yaml_files = list(BASE_DIR.glob("*.yml"))
 
 
-# --- 1. Load YAML files ---
-def load_yaml(path: str | Path) -> Any:
+def load_yaml(path: str | Path) -> dict:
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)  # returns nested dicts/lists
 
@@ -80,10 +80,9 @@ def test_open_file_validate_ui_data(qtbot, sample_yaml: str):
         # fail the test if a legit file (e.g. "docker.config.yml") did not pass the validation
         assert False, f"'{sample_yaml.name}' file UI data is not valid: {invalid_props}"
     else:
+        print(f"_________Data validated for '{sample_yaml.name}'", flush=True)
         assert True
-
-    print(f"_________Data validated for '{sample_yaml.name}'", flush=True)
-    assert True
+        return
 
 
 @pytest.mark.parametrize("sample_yaml", sample_yaml_files)
@@ -95,8 +94,11 @@ def test_open_file_validate_ui_data_save_file(qtbot, sample_yaml: str):
     qtbot.addWidget(dialog)
 
     # Load YAML
-    # abs_yaml_path = os.path.join(base_dir, sample_yaml)
-    dialog.open_file(sample_yaml)  # now dialog.config_data has the data stored
+    dialog.open_file(
+        sample_yaml
+    )  # now dialog.config_data has the data stored including .all_missing_props
+    yaml1_data = deepcopy(dialog.yaml_original_data)
+    yaml1_missing_props = deepcopy(dialog.config_data.all_missing_props)
 
     # Save YAML - EVEN THOUGH some mandatory fields might be missing and recorded as empty strings/lists
     abs_new_yaml_path = sample_yaml.with_name(f"saved_updated_{sample_yaml.name}")
@@ -104,15 +106,15 @@ def test_open_file_validate_ui_data_save_file(qtbot, sample_yaml: str):
 
     # open the new file
     dialog.open_file(abs_new_yaml_path)  # now dialog.config_data has the data stored
+    yaml2_data = deepcopy(dialog.yaml_original_data)
 
-    # get the YAML diff
-    yaml1 = load_yaml(sample_yaml)
-    yaml2 = load_yaml(abs_new_yaml_path)
-
-    diff_data = diff_yaml(yaml1, yaml2)
-    diff_yaml_path = sample_yaml.with_name(f"saved_DIFF_{sample_yaml.name}")
+    # get diff between old and new data
+    diff_data = diff_yaml_dict_remove_known_faulty_fields(
+        yaml1_data, yaml2_data, yaml1_missing_props
+    )
 
     # save to file
+    diff_yaml_path = sample_yaml.with_name(f"saved_DIFF_{sample_yaml.name}")
     with open(diff_yaml_path, "w", encoding="utf-8") as file:
         yaml.dump(
             diff_data,
@@ -124,48 +126,13 @@ def test_open_file_validate_ui_data_save_file(qtbot, sample_yaml: str):
             indent=4,
         )
 
-    if len(diff_data) == 0:
+    if (
+        len(diff_data["added"]) + len(diff_data["removed"]) + len(diff_data["changed"])
+        == 0
+    ):
         assert True
+        return
 
     assert (
         False
     ), f"YAML data changed after saving: '{sample_yaml.name}'. \nAdded: {len(diff_data['added'])} fields, changed: {len(diff_data['changed'])} fields, removed: {len(diff_data['removed'])} fields."
-
-
-def diff_yaml(obj1: Any, obj2: Any, path: str = "") -> dict:
-    """Returns all added, removed or changed elements between 2 YAML files.
-    Ignores diff in dict keys order. For lists, order is checked."""
-
-    diff = {"added": {}, "removed": {}, "changed": {}}
-
-    if isinstance(obj1, dict) and isinstance(obj2, dict):
-        all_keys = set(obj1.keys()) | set(obj2.keys())
-        for key in all_keys:
-            new_path = f"{path}.{key}" if path else key
-            if key not in obj1:
-                diff["added"][new_path] = obj2[key]
-            elif key not in obj2:
-                diff["removed"][new_path] = obj1[key]
-            else:
-                nested = diff_yaml(obj1[key], obj2[key], new_path)
-                for k in diff:
-                    diff[k].update(nested[k])
-
-    elif isinstance(obj1, list) and isinstance(obj2, list):
-        max_len = max(len(obj1), len(obj2))
-        for i in range(max_len):
-            new_path = f"{path}[{i}]"
-            if i >= len(obj1):
-                diff["added"][new_path] = obj2[i]
-            elif i >= len(obj2):
-                diff["removed"][new_path] = obj1[i]
-            else:
-                nested = diff_yaml(obj1[i], obj2[i], new_path)
-                for k in diff:
-                    diff[k].update(nested[k])
-
-    else:
-        if obj1 != obj2:
-            diff["changed"][path] = {"old": obj1, "new": obj2}
-
-    return diff

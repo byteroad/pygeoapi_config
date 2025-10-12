@@ -22,9 +22,12 @@
  ***************************************************************************/
 """
 
+from copy import deepcopy
 from datetime import datetime, timezone
 import os
 import yaml
+
+from .utils.data_diff import diff_yaml_dict
 
 from .ui_widgets.utils import get_url_status
 
@@ -46,6 +49,7 @@ from PyQt5.QtWidgets import (
     QFileDialog,
     QMessageBox,
     QDialogButtonBox,
+    QDialog,
     QApplication,
 )  # or PyQt6.QtWidgets
 
@@ -78,6 +82,7 @@ FORM_CLASS, _ = uic.loadUiType(
 class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     config_data: ConfigData
+    yaml_original_data: dict
     ui_setter: UiSetter
     data_from_ui_setter: DataSetterFromUi
     current_res_name = ""
@@ -98,6 +103,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
         self.config_data = ConfigData()
+        self.yaml_original_data = None
         self.ui_setter = UiSetter(self)
         self.data_from_ui_setter = DataSetterFromUi(self)
 
@@ -133,6 +139,31 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.ui_setter.customize_ui_on_launch()
         self.ui_setter.set_ui_from_data()
         self.ui_setter.setup_map_widget()
+
+    def on_button_clicked(self, button):
+
+        role = self.buttonBox.buttonRole(button)
+        print(f"Button clicked: {button.text()}, Role: {role}")
+
+        # You can also check the standard button type
+        if button == self.buttonBox.button(QDialogButtonBox.Save):
+            if self._set_validate_ui_data()[0]:
+                file_path, _ = QFileDialog.getSaveFileName(
+                    self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
+                )
+
+                # before saving, show diff with "Procced" and "Cancel" options
+                if file_path and self._diff_original_and_current_data():
+                    self.save_to_file(file_path)
+
+        elif button == self.buttonBox.button(QDialogButtonBox.Open):
+            file_name, _ = QFileDialog.getOpenFileName(
+                self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
+            )
+            self.open_file(file_name)
+
+        elif button == self.buttonBox.button(QDialogButtonBox.Close):
+            self.reject()
 
     def save_to_file(self, file_path):
 
@@ -176,7 +207,14 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
                 # reset data
                 self.config_data = ConfigData()
-                self.config_data.set_data_from_yaml(yaml.safe_load(file_content))
+
+                # set data and .all_missing_props:
+                yaml_original_data = yaml.safe_load(file_content)
+                self.yaml_original_data = deepcopy(yaml_original_data)
+
+                self.config_data.set_data_from_yaml(yaml_original_data)
+
+                # set UI from data
                 self.ui_setter.set_ui_from_data()
 
                 # log messages about missing or mistyped values during deserialization
@@ -209,26 +247,6 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # finally:
         #     QApplication.restoreOverrideCursor()
 
-    def on_button_clicked(self, button):
-
-        role = self.buttonBox.buttonRole(button)
-        print(f"Button clicked: {button.text()}, Role: {role}")
-
-        # You can also check the standard button type
-        if button == self.buttonBox.button(QDialogButtonBox.Save):
-            if self._set_validate_ui_data()[0]:
-                file_path, _ = QFileDialog.getSaveFileName(
-                    self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
-                )
-                self.save_to_file(file_path)
-        elif button == self.buttonBox.button(QDialogButtonBox.Open):
-            file_name, _ = QFileDialog.getOpenFileName(
-                self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
-            )
-            self.open_file(file_name)
-        elif button == self.buttonBox.button(QDialogButtonBox.Close):
-            self.reject()
-
     def _set_validate_ui_data(self) -> tuple[bool, list]:
         # Set and validate data from UI
         try:
@@ -256,6 +274,34 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             QgsMessageLog.logMessage(f"Error deserializing: {e}")
             QMessageBox.warning(f"Error deserializing: {e}")
             return
+
+    def _diff_original_and_current_data(self) -> tuple[bool, list]:
+        """Before saving the file, show the diff and give an option to proceed or cancel."""
+        if not self.yaml_original_data:
+            return True
+
+        diff_data = diff_yaml_dict(
+            self.yaml_original_data,
+            self.config_data.asdict_enum_safe(self.config_data),
+        )
+
+        if (
+            len(diff_data["added"])
+            + len(diff_data["removed"])
+            + len(diff_data["changed"])
+            == 0
+        ):
+            return True
+
+        # add a window with the choice
+        QgsMessageLog.logMessage(f"{diff_data}")
+        dialog = ReadOnlyTextDialog(self, "Warning", diff_data, True)
+        result = dialog.exec_()  # returns QDialog.Accepted (1) or QDialog.Rejected (0)
+
+        if result == QDialog.Accepted:
+            return True
+        else:
+            return False
 
     def open_templates_path_dialog(self):
         """Defining Server.templates.path path, called from .ui file."""

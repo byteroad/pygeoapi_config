@@ -21,7 +21,9 @@ from ..models.top_level import (
     MetadataKeywordTypeEnum,
     MetadataRoleEnum,
     ServerOnExceedEnum,
+    ServerOptionalBoolsEnum,
     ServerTemplatesConfig,
+    ServerLimitsConfig,
 )
 from ..models.top_level.providers import ProviderTemplate
 from ..models.top_level.providers.records import (
@@ -57,19 +59,38 @@ class DataSetterFromUi:
 
         # bind
         config_data.server.bind.host = dialog.lineEditHost.text()
-        config_data.server.bind.port = dialog.spinBoxPort.value()
+        try:
+            config_data.server.bind.port = int(dialog.lineEditPort.text())
+        except ValueError:
+            config_data.server.bind.port = dialog.lineEditPort.text()
 
         # gzip
-        config_data.server.gzip = dialog.checkBoxGzip.isChecked()
+        config_data.server.gzip = get_enum_value_from_string(
+            ServerOptionalBoolsEnum, dialog.comboBoxGzip.currentText()
+        )
+        if config_data.server.gzip == ServerOptionalBoolsEnum.NONE:
+            config_data.server.gzip = None
 
         # pretty print
-        config_data.server.pretty_print = dialog.checkBoxPretty.isChecked()
+        config_data.server.pretty_print = get_enum_value_from_string(
+            ServerOptionalBoolsEnum, dialog.comboBoxPretty.currentText()
+        )
+        if config_data.server.pretty_print == ServerOptionalBoolsEnum.NONE:
+            config_data.server.pretty_print = None
 
         # admin
-        config_data.server.admin = dialog.checkBoxAdmin.isChecked()
+        config_data.server.admin = get_enum_value_from_string(
+            ServerOptionalBoolsEnum, dialog.comboBoxAdmin.currentText()
+        )
+        if config_data.server.admin == ServerOptionalBoolsEnum.NONE:
+            config_data.server.admin = None
 
         # cors
-        config_data.server.cors = dialog.checkBoxCors.isChecked()
+        config_data.server.cors = get_enum_value_from_string(
+            ServerOptionalBoolsEnum, dialog.comboBoxCors.currentText()
+        )
+        if config_data.server.cors == ServerOptionalBoolsEnum.NONE:
+            config_data.server.cors = None
 
         # templates
         if is_valid_string(dialog.lineEditTemplatesPath.text()) or is_valid_string(
@@ -90,20 +111,14 @@ class DataSetterFromUi:
         # url
         config_data.server.url = dialog.lineEditUrl.text()
 
-        # language single (if selected)
-        for i in range(dialog.listWidgetLangSingle.count()):
-            item = dialog.listWidgetLangSingle.item(i)
-            if item.isSelected():
-                config_data.server.language = item.text()
-                break
+        # language single
+        config_data.server.language = get_enum_value_from_string(
+            Languages, dialog.comboBoxLangSingle.currentText()
+        )
+        if config_data.server.language == Languages.NONE:
+            config_data.server.language = None
 
         # languages
-        # config_data.server.languages = []
-        # for i in range(dialog.listWidgetLang.count()):
-        #    item = dialog.listWidgetLang.item(i)
-        #    if item.isSelected():
-        #        config_data.server.languages.append(item.text())
-
         config_data.server.languages = []
         languages_lists = unpack_listwidget_values_to_sublists(
             dialog.listWidgetServerLangs
@@ -111,14 +126,23 @@ class DataSetterFromUi:
         for lang in languages_lists:
             if is_valid_string(lang[0]):
                 config_data.server.languages.append(lang[0])
+        if len(config_data.server.languages) == 0:
+            config_data.server.languages = None
 
         # limits
-        config_data.server.limits.default_items = dialog.spinBoxDefault.value()
-        config_data.server.limits.max_items = dialog.spinBoxMax.value()
+        default_items = dialog.spinBoxDefault.value()
+        max_items = dialog.spinBoxMax.value()
 
-        config_data.server.limits.on_exceed = get_enum_value_from_string(
+        on_exceed = get_enum_value_from_string(
             ServerOnExceedEnum, dialog.comboBoxExceed.currentText()
         )
+        if on_exceed == ServerOnExceedEnum.NONE:
+            on_exceed = None
+        if default_items or max_items or on_exceed:
+            config_data.server.limits = ServerLimitsConfig()
+            config_data.server.limits.default_items = default_items
+            config_data.server.limits.max_items = max_items
+            config_data.server.limits.on_exceed = on_exceed
 
         # logging
         config_data.logging.level = get_enum_value_from_string(
@@ -155,52 +179,75 @@ class DataSetterFromUi:
             )
         )
 
-        config_data.metadata.identification.keywords_type = get_enum_value_from_string(
+        keywords_type = get_enum_value_from_string(
             MetadataKeywordTypeEnum, dialog.comboBoxMetadataIdKeywordsType.currentText()
         )
+        config_data.metadata.identification.keywords_type = (
+            keywords_type if keywords_type != MetadataKeywordTypeEnum.NONE else None
+        )
+
         config_data.metadata.identification.terms_of_service = (
-            dialog.lineEditMetadataIdTerms.text()
+            self.valid_string_or_none(dialog.lineEditMetadataIdTerms)
         )
         config_data.metadata.identification.url = dialog.lineEditMetadataIdUrl.text()
 
         # metadata license
         config_data.metadata.license.name = dialog.lineEditMetadataLicenseName.text()
-        config_data.metadata.license.url = dialog.lineEditMetadataLicenseUrl.text()
+        config_data.metadata.license.url = self.valid_string_or_none(
+            dialog.lineEditMetadataLicenseUrl
+        )
 
         # metadata provider
         config_data.metadata.provider.name = dialog.lineEditMetadataProviderName.text()
-        config_data.metadata.provider.url = dialog.lineEditMetadataProviderUrl.text()
+        config_data.metadata.provider.url = self.valid_string_or_none(
+            dialog.lineEditMetadataProviderUrl
+        )
 
         # metadata contact
         config_data.metadata.contact.name = dialog.lineEditMetadataContactName.text()
-        config_data.metadata.contact.position = (
-            dialog.lineEditMetadataContactPosition.text()
+        config_data.metadata.contact.position = self.valid_string_or_none(
+            dialog.lineEditMetadataContactPosition
         )
-        config_data.metadata.contact.address = (
-            dialog.lineEditMetadataContactAddress.text()
+        config_data.metadata.contact.address = self.valid_string_or_none(
+            dialog.lineEditMetadataContactAddress
         )
         config_data.metadata.contact.city = dialog.lineEditMetadataContactCity.text()
-        config_data.metadata.contact.stateorprovince = (
-            dialog.lineEditMetadataContactState.text()
+        config_data.metadata.contact.stateorprovince = self.valid_string_or_none(
+            dialog.lineEditMetadataContactState
         )
-        config_data.metadata.contact.postalcode = (
-            dialog.lineEditMetadataContactPostal.text()
+        config_data.metadata.contact.postalcode = self.valid_string_or_none(
+            dialog.lineEditMetadataContactPostal
         )
-        config_data.metadata.contact.country = (
-            dialog.lineEditMetadataContactCountry.text()
+        config_data.metadata.contact.country = self.valid_string_or_none(
+            dialog.lineEditMetadataContactCountry
         )
-        config_data.metadata.contact.phone = dialog.lineEditMetadataContactPhone.text()
-        config_data.metadata.contact.fax = dialog.lineEditMetadataContactFax.text()
-        config_data.metadata.contact.email = dialog.lineEditMetadataContactEmail.text()
-        config_data.metadata.contact.url = dialog.lineEditMetadataContactUrl.text()
-        config_data.metadata.contact.hours = dialog.lineEditMetadataContactHours.text()
-        config_data.metadata.contact.instructions = (
-            dialog.lineEditMetadataContactInstructions.text()
+        config_data.metadata.contact.phone = self.valid_string_or_none(
+            dialog.lineEditMetadataContactPhone
         )
-        config_data.metadata.contact.role = get_enum_value_from_string(
+        config_data.metadata.contact.fax = self.valid_string_or_none(
+            dialog.lineEditMetadataContactFax
+        )
+        config_data.metadata.contact.email = self.valid_string_or_none(
+            dialog.lineEditMetadataContactEmail
+        )
+        config_data.metadata.contact.url = self.valid_string_or_none(
+            dialog.lineEditMetadataContactUrl
+        )
+        config_data.metadata.contact.hours = self.valid_string_or_none(
+            dialog.lineEditMetadataContactHours
+        )
+        config_data.metadata.contact.instructions = self.valid_string_or_none(
+            dialog.lineEditMetadataContactInstructions
+        )
+        role = get_enum_value_from_string(
             MetadataRoleEnum,
             dialog.comboBoxMetadataContactRole.currentText(),
         )
+        config_data.metadata.contact.role = role if is_valid_string(role) else None
+
+    def valid_string_or_none(self, line_edit):
+        text_value = line_edit.text()
+        return text_value if is_valid_string(text_value) else None
 
     def set_resource_data_from_ui(self):
         """Collect data from Resource UI and add to ConfigData."""
@@ -239,7 +286,7 @@ class DataSetterFromUi:
                 dialog.lineEditResExtentsSpatialYMax,
             ]
         ]
-        # this loop is to not add empty decimals unnecessarily
+        # this loop is to not add empty decimals to int unnecessarily
         config_data.resources[res_name].extents.spatial.bbox = InlineList(
             bbox_from_list(raw_bbox_list)
         )
@@ -247,6 +294,8 @@ class DataSetterFromUi:
         # spatial crs
         config_data.resources[res_name].extents.spatial.crs = (
             self.get_extents_crs_from_ui(dialog)
+            if is_valid_string(dialog.lineEditResExtentsSpatialCrs.text())
+            else None
         )
 
         # temporal: only initialize if any of the values are present, otherwise leave as default None
@@ -269,11 +318,12 @@ class DataSetterFromUi:
 
             config_data.resources[res_name].extents.temporal.begin = temporal_begin
             config_data.resources[res_name].extents.temporal.end = temporal_end
+            trs = get_enum_value_from_string(
+                TrsAuthorities,
+                get_widget_text_value(dialog.comboBoxResExtentsTemporalTrs),
+            )
             config_data.resources[res_name].extents.temporal.trs = (
-                get_enum_value_from_string(
-                    TrsAuthorities,
-                    get_widget_text_value(dialog.comboBoxResExtentsTemporalTrs),
-                )
+                trs if trs != TrsAuthorities.NONE else None
             )
 
         # links
@@ -290,14 +340,19 @@ class DataSetterFromUi:
             if is_valid_string(link[3]):
                 new_link.title = link[3]
             if is_valid_string(link[4]):
-                new_link.hreflang = get_enum_value_from_string(
-                    Languages,
-                    link[4],
-                )
+                new_link.hreflang = link[4]
             if is_valid_string(link[5]):
                 new_link.length = int(link[5])
 
             config_data.resources[res_name].links.append(new_link)
+
+        # linked-data
+        read_only_linked_data_lists: list[list[str]] = (
+            unpack_listwidget_values_to_sublists(dialog.listWidgetResLinkedData, 1)
+        )
+        if len(read_only_linked_data_lists) > 0:
+            new_linked_data = read_only_linked_data_lists[0][0]
+            config_data.resources[res_name].linked__data = json.loads(new_linked_data)
 
         # providers
         config_data.resources[res_name].providers = []
@@ -326,8 +381,14 @@ class DataSetterFromUi:
 
         # change resource key to a new alias
         new_alias = dialog.lineEditResAlias.text()
-        if res_name in config_data.resources:
-            config_data.resources[new_alias] = config_data.resources.pop(res_name)
+
+        new_resources = {}
+        for k, v in config_data.resources.items():
+            if k == res_name:
+                new_resources[new_alias] = v
+            else:
+                new_resources[k] = v
+        config_data.resources = new_resources
 
     def delete_selected_provider_type_and_name(self, list_widget):
         """Find and remove first matching resource provider with specified type and name."""
@@ -394,16 +455,16 @@ class DataSetterFromUi:
                 ]
             ]
             bbox_from_list(raw_bbox_list)
-        except Exception as e:
+        except:
             invalid_fields.append("spatial extents (bbox)")
 
-        if not is_valid_string(dialog.lineEditResExtentsSpatialCrs.text()):
-            invalid_fields.append("spatial extents (crs)")
-
-        if dialog.listWidgetResProvider.count() == 0:
+        if (
+            dialog.listWidgetResProvider.count() == 0
+            and dialog.listWidgetResReadOnlyProviders.count() == 0
+        ):
             invalid_fields.append("providers")
 
-        # optional fields, but can cause crash if wrong format
+        # optional fields, but can cause crash if wrong format, so we need to warn about them already here
         if is_valid_string(dialog.lineEditResExtentsTemporalBegin.text()):
             try:
                 datetime.strptime(

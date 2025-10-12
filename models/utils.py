@@ -19,6 +19,11 @@ def update_dataclass_from_dict(
     for fld in fields(instance):
         field_name = fld.name
 
+        # handle exception for resource 'linked-data'
+        if field_name == "linked__data":
+            if "linked-data" in new_dict:
+                new_dict["linked__data"] = new_dict["linked-data"]
+
         # try overwrite instance property with new dictionary value
         if field_name in new_dict:
             new_value = new_dict[field_name]
@@ -131,6 +136,10 @@ def cast_element_to_type(value: Any, expected_type, prop_name: str):
         for inner_type in args:
 
             if inner_type.__name__.startswith("Provider"):
+                # don't cast anything except supported providers
+                if value.get("name") not in ["PostgreSQL", "MVT-proxy", "WMSFacade"]:
+                    continue
+
                 # don't cast to wrong provider, even if properties match
                 if (
                     (
@@ -155,7 +164,8 @@ def cast_element_to_type(value: Any, expected_type, prop_name: str):
                 except ValueError:
                     pass
 
-            elif _is_instance_of_type(value, inner_type):
+            # if the loop hasn't returned yet, check directly by type
+            if _is_instance_of_type(value, inner_type):
                 return cast_element_to_type(value, inner_type, prop_name)
 
     elif is_dataclass(expected_type):

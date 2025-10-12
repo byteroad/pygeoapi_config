@@ -63,16 +63,16 @@ class ProviderPostgresql(ProviderTemplate):
         # Mandatory to align the fields order with data packing and assigning.
         # label, data_type, default, special_widget_type, placeholder
         return [
-            (*cls.get_field_info(cls, "name"), "QComboBox", ["PostgreSQL"]),
-            (*cls.get_field_info(cls, "table"), None, ""),
-            (*cls.get_field_info(cls, "id_field"), None, ""),
-            (*cls.get_field_info(cls, "data.host"), None, ""),
+            (*cls.get_field_info(cls, "name*"), "QComboBox", ["PostgreSQL"]),
+            (*cls.get_field_info(cls, "table*"), None, ""),
+            (*cls.get_field_info(cls, "id_field*"), None, ""),
+            (*cls.get_field_info(cls, "data.host*"), None, ""),
             (
-                *cls.get_field_info(cls, "data.dbname"),
+                *cls.get_field_info(cls, "data.dbname*"),
                 None,
                 "",
             ),
-            (*cls.get_field_info(cls, "data.user"), None, ""),
+            (*cls.get_field_info(cls, "data.user*"), None, ""),
             # non-mandatory:
             (*cls.get_field_info(cls, "crs"), None, ""),
             (
@@ -133,7 +133,6 @@ class ProviderPostgresql(ProviderTemplate):
         ]
 
     def assign_value_list_to_provider_data_on_read(self, values: list):
-        print("_______assign_value_list_to_provider_data_on_read")
         if len(values) != 16:
             raise ValueError(
                 f"Unexpected number of value to unpack: {len(values)}. Expected: 16"
