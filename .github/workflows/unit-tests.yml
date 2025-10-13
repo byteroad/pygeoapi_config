@@ -3,6 +3,9 @@ name: Run unit tests on PR branch
 on:
   pull_request:
 
+on:
+ workflow_dispatch:
+
 jobs:
   test-on-pr: 
     runs-on: windows-latest
