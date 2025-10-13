@@ -2,28 +2,37 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from .utils import is_valid_string
+from ..top_level.providers.records import Languages
 
 
 # records
 class ServerOnExceedEnum(Enum):
+    NONE = ""
     THROTTLE = "throttle"
     ERROR = "error"
+
+
+class ServerOptionalBoolsEnum(Enum):
+    NONE = None
+    TRUE = True
+    FALSE = False
 
 
 # data classes
 @dataclass(kw_only=True)
 class ServerBindConfig:
     host: str = field(default="0.0.0.0")
-    port: int = field(default=5000)
+    port: int | str = field(default=5000)
 
 
 @dataclass(kw_only=True)
 class ServerLimitsConfig:
-    default_items: int = field(default=20)
-    max_items: int = field(default=50)
-    on_exceed: ServerOnExceedEnum = field(
-        default_factory=lambda: ServerOnExceedEnum.THROTTLE
-    )
+    default_items: int = field(default=10)
+    max_items: int = field(default=10)
+    on_exceed: ServerOnExceedEnum | None = None
+    max_distance_x: int | None = None
+    max_distance_y: int | None = None
+    max_distance_units: int | None = None
 
 
 @dataclass(kw_only=True)
@@ -50,6 +59,13 @@ class ServerApiRulesConfig:
 
 
 @dataclass(kw_only=True)
+class ServerManagerConfig:
+    name: str = ""
+    connection: str = ""
+    output_dir: str = ""
+
+
+@dataclass(kw_only=True)
 class ServerConfig:
     """Placeholder class for Server configuration data."""
 
@@ -60,16 +76,20 @@ class ServerConfig:
     map: ServerMapConfig = field(default_factory=lambda: ServerMapConfig())
 
     # optional fields:
-    gzip: bool = field(default=False)
-    languages: list = field(default_factory=lambda: ["en-US"])  # to format with " - "
-    cors: bool = field(default=False)
-    pretty_print: bool = field(default=False)
-    limits: ServerLimitsConfig = field(default_factory=lambda: ServerLimitsConfig())
-    admin: bool = field(default=False)
+    language: Languages | None = None
+    languages: list | None = None
+    gzip: ServerOptionalBoolsEnum | None = None
+    pretty_print: ServerOptionalBoolsEnum | None = None
+    admin: ServerOptionalBoolsEnum | None = None
+    cors: ServerOptionalBoolsEnum | None = None
+    limits: ServerLimitsConfig | None = None
     templates: ServerTemplatesConfig | None = None
-
-    # Not currently used in the UI
-    # api_rules: ServerApiRulesConfig | None = None
+    manager: dict | None = None
+    ogc_schemas_location: str | None = None
+    icon: str | None = None
+    logo: str | None = None
+    locale_dir: str | None = None
+    api_rules: dict | None = None
 
     def get_invalid_properties(self):
         """Checks the values of mandatory fields: bind (host), url, languages."""
@@ -77,9 +97,17 @@ class ServerConfig:
 
         if not is_valid_string(self.bind.host):
             all_invalid_fields.append("server.bind.host")
+        if not is_valid_string(self.bind.port):
+            all_invalid_fields.append("server.bind.port")
         if not is_valid_string(self.url):
             all_invalid_fields.append("server.url")
-        if len(self.languages) == 0:
-            all_invalid_fields.append("server.languages")
+        if not is_valid_string(self.mimetype):
+            all_invalid_fields.append("server.mimetype")
+        if not is_valid_string(self.encoding):
+            all_invalid_fields.append("server.encoding")
+        if not is_valid_string(self.map.url):
+            all_invalid_fields.append("server.map.url")
+        if not is_valid_string(self.map.attribution):
+            all_invalid_fields.append("server.map.attribution")
 
         return all_invalid_fields

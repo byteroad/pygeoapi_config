@@ -34,5 +34,4 @@ class LoggingConfig:
     logfile: str | None = None
     logformat: str | None = None
     dateformat: str | None = None
-    # TODO: Not currently used in the UI
-    # rotation: LoggingRotationConfig | None = None
+    rotation: dict | None = None

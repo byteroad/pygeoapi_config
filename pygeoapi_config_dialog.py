@@ -22,9 +22,12 @@
  ***************************************************************************/
 """
 
+from copy import deepcopy
 from datetime import datetime, timezone
 import os
 import yaml
+
+from .utils.data_diff import diff_yaml_dict
 
 from .ui_widgets.utils import get_url_status
 
@@ -40,11 +43,13 @@ from .models.top_level.utils import (
 )
 from .models.top_level.utils import STRING_SEPARATOR
 
+from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import (
     QMainWindow,
     QFileDialog,
     QMessageBox,
     QDialogButtonBox,
+    QDialog,
     QApplication,
 )  # or PyQt6.QtWidgets
 
@@ -55,14 +60,17 @@ from PyQt5.QtCore import (
     QSortFilterProxyModel,
 )  # Not strictly needed, can use Python file API instead
 
-from qgis.core import (
-    QgsMessageLog,
-    QgsRasterLayer,
-    QgsVectorLayer,
-)
+# make imports optional for pytests
+try:
+    from qgis.core import (
+        QgsMessageLog,
+        QgsRasterLayer,
+        QgsVectorLayer,
+    )
 
-from qgis.gui import QgsMapCanvas
-from qgis.PyQt import QtWidgets, uic
+    from qgis.gui import QgsMapCanvas
+except:
+    pass
 
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
@@ -74,15 +82,16 @@ FORM_CLASS, _ = uic.loadUiType(
 class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     config_data: ConfigData
+    yaml_original_data: dict
     ui_setter: UiSetter
     data_from_ui_setter: DataSetterFromUi
     current_res_name = ""
 
     # these need to be class properties, otherwise, without constant reference, they are not displayed in a widget
     provider_window: QMainWindow
-    bbox_map_canvas: QgsMapCanvas
-    bbox_base_layer: QgsRasterLayer
-    bbox_extents_layer: QgsVectorLayer
+    bbox_map_canvas: "QgsMapCanvas"
+    bbox_base_layer: "QgsRasterLayer"
+    bbox_extents_layer: "QgsVectorLayer"
 
     def __init__(self, parent=None):
         """Constructor."""
@@ -94,6 +103,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # #widgets-and-dialogs-with-auto-connect
         self.setupUi(self)
         self.config_data = ConfigData()
+        self.yaml_original_data = None
         self.ui_setter = UiSetter(self)
         self.data_from_ui_setter = DataSetterFromUi(self)
 
@@ -111,12 +121,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         )
 
         def represent_datetime_as_timestamp(dumper, data: datetime):
-            # normalize to UTC and format with Z
-            if data.tzinfo is None:
-                data = data.replace(tzinfo=timezone.utc)
-            else:
-                data = data.astimezone(timezone.utc)
-            value = data.strftime("%Y-%m-%dT%H:%M:%SZ")
+            value = self.config_data.datetime_to_string(data)
+
             # emit as YAML timestamp → plain scalar, no quotes
             return dumper.represent_scalar("tag:yaml.org,2002:timestamp", value)
 
@@ -130,31 +136,32 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         self.ui_setter.set_ui_from_data()
         self.ui_setter.setup_map_widget()
 
-    def save_to_file(self):
-        # Set and validate data from UI
-        try:
-            self.data_from_ui_setter.set_data_from_ui()
-            invalid_props = self.config_data.validate_config_data()
-            if len(invalid_props) > 0:
-                QgsMessageLog.logMessage(
-                    f"Properties are missing or have invalid values: {invalid_props}"
+    def on_button_clicked(self, button):
+
+        role = self.buttonBox.buttonRole(button)
+        print(f"Button clicked: {button.text()}, Role: {role}")
+
+        # You can also check the standard button type
+        if button == self.buttonBox.button(QDialogButtonBox.Save):
+            if self._set_validate_ui_data()[0]:
+                file_path, _ = QFileDialog.getSaveFileName(
+                    self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
                 )
-                ReadOnlyTextDialog(
-                    self,
-                    "Warning",
-                    f"Properties are missing or have invalid values: {invalid_props}",
-                ).exec_()
-                return
 
-        except Exception as e:
-            QgsMessageLog.logMessage(f"Error deserializing: {e}")
-            QMessageBox.warning(f"Error deserializing: {e}")
-            return
+                # before saving, show diff with "Procced" and "Cancel" options
+                if file_path and self._diff_original_and_current_data():
+                    self.save_to_file(file_path)
 
-        # Open dialog to set file path
-        file_path, _ = QFileDialog.getSaveFileName(
-            self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
-        )
+        elif button == self.buttonBox.button(QDialogButtonBox.Open):
+            file_name, _ = QFileDialog.getOpenFileName(
+                self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
+            )
+            self.open_file(file_name)
+
+        elif button == self.buttonBox.button(QDialogButtonBox.Close):
+            self.reject()
+
+    def save_to_file(self, file_path):
 
         if file_path:
             QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -169,19 +176,25 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                         allow_unicode=True,
                         indent=4,
                     )
-                QgsMessageLog.logMessage(f"File saved to: {file_path}")
+
+                # try/except in case of running it from pytests
+                try:
+                    QgsMessageLog.logMessage(f"File saved to: {file_path}")
+                except:
+                    pass
+
             except Exception as e:
                 QgsMessageLog.logMessage(f"Error saving file: {e}")
             finally:
                 QApplication.restoreOverrideCursor()
 
-    def open_file(self):
-        file_name, _ = QFileDialog.getOpenFileName(
-            self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
-        )
+    def open_file(self, file_name):
 
         if not file_name:
             return
+
+        # exit Resource view
+        self.exit_resource_edit()
 
         try:
             # QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -190,47 +203,101 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
                 # reset data
                 self.config_data = ConfigData()
-                self.config_data.set_data_from_yaml(yaml.safe_load(file_content))
+
+                # set data and .all_missing_props:
+                yaml_original_data = yaml.safe_load(file_content)
+                self.yaml_original_data = deepcopy(yaml_original_data)
+
+                self.config_data.set_data_from_yaml(yaml_original_data)
+
+                # set UI from data
                 self.ui_setter.set_ui_from_data()
 
                 # log messages about missing or mistyped values during deserialization
-                QgsMessageLog.logMessage(
-                    f"Errors during deserialization: {self.config_data.error_message}"
-                )
-                QgsMessageLog.logMessage(
-                    f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
-                )
+                # try/except in case of running it from pytests
+                try:
+                    QgsMessageLog.logMessage(
+                        f"Errors during deserialization: {self.config_data.error_message}"
+                    )
+                    QgsMessageLog.logMessage(
+                        f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
+                    )
 
-                # summarize all properties missing/overwitten with defaults
-                # atm, warning with the full list of properties
-                all_missing_props = self.config_data.all_missing_props
-                QgsMessageLog.logMessage(
-                    f"All missing or replaced properties: {self.config_data.all_missing_props}"
-                )
-                if len(all_missing_props) > 0:
-                    ReadOnlyTextDialog(
-                        self,
-                        "Warning",
-                        f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
-                    ).exec_()
+                    # summarize all properties missing/overwitten with defaults
+                    # atm, warning with the full list of properties
+                    QgsMessageLog.logMessage(
+                        f"All missing or replaced properties: {self.config_data.all_missing_props}"
+                    )
+
+                    if len(self.config_data.all_missing_props) > 0:
+                        ReadOnlyTextDialog(
+                            self,
+                            "Warning",
+                            f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
+                        ).exec_()
+                except:
+                    pass
 
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
         # finally:
         #     QApplication.restoreOverrideCursor()
 
-    def on_button_clicked(self, button):
+    def _set_validate_ui_data(self) -> tuple[bool, list]:
+        # Set and validate data from UI
+        try:
+            self.data_from_ui_setter.set_data_from_ui()
+            invalid_props = self.config_data.validate_config_data()
+            if len(invalid_props) > 0:
 
-        role = self.buttonBox.buttonRole(button)
-        print(f"Button clicked: {button.text()}, Role: {role}")
+                # in case of running from pytests
+                try:
+                    QgsMessageLog.logMessage(
+                        f"Properties are missing or have invalid values: {invalid_props}"
+                    )
+                    ReadOnlyTextDialog(
+                        self,
+                        "Warning",
+                        f"Properties are missing or have invalid values: {invalid_props}",
+                    ).exec_()
+                except:
+                    pass
 
-        # You can also check the standard button type
-        if button == self.buttonBox.button(QDialogButtonBox.Save):
-            self.save_to_file()
-        elif button == self.buttonBox.button(QDialogButtonBox.Open):
-            self.open_file()
-        elif button == self.buttonBox.button(QDialogButtonBox.Close):
-            self.reject()
+                return False, invalid_props
+            return True, []
+
+        except Exception as e:
+            QgsMessageLog.logMessage(f"Error deserializing: {e}")
+            QMessageBox.warning(f"Error deserializing: {e}")
+            return
+
+    def _diff_original_and_current_data(self) -> tuple[bool, list]:
+        """Before saving the file, show the diff and give an option to proceed or cancel."""
+        if not self.yaml_original_data:
+            return True
+
+        diff_data = diff_yaml_dict(
+            self.yaml_original_data,
+            self.config_data.asdict_enum_safe(self.config_data),
+        )
+
+        if (
+            len(diff_data["added"])
+            + len(diff_data["removed"])
+            + len(diff_data["changed"])
+            == 0
+        ):
+            return True
+
+        # add a window with the choice
+        QgsMessageLog.logMessage(f"{diff_data}")
+        dialog = ReadOnlyTextDialog(self, "Warning", diff_data, True)
+        result = dialog.exec_()  # returns QDialog.Accepted (1) or QDialog.Rejected (0)
+
+        if result == QDialog.Accepted:
+            return True
+        else:
+            return False
 
     def open_templates_path_dialog(self):
         """Defining Server.templates.path path, called from .ui file."""
@@ -261,6 +328,16 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     #################################################################
     ################## methods that are called from .ui file:
     #################################################################
+
+    def add_server_lang(self):
+        """Add language to Server Languages list, called from .ui file."""
+        self.ui_setter.add_listwidget_element_from_lineedit(
+            line_edit_widget=None,
+            list_widget=self.listWidgetServerLangs,
+            locale_combobox=self.comboBoxServerLangs,
+            allow_repeated_locale=False,
+            sort=False,
+        )
 
     def add_metadata_id_title(self):
         """Add title to metadata, called from .ui file."""
@@ -385,6 +462,10 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         """Called from .ui file."""
         url = self.data_from_ui_setter.get_extents_crs_from_ui(self)
         get_url_status(url, self)
+
+    def delete_server_lang(self):
+        """Delete Server language from list, called from .ui file."""
+        self.ui_setter.delete_list_widget_selected_item(self.listWidgetServerLangs)
 
     def delete_metadata_id_title(self):
         """Delete keyword from metadata, called from .ui file."""
