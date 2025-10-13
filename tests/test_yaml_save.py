@@ -97,7 +97,9 @@ def test_open_file_validate_ui_data_save_file(qtbot, sample_yaml: str):
     dialog.open_file(
         sample_yaml
     )  # now dialog.config_data has the data stored including .all_missing_props
-    yaml1_data = deepcopy(dialog.yaml_original_data)
+    yaml1_data = dialog.config_data.asdict_enum_safe(
+        deepcopy(dialog.yaml_original_data), True
+    )
     yaml1_missing_props = deepcopy(dialog.config_data.all_missing_props)
 
     # Save YAML - EVEN THOUGH some mandatory fields might be missing and recorded as empty strings/lists
@@ -106,7 +108,9 @@ def test_open_file_validate_ui_data_save_file(qtbot, sample_yaml: str):
 
     # open the new file
     dialog.open_file(abs_new_yaml_path)  # now dialog.config_data has the data stored
-    yaml2_data = deepcopy(dialog.yaml_original_data)
+    yaml2_data = dialog.config_data.asdict_enum_safe(
+        deepcopy(dialog.yaml_original_data), True
+    )
 
     # get diff between old and new data
     diff_data = diff_yaml_dict_remove_known_faulty_fields(

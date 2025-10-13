@@ -121,12 +121,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         )
 
         def represent_datetime_as_timestamp(dumper, data: datetime):
-            # normalize to UTC and format with Z
-            if data.tzinfo is None:
-                data = data.replace(tzinfo=timezone.utc)
-            else:
-                data = data.astimezone(timezone.utc)
-            value = data.strftime("%Y-%m-%dT%H:%M:%SZ")
+            value = self.config_data.datetime_to_string(data)
+
             # emit as YAML timestamp → plain scalar, no quotes
             return dumper.represent_scalar("tag:yaml.org,2002:timestamp", value)
 

@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field, fields, is_dataclass
+from datetime import datetime, timezone
 from enum import Enum
 
 from .utils import update_dataclass_from_dict
@@ -140,7 +141,15 @@ class ConfigData:
             return self._all_missing_props
         return []
 
-    def asdict_enum_safe(self, obj):
+    def datetime_to_string(self, data: datetime):
+        # normalize to UTC and format with Z
+        if data.tzinfo is None:
+            data = data.replace(tzinfo=timezone.utc)
+        else:
+            data = data.astimezone(timezone.utc)
+        return data.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    def asdict_enum_safe(self, obj, datetime_to_str=False):
         """Overwriting dataclass 'asdict' fuction to replace Enums with strings."""
         if is_dataclass(obj):
             result = {}
@@ -151,21 +160,26 @@ class ConfigData:
                 if key == "linked__data":
                     key = "linked-data"
                 if value is not None:
-                    result[key] = self.asdict_enum_safe(value)
+                    result[key] = self.asdict_enum_safe(value, datetime_to_str)
             return result
         elif isinstance(obj, Enum):
             return obj.value
         elif isinstance(obj, InlineList):
             return obj
         elif isinstance(obj, list):
-            return [self.asdict_enum_safe(v) for v in obj]
+            return [self.asdict_enum_safe(v, datetime_to_str) for v in obj]
         elif isinstance(obj, dict):
             return {
-                self.asdict_enum_safe(k): self.asdict_enum_safe(v)
+                self.asdict_enum_safe(k, datetime_to_str): self.asdict_enum_safe(
+                    v, datetime_to_str
+                )
                 for k, v in obj.items()
             }
         else:
-            return obj
+            if isinstance(obj, datetime) and datetime_to_str:
+                return self.datetime_to_string(obj)
+            else:
+                return obj
 
     def add_new_resource(self) -> str:
         """Add a placeholder resource."""
