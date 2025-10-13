@@ -2,11 +2,13 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
-from ..models.top_level import ResourceConfigTemplate
+from ..models.top_level import ResourceConfigTemplate, ServerLimitsConfig
 from ..models.top_level.ResourceConfigTemplate import (
     ResourceTypesEnum,
     ResourceVisibilityEnum,
 )
+from ..models.top_level.ServerConfig import ServerOnExceedEnum, ServerOptionalBoolsEnum
+from ..models.top_level.MetadataConfig import MetadataKeywordTypeEnum, MetadataRoleEnum
 from ..models.top_level.providers.records import (
     CrsAuthorities,
     Languages,
@@ -26,23 +28,25 @@ from .ui_setter_utils import (
     fill_combo_box,
     pack_locales_data_into_list,
     pack_list_data_into_list_widget,
-    select_list_widget_items_by_texts,
 )
 from .utils import get_widget_text_value, reset_widget
 
 
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtCore import (
-    QRegularExpression,
     Qt,
 )
 from PyQt5.QtWidgets import QMessageBox
 
-from qgis.gui import QgsMapCanvas
-from qgis.core import (
-    QgsRasterLayer,
-    QgsCoordinateReferenceSystem,
-)
+# make imports optional for pytests
+try:
+    from qgis.gui import QgsMapCanvas
+    from qgis.core import (
+        QgsRasterLayer,
+        QgsCoordinateReferenceSystem,
+    )
+except:
+    pass
 
 if TYPE_CHECKING:
     # preserve type checking, but don't import in runtime to avoid circular import
@@ -63,10 +67,43 @@ class UiSetter:
 
         # bind
         self.dialog.lineEditHost.setText(config_data.server.bind.host)
-        self.dialog.spinBoxPort.setValue(config_data.server.bind.port)
+        self.dialog.lineEditPort.setText(str(config_data.server.bind.port))
 
         # gzip
-        self.dialog.checkBoxGzip.setChecked(config_data.server.gzip)
+        set_combo_box_value_from_data(
+            combo_box=self.dialog.comboBoxGzip,
+            value=(
+                str(config_data.server.gzip.value) if config_data.server.gzip else None
+            ),
+        )
+
+        # pretty print
+        set_combo_box_value_from_data(
+            combo_box=self.dialog.comboBoxPretty,
+            value=(
+                str(config_data.server.pretty_print.value)
+                if config_data.server.pretty_print
+                else None
+            ),
+        )
+
+        # admin
+        set_combo_box_value_from_data(
+            combo_box=self.dialog.comboBoxAdmin,
+            value=(
+                str(config_data.server.admin.value)
+                if config_data.server.admin
+                else None
+            ),
+        )
+
+        # cors
+        set_combo_box_value_from_data(
+            combo_box=self.dialog.comboBoxCors,
+            value=(
+                str(config_data.server.cors.value) if config_data.server.cors else None
+            ),
+        )
 
         # mimetype
         set_combo_box_value_from_data(
@@ -80,15 +117,6 @@ class UiSetter:
             value=config_data.server.encoding,
         )
 
-        # pretty print
-        self.dialog.checkBoxPretty.setChecked(config_data.server.pretty_print)
-
-        # admin
-        self.dialog.checkBoxAdmin.setChecked(config_data.server.admin)
-
-        # cors
-        self.dialog.checkBoxCors.setChecked(config_data.server.cors)
-
         # templates
         if config_data.server.templates:
             self.dialog.lineEditTemplatesPath.setText(config_data.server.templates.path)
@@ -99,24 +127,81 @@ class UiSetter:
             self.dialog.lineEditTemplatesPath.setText("")
             self.dialog.lineEditTemplatesStatic.setText("")
 
+        # manager (only for display, data is kept without changes)
+        config_data_server_manager = config_data.server.manager or {}
+        pack_list_data_into_list_widget(
+            (
+                [str(json.dumps(config_data_server_manager))]
+                if len(config_data_server_manager) > 0
+                else []
+            ),
+            self.dialog.listWidgetServerManager,
+        )
+
+        # ogc schemas location
+        ogc_schemas_location = config_data.server.ogc_schemas_location or ""
+        self.dialog.lineEditServerOgcSchemasLocation.setText(ogc_schemas_location)
+
+        # icon
+        icon = config_data.server.icon or ""
+        self.dialog.lineEditServerIcon.setText(icon)
+
+        # logo
+        logo = config_data.server.logo or ""
+        self.dialog.lineEditServerLogo.setText(logo)
+
+        # locale_dir
+        locale_dir = config_data.server.locale_dir or ""
+        self.dialog.lineEditServerLocaleDir.setText(locale_dir)
+
+        # api_rules
+        config_data_server_api_rules = config_data.server.api_rules or {}
+        pack_list_data_into_list_widget(
+            (
+                [str(json.dumps(config_data_server_api_rules))]
+                if len(config_data_server_api_rules) > 0
+                else []
+            ),
+            self.dialog.listWidgetApiRules,
+        )
+
         # map
         self.dialog.lineEditMapUrl.setText(config_data.server.map.url)
         self.dialog.lineEditAttribution.setText(config_data.server.map.attribution)
 
         self.dialog.lineEditUrl.setText(config_data.server.url)
 
-        # language
-        select_list_widget_items_by_texts(
-            list_widget=self.dialog.listWidgetLang,
-            texts_to_select=config_data.server.languages,
+        # language single
+        set_combo_box_value_from_data(
+            combo_box=self.dialog.comboBoxLangSingle,
+            value=config_data.server.language,
         )
 
+        # languages
+        if config_data.server.languages is not None:
+            pack_list_data_into_list_widget(
+                [l for l in config_data.server.languages],
+                self.dialog.listWidgetServerLangs,
+            )
+
         # limits
+        if config_data.server.limits is None:
+            config_data.server.limits = ServerLimitsConfig()
+
         self.dialog.spinBoxDefault.setValue(config_data.server.limits.default_items)
         self.dialog.spinBoxMax.setValue(config_data.server.limits.max_items)
 
+        max_distance_x = config_data.server.limits.max_distance_x or ""
+        self.dialog.lineEditServerLimitsMaxDistX.setText(str(max_distance_x))
+
+        max_distance_y = config_data.server.limits.max_distance_y or ""
+        self.dialog.lineEditServerLimitsMaxDistY.setText(str(max_distance_y))
+
+        max_distance_units = config_data.server.limits.max_distance_units or ""
+        self.dialog.lineEditServerLimitsMaxDistUnits.setText(str(max_distance_units))
+
         set_combo_box_value_from_data(
-            combo_box=self.dialog.comboBoxExceed,
+            combo_box=self.dialog.comboBoxExceed or ServerOnExceedEnum.NONE,
             value=config_data.server.limits.on_exceed,
         )
 
@@ -126,20 +211,27 @@ class UiSetter:
             value=config_data.logging.level,
         )
 
-        if config_data.logging.logfile:
-            self.dialog.lineEditLogfile.setText(config_data.logging.logfile)
-        else:
-            self.dialog.lineEditLogfile.setText("")
+        # logfile
+        logfile = config_data.logging.logfile or ""
+        self.dialog.lineEditLogfile.setText(logfile)
 
-        if config_data.logging.logformat:
-            self.dialog.lineEditLogformat.setText(config_data.logging.logformat)
-        else:
-            self.dialog.lineEditLogformat.setText("")
+        # logformat
+        logformat = config_data.logging.logformat or ""
+        self.dialog.lineEditLogformat.setText(logformat)
 
-        if config_data.logging.dateformat:
-            self.dialog.lineEditDateformat.setText(config_data.logging.dateformat)
-        else:
-            self.dialog.lineEditDateformat.setText("")
+        # dateformat
+        dateformat = config_data.logging.dateformat or ""
+        self.dialog.lineEditDateformat.setText(dateformat)
+
+        config_data_logging_rotation = config_data.logging.rotation or {}
+        pack_list_data_into_list_widget(
+            (
+                [str(json.dumps(config_data_logging_rotation))]
+                if len(config_data_logging_rotation) > 0
+                else []
+            ),
+            self.dialog.listWidgetLogRotation,
+        )
 
         # metadata identification
 
@@ -339,14 +431,37 @@ class UiSetter:
                 combo_box=dialog.comboBoxResExtentsTemporalTrs,
                 value=res_data.extents.temporal.trs,
             )
+        else:
+            dialog.lineEditResExtentsTemporalBegin.setText("")
+            dialog.lineEditResExtentsTemporalEnd.setText("")
 
         # links
+        res_data_links = (
+            res_data.links or []
+        )  # make sure to set UI even if it's an empty value
         pack_list_data_into_list_widget(
-            [
-                [l.type, l.rel, l.href, l.title, l.hreflang, l.length]
-                for l in res_data.links
-            ],
+            (
+                [
+                    [l.type, l.rel, l.href, l.title, l.hreflang, l.length]
+                    for l in res_data_links
+                ]
+                if len(res_data_links) > 0
+                else []
+            ),
             dialog.listWidgetResLinks,
+        )
+
+        # linked-data
+        res_data_linked__data = (
+            res_data.linked__data or {}
+        )  # make sure to set UI even if it's an empty value
+        pack_list_data_into_list_widget(
+            (
+                [str(json.dumps(res_data_linked__data))]
+                if len(res_data_linked__data) > 0
+                else []
+            ),
+            dialog.listWidgetResLinkedData,
         )
 
         # providers
@@ -384,16 +499,21 @@ class UiSetter:
         config_data: ConfigData = dialog.config_data
 
         # add default values to the main UI
-        fill_combo_box(dialog.comboBoxExceed, config_data.server.limits.on_exceed)
+        fill_combo_box(dialog.comboBoxLangSingle, Languages.NONE)
+        fill_combo_box(dialog.comboBoxExceed, ServerOnExceedEnum.NONE)
         fill_combo_box(dialog.comboBoxLog, config_data.logging.level)
         fill_combo_box(
             dialog.comboBoxMetadataIdKeywordsType,
-            config_data.metadata.identification.keywords_type,
+            MetadataKeywordTypeEnum.NONE,
         )
         fill_combo_box(
             dialog.comboBoxMetadataContactRole,
-            config_data.metadata.contact.role,
+            MetadataRoleEnum.NONE,
         )
+        fill_combo_box(dialog.comboBoxGzip, ServerOptionalBoolsEnum.NONE)
+        fill_combo_box(dialog.comboBoxPretty, ServerOptionalBoolsEnum.NONE)
+        fill_combo_box(dialog.comboBoxAdmin, ServerOptionalBoolsEnum.NONE)
+        fill_combo_box(dialog.comboBoxCors, ServerOptionalBoolsEnum.NONE)
 
         # add default values to the Resource UI
         fill_combo_box(
@@ -410,7 +530,7 @@ class UiSetter:
         )
         fill_combo_box(
             dialog.comboBoxResExtentsTemporalTrs,
-            TrsAuthorities.ISO8601,
+            TrsAuthorities.NONE,
         )
 
         fill_combo_box(
@@ -437,28 +557,45 @@ class UiSetter:
         self.dialog.addResLinksLengthLineEdit.setValidator(QIntValidator())
 
     def setup_map_widget(self):
-        dialog = self.dialog
+        try:  # using qgis imports, so we should ignore for pytests
+            dialog = self.dialog
 
-        # Define base tile layer (OSM)
-        urlWithParams = "type=xyz&url=https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        dialog.bbox_base_layer = QgsRasterLayer(urlWithParams, "OpenStreetMap", "wms")
+            # Define base tile layer (OSM)
+            urlWithParams = (
+                "type=xyz&url=https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+            )
+            dialog.bbox_base_layer = QgsRasterLayer(
+                urlWithParams, "OpenStreetMap", "wms"
+            )
 
-        # Create QgsMapCanvas with OSM layer
-        dialog.bbox_map_canvas = QgsMapCanvas()
-        crs = QgsCoordinateReferenceSystem("EPSG:4326")
-        dialog.bbox_map_canvas.setDestinationCrs(crs)
-        dialog.bbox_map_canvas.setCanvasColor(Qt.white)
-        dialog.bbox_map_canvas.setLayers([dialog.bbox_base_layer])
-        dialog.bbox_map_canvas.zoomToFullExtent()
-        # self.canvas.setExtent(layer.extent(), True)
-        # self.canvas.refreshAllLayers()
+            # Create QgsMapCanvas with OSM layer
+            dialog.bbox_map_canvas = QgsMapCanvas()
+            crs = QgsCoordinateReferenceSystem("EPSG:4326")
+            dialog.bbox_map_canvas.setDestinationCrs(crs)
+            dialog.bbox_map_canvas.setCanvasColor(Qt.white)
+            dialog.bbox_map_canvas.setLayers([dialog.bbox_base_layer])
+            dialog.bbox_map_canvas.zoomToFullExtent()
+            # self.canvas.setExtent(layer.extent(), True)
+            # self.canvas.refreshAllLayers()
 
-        # Add QgsMapCanvas as a widget to the Resource Tab
-        clear_layout(dialog.bboxMapPlaceholder)
-        dialog.bboxMapPlaceholder.addWidget(dialog.bbox_map_canvas)
+            # Add QgsMapCanvas as a widget to the Resource Tab
+            clear_layout(dialog.bboxMapPlaceholder)
+            dialog.bboxMapPlaceholder.addWidget(dialog.bbox_map_canvas)
+        except NameError:
+            pass
 
     def preview_resource(self, model_index: "QModelIndex" = None):
         dialog = self.dialog
+        dialog.current_res_name = model_index.data()
+
+        # do nothing, if resource is unsupported
+        if isinstance(dialog.config_data.resources[dialog.current_res_name], dict):
+            QMessageBox.warning(
+                self.dialog,
+                "Message",
+                f"Preview is not supported for the Resource type '{dialog.config_data.resources[dialog.current_res_name].get('type')}'.",
+            )
+            return
 
         # if called as a generic preview, no selected collection
         if not model_index:
@@ -475,8 +612,6 @@ class UiSetter:
         dialog.groupBoxCollectionLoaded.hide()
         dialog.groupBoxCollectionSelect.show()
         dialog.groupBoxCollectionPreview.show()
-
-        dialog.current_res_name = model_index.data()
 
         # If title is a dictionary, use the first (default) value
         title = dialog.config_data.resources[dialog.current_res_name].title
@@ -513,15 +648,27 @@ class UiSetter:
                 dialog.listViewCollection.setCurrentIndex(index)
                 break
 
-    def _lang_entry_exists_in_list_widget(self, list_widget, locale) -> bool:
+    def _lang_entry_exists_in_list_widget(
+        self, list_widget, locale, punctuation=True
+    ) -> bool:
         for i in range(list_widget.count()):
-            if list_widget.item(i).text().startswith(f"{locale}: "):
-                QMessageBox.warning(
-                    self.dialog,
-                    "Message",
-                    f"Data entry in selected language already exists: {locale}",
-                )
-                return True
+            if punctuation:
+                if list_widget.item(i).text().startswith(f"{locale}: "):
+                    QMessageBox.warning(
+                        self.dialog,
+                        "Message",
+                        f"Data entry in selected language already exists: {locale}",
+                    )
+                    return True
+            else:
+                if list_widget.item(i).text().startswith(locale):
+                    QMessageBox.warning(
+                        self.dialog,
+                        "Message",
+                        f"Data entry in selected language already exists: {locale}",
+                    )
+                    return True
+
         return False
 
     def add_listwidget_element_from_lineedit(
@@ -536,11 +683,11 @@ class UiSetter:
         """Take the content of LineEdit and add it as a new List entry."""
 
         dialog = self.dialog
-        text = line_edit_widget.text().strip()
-        if text:
+        text = line_edit_widget.text().strip() if line_edit_widget else ""
+        if (line_edit_widget and text) or not line_edit_widget:
 
             text_to_print = text
-            if locale_combobox:
+            if locale_combobox and line_edit_widget:
                 # get text with locale
                 locale = locale_combobox.currentText()
                 text_to_print = f"{locale}: {text}"
@@ -551,6 +698,18 @@ class UiSetter:
                 ):
                     list_widget.addItem(text_to_print)
                     line_edit_widget.clear()
+
+            elif (
+                locale_combobox and not line_edit_widget
+            ):  # if locale box is the only text to use: don't wrap in extra punctuation
+                locale = locale_combobox.currentText()
+                text_to_print = locale
+
+                # check if repeated language entries are allowed
+                if allow_repeated_locale or not self._lang_entry_exists_in_list_widget(
+                    list_widget, locale, False
+                ):
+                    list_widget.addItem(text_to_print)
 
             else:
                 list_widget.addItem(text_to_print)

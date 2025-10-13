@@ -1,4 +1,5 @@
 from dataclasses import is_dataclass, fields, MISSING
+from datetime import datetime
 from enum import Enum
 from types import UnionType
 from typing import Any, get_origin, get_args, Union, get_type_hints
@@ -17,6 +18,11 @@ def update_dataclass_from_dict(
     # loop through the instance properties
     for fld in fields(instance):
         field_name = fld.name
+
+        # handle exception for resource 'linked-data'
+        if field_name == "linked__data":
+            if "linked-data" in new_dict:
+                new_dict["linked__data"] = new_dict["linked-data"]
 
         # try overwrite instance property with new dictionary value
         if field_name in new_dict:
@@ -57,6 +63,17 @@ def update_dataclass_from_dict(
 
                         new_value = InlineList(new_value)
 
+                    # Exception: try remap to datetime
+                    if (datetime in args or expected_type is datetime) and isinstance(
+                        new_value, str
+                    ):
+                        try:
+                            new_value = datetime.strptime(
+                                new_value, "%Y-%m-%dT%H:%M:%SZ"
+                            )
+                        except:
+                            pass
+
                     # Exception: remap str to Enum
                     elif isinstance(expected_type, type) and issubclass(
                         expected_type, Enum
@@ -65,8 +82,18 @@ def update_dataclass_from_dict(
 
                     # Exception: remap str to Enum (when one of possible classes is Enum)
                     elif type(expected_type) is UnionType:
+
                         subtype = next((t for t in args if t is not type(None)), None)
-                        if isinstance(subtype, type) and issubclass(subtype, Enum):
+                        # check for list type, run cast for every element
+                        if isinstance(new_value, list):
+                            new_value, more_wrong_types = (
+                                cast_list_elements_to_expected_types(
+                                    new_value, subtype, f"{prop_name}.{field_name}"
+                                )
+                            )
+                            wrong_types.extend(more_wrong_types)
+
+                        elif isinstance(subtype, type) and issubclass(subtype, Enum):
                             new_value = get_enum_value_from_string(subtype, new_value)
 
                     # Exception with 'expected_type' 'list[some dataclass]'
@@ -76,7 +103,7 @@ def update_dataclass_from_dict(
 
                     elif isinstance(new_value, list):
                         new_value, more_wrong_types = (
-                            _cast_list_elements_to_expected_types(
+                            cast_list_elements_to_expected_types(
                                 new_value, expected_type, f"{prop_name}.{field_name}"
                             )
                         )
@@ -100,15 +127,46 @@ def update_dataclass_from_dict(
     return missing_fields, wrong_types, all_missing_props
 
 
-def _cast_element_to_type(value: Any, expected_type, prop_name: str):
+def cast_element_to_type(value: Any, expected_type, prop_name: str):
     """Function intended to cast non-iterable values, or dict (to dataclasses)."""
 
     # if there are alternative options for the expected type: recurse
     if type(expected_type) is UnionType:
         args = get_args(expected_type)
         for inner_type in args:
+
+            if inner_type.__name__.startswith("Provider"):
+                # don't cast anything except supported providers
+                if value.get("name") not in ["PostgreSQL", "MVT-proxy", "WMSFacade"]:
+                    continue
+
+                # don't cast to wrong provider, even if properties match
+                if (
+                    (
+                        value.get("name") == "PostgreSQL"
+                        and not inner_type.__name__.endswith("ProviderPostgresql")
+                    )
+                    or (
+                        value.get("name") == "MVT-proxy"
+                        and not inner_type.__name__.endswith("ProviderMvtProxy")
+                    )
+                    or (
+                        value.get("name") == "WMSFacade"
+                        and not inner_type.__name__.endswith("ProviderWmsFacade")
+                    )
+                ):
+                    continue
+
+            # handle the case when manual casting is required
+            elif type(value) is str and inner_type is int:
+                try:
+                    return int(value)
+                except ValueError:
+                    pass
+
+            # if the loop hasn't returned yet, check directly by type
             if _is_instance_of_type(value, inner_type):
-                return _cast_element_to_type(value, inner_type, prop_name)
+                return cast_element_to_type(value, inner_type, prop_name)
 
     elif is_dataclass(expected_type):
         class_instance = expected_type()
@@ -123,10 +181,12 @@ def _cast_element_to_type(value: Any, expected_type, prop_name: str):
         if _is_instance_of_type(value, expected_type):
             return value
 
-    raise ValueError("Element type not matched")
+    raise ValueError(
+        f"Element type not matched: {prop_name}={value}, expected type is {expected_type}"
+    )
 
 
-def _cast_list_elements_to_expected_types(
+def cast_list_elements_to_expected_types(
     new_value: list, expected_type, prop_name: str
 ):
     """Cast all elements in the list to one of the expected types."""
@@ -140,7 +200,7 @@ def _cast_list_elements_to_expected_types(
         # e.g. 'list | dict'
         for possible_type in args:
             if _is_instance_of_type(new_value, possible_type):
-                casted_values, more_wrong_types = _cast_list_elements_to_expected_types(
+                casted_values, more_wrong_types = cast_list_elements_to_expected_types(
                     new_value, possible_type, prop_name
                 )
                 wrong_types.extend(more_wrong_types)
@@ -153,7 +213,7 @@ def _cast_list_elements_to_expected_types(
             value_casted = False
             for inner_type in args:
                 try:
-                    casted_element = _cast_element_to_type(val, inner_type, prop_name)
+                    casted_element = cast_element_to_type(val, inner_type, prop_name)
                     casted_values.append(casted_element)
                     value_casted = True
                     break
@@ -231,6 +291,14 @@ def _is_instance_of_type(value, expected_type) -> bool:
     # Exception for when 'expected_type' is a custom dataclass and 'value' is dict
     if isinstance(value, dict) and is_dataclass(expected_type):
         return can_cast_to_dataclass(value, expected_type)
+
+    # Exception: try cast str to datetime manually
+    if expected_type is datetime:
+        try:
+            datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
+            return True
+        except:
+            pass
 
     # Fallback for normal types
     return isinstance(value, expected_type)
