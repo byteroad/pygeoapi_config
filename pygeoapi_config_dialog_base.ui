@@ -2551,7 +2551,532 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+<connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>clicked(QAbstractButton*)</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>on_button_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>271</x>
+     <y>375</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>271</x>
+     <y>198</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButtonBrowse</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>open_logfile_dialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  
+  <connection>
+   <sender>pushButtonBrowseTemplatesPath</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>open_templates_path_dialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+  <connection>
+   <sender>addServerLangsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>add_server_lang()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  
+  <connection>
+   <sender>deleteServerLangsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>delete_server_lang()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  
+  <connection>
+   <sender>addMetadataIdTitleButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>add_metadata_id_title()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+  <connection>
+   <sender>addMetadataIdDescriptionButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>add_metadata_id_description()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  
+  <connection>
+   <sender>addMetadataKeywordButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>add_metadata_keyword()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  
+  
+  <connection>
+   <sender>addResTitleButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>add_res_title()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+
+  <connection>
+   <sender>addResDescriptionButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>add_res_description()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+
+  <connection>
+   <sender>addResKeywordsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>add_res_keyword()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+  <connection>
+   <sender>addResLinksButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>add_res_link()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  
+  <connection>
+   <sender>addResProviderButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>try_add_res_provider()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+  <connection>
+   <sender>deleteMetadataIdTitleButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>delete_metadata_id_title()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+  <connection>
+   <sender>deleteMetadataIdDescriptionButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>delete_metadata_id_description()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+  <connection>
+   <sender>deleteResTitleButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>delete_res_title()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+  <connection>
+   <sender>deleteResDescriptionButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>delete_res_description()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+  <connection>
+   <sender>deleteResKeywordsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>delete_res_keyword()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+  <connection>
+   <sender>deleteResLinksButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>delete_res_link()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+  <connection>
+   <sender>editResProviderButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>edit_res_provider()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+  <connection>
+   <sender>deleteResProviderButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>delete_res_provider()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+
+  <connection>
+   <sender>deleteMetadataKeywordButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>delete_metadata_keyword()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+  <connection>
+   <sender>pushButtonBrowseTemplatesStatic</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>open_templates_static_dialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>822</x>
+     <y>406</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+
+  <connection>
+   <sender>lineEditCollection</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>filterResources(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>91</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>listViewCollection</sender>
+   <signal>clicked(QModelIndex)</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>preview_resource(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushDeleteCollection</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>delete_resource()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushNewCollection</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>new_resource()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushLoadCollection</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>load_resource()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  
+  <connection>
+   <sender>pushSaveAndPreviewResource</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>save_resource_edit_and_preview()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushExitResourceEdit</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>exit_resource_edit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  
+  <connection>
+   <sender>validateResExtentsCrsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>validate_res_extents_crs()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>160</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
  <slots>
   <slot>open_logfile_dialog()</slot>
  </slots>
