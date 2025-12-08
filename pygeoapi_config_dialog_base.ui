@@ -29,9 +29,9 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>0</y>
+          <y>-71</y>
           <width>834</width>
-          <height>992</height>
+          <height>1021</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -2521,6 +2521,23 @@
           </widget>
          </item>
          <item>
+          <widget class="QRadioButton" name="serverRadio">
+           <property name="layoutDirection">
+            <enum>Qt::RightToLeft</enum>
+           </property>
+           <property name="text">
+            <string>Server Connection</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDialogButtonBox" name="buttonBox">
+           <property name="standardButtons">
+            <set>QDialogButtonBox::Close|QDialogButtonBox::Open|QDialogButtonBox::Save</set>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLabel" name="label_79">
            <property name="font">
             <font>
@@ -2535,13 +2552,6 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QDialogButtonBox" name="buttonBox">
-           <property name="standardButtons">
-            <set>QDialogButtonBox::Close|QDialogButtonBox::Open|QDialogButtonBox::Save</set>
-           </property>
-          </widget>
-         </item>
         </layout>
        </widget>
       </widget>
@@ -2551,23 +2561,7 @@
   </layout>
  </widget>
  <resources/>
-<connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>clicked(QAbstractButton*)</signal>
-   <receiver>PygeoapiConfigDialogBase</receiver>
-   <slot>on_button_clicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>271</x>
-     <y>375</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>271</x>
-     <y>198</y>
-    </hint>
-   </hints>
-  </connection>
+ <connections>
   <connection>
    <sender>pushButtonBrowse</sender>
    <signal>clicked()</signal>
@@ -2584,7 +2578,6 @@
     </hint>
    </hints>
   </connection>
-  
   <connection>
    <sender>pushButtonBrowseTemplatesPath</sender>
    <signal>clicked()</signal>
@@ -2601,7 +2594,6 @@
     </hint>
    </hints>
   </connection>
-
   <connection>
    <sender>addServerLangsButton</sender>
    <signal>clicked()</signal>
@@ -2618,7 +2610,6 @@
     </hint>
    </hints>
   </connection>
-  
   <connection>
    <sender>deleteServerLangsButton</sender>
    <signal>clicked()</signal>
@@ -2635,7 +2626,6 @@
     </hint>
    </hints>
   </connection>
-  
   <connection>
    <sender>addMetadataIdTitleButton</sender>
    <signal>clicked()</signal>
@@ -2652,7 +2642,6 @@
     </hint>
    </hints>
   </connection>
-
   <connection>
    <sender>addMetadataIdDescriptionButton</sender>
    <signal>clicked()</signal>
@@ -2669,7 +2658,6 @@
     </hint>
    </hints>
   </connection>
-  
   <connection>
    <sender>addMetadataKeywordButton</sender>
    <signal>clicked()</signal>
@@ -2686,8 +2674,6 @@
     </hint>
    </hints>
   </connection>
-  
-  
   <connection>
    <sender>addResTitleButton</sender>
    <signal>clicked()</signal>
@@ -2704,8 +2690,6 @@
     </hint>
    </hints>
   </connection>
-
-
   <connection>
    <sender>addResDescriptionButton</sender>
    <signal>clicked()</signal>
@@ -2722,8 +2706,6 @@
     </hint>
    </hints>
   </connection>
-
-
   <connection>
    <sender>addResKeywordsButton</sender>
    <signal>clicked()</signal>
@@ -2740,7 +2722,6 @@
     </hint>
    </hints>
   </connection>
-
   <connection>
    <sender>addResLinksButton</sender>
    <signal>clicked()</signal>
@@ -2757,7 +2738,6 @@
     </hint>
    </hints>
   </connection>
-  
   <connection>
    <sender>addResProviderButton</sender>
    <signal>clicked()</signal>
@@ -2774,7 +2754,6 @@
     </hint>
    </hints>
   </connection>
-
   <connection>
    <sender>deleteMetadataIdTitleButton</sender>
    <signal>clicked()</signal>
@@ -2791,7 +2770,6 @@
     </hint>
    </hints>
   </connection>
-
   <connection>
    <sender>deleteMetadataIdDescriptionButton</sender>
    <signal>clicked()</signal>
@@ -2808,7 +2786,6 @@
     </hint>
    </hints>
   </connection>
-
   <connection>
    <sender>deleteResTitleButton</sender>
    <signal>clicked()</signal>
@@ -2825,7 +2802,6 @@
     </hint>
    </hints>
   </connection>
-
   <connection>
    <sender>deleteResDescriptionButton</sender>
    <signal>clicked()</signal>
@@ -2842,7 +2818,6 @@
     </hint>
    </hints>
   </connection>
-
   <connection>
    <sender>deleteResKeywordsButton</sender>
    <signal>clicked()</signal>
@@ -2859,7 +2834,6 @@
     </hint>
    </hints>
   </connection>
-
   <connection>
    <sender>deleteResLinksButton</sender>
    <signal>clicked()</signal>
@@ -2876,7 +2850,6 @@
     </hint>
    </hints>
   </connection>
-
   <connection>
    <sender>editResProviderButton</sender>
    <signal>clicked()</signal>
@@ -2893,7 +2866,6 @@
     </hint>
    </hints>
   </connection>
-
   <connection>
    <sender>deleteResProviderButton</sender>
    <signal>clicked()</signal>
@@ -2910,8 +2882,6 @@
     </hint>
    </hints>
   </connection>
-
-
   <connection>
    <sender>deleteMetadataKeywordButton</sender>
    <signal>clicked()</signal>
@@ -2928,7 +2898,6 @@
     </hint>
    </hints>
   </connection>
-
   <connection>
    <sender>pushButtonBrowseTemplatesStatic</sender>
    <signal>clicked()</signal>
@@ -2945,7 +2914,6 @@
     </hint>
    </hints>
   </connection>
-
   <connection>
    <sender>lineEditCollection</sender>
    <signal>textChanged(QString)</signal>
@@ -3026,7 +2994,6 @@
     </hint>
    </hints>
   </connection>
-  
   <connection>
    <sender>pushSaveAndPreviewResource</sender>
    <signal>clicked()</signal>
@@ -3059,7 +3026,6 @@
     </hint>
    </hints>
   </connection>
-  
   <connection>
    <sender>validateResExtentsCrsButton</sender>
    <signal>clicked()</signal>
@@ -3073,6 +3039,22 @@
     <hint type="destinationlabel">
      <x>434</x>
      <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>clicked(QAbstractButton*)</signal>
+   <receiver>PygeoapiConfigDialogBase</receiver>
+   <slot>on_button_clicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>271</x>
+     <y>375</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>271</x>
+     <y>198</y>
     </hint>
    </hints>
   </connection>

@@ -144,19 +144,36 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # You can also check the standard button type
         if button == self.buttonBox.button(QDialogButtonBox.Save):
             if self._set_validate_ui_data()[0]:
-                file_path, _ = QFileDialog.getSaveFileName(
-                    self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
-                )
 
-                # before saving, show diff with "Procced" and "Cancel" options
-                if file_path and self._diff_original_and_current_data():
-                    self.save_to_file(file_path)
+                if self.serverRadio.isChecked():
+                    QMessageBox.warning(
+                        self,
+                        "Warning",
+                        "Please switch to 'Server' tab before opening a configuration file.",
+                    )
+                    return
+                else:
+                    file_path, _ = QFileDialog.getSaveFileName(
+                        self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
+                    )
+
+                    # before saving, show diff with "Procced" and "Cancel" options
+                    if file_path and self._diff_original_and_current_data():
+                        self.save_to_file(file_path)
 
         elif button == self.buttonBox.button(QDialogButtonBox.Open):
-            file_name, _ = QFileDialog.getOpenFileName(
-                self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
-            )
-            self.open_file(file_name)
+            if self.serverRadio.isChecked():
+                QMessageBox.warning(
+                    self,
+                    "Warning",
+                    "Please switch to 'Server' tab before opening a configuration file.",
+                )
+                return
+            else:
+                file_name, _ = QFileDialog.getOpenFileName(
+                    self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
+                )
+                self.open_file(file_name)
 
         elif button == self.buttonBox.button(QDialogButtonBox.Close):
             self.reject()
