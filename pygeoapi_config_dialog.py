@@ -31,6 +31,7 @@ from .utils.data_diff import diff_yaml_dict
 
 from .ui_widgets.utils import get_url_status
 
+from .server_config_dialog import Ui_serverDialog 
 
 from .models.top_level.providers.records import ProviderTypes
 from .ui_widgets.providers.NewProviderWindow import NewProviderWindow
@@ -72,13 +73,34 @@ try:
 except:
     pass
 
+class ServerConfigDialog(QDialog, Ui_serverDialog):
+    """
+    Logic for the Server Configuration Dialog.
+    Inherits from QDialog (functionality) and Ui_serverDialog (layout).
+    """
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setupUi(self) # Builds the UI defined in Designer
+        
+        # Optional: Set default values based on current config if needed
+        # self.ServerHostlineEdit.setText("localhost")
+
+    def get_server_data(self):
+        """
+        Retrieve the server configuration data entered by the user.
+        :return: A dictionary with 'host' and 'port' keys.
+        """
+        host = self.ServerHostlineEdit.text()
+        port = self.ServerSpinBox.value()
+        return {'host': host, 'port': port}
+
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(
     os.path.join(os.path.dirname(__file__), "pygeoapi_config_dialog_base.ui")
 )
 
-
+        
 class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     config_data: ConfigData
@@ -146,12 +168,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             if self._set_validate_ui_data()[0]:
 
                 if self.serverRadio.isChecked():
-                    QMessageBox.warning(
-                        self,
-                        "Warning",
-                        "Please switch to 'Server' tab before opening a configuration file.",
-                    )
-                    return
+                    self.server_config(save=True)
                 else:
                     file_path, _ = QFileDialog.getSaveFileName(
                         self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
@@ -163,12 +180,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         elif button == self.buttonBox.button(QDialogButtonBox.Open):
             if self.serverRadio.isChecked():
-                QMessageBox.warning(
-                    self,
-                    "Warning",
-                    "Please switch to 'Server' tab before opening a configuration file.",
-                )
-                return
+                self.server_config(save=False)
             else:
                 file_name, _ = QFileDialog.getOpenFileName(
                     self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
@@ -177,6 +189,32 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         elif button == self.buttonBox.button(QDialogButtonBox.Close):
             self.reject()
+            return
+
+    def server_config(self, save):
+
+        dialog = ServerConfigDialog(self)
+
+        if dialog.exec_(): 
+            data = dialog.get_server_data()
+            if save == True:
+                self.push_to_server(data)
+            else:
+                self.pull_from_server(data) 
+    
+    def push_to_server(self, data):
+            QMessageBox.warning(
+                self,
+                "Warning",
+                f"Pushing configuration to Host: {data['host']}, Port: {data['port']}",
+            )
+
+    def pull_from_server(self, data):
+            QMessageBox.warning(
+                self,
+                "Warning",
+                f"Pulling configuration from Host: {data['host']}, Port: {data['port']}",
+            )
 
     def save_to_file(self, file_path):
 

@@ -30,6 +30,7 @@ from .resources import *
 
 # Import the code for the dialog
 from .pygeoapi_config_dialog import PygeoapiConfigDialog
+
 import os.path
 
 
