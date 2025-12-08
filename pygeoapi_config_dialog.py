@@ -92,7 +92,8 @@ class ServerConfigDialog(QDialog, Ui_serverDialog):
         """
         host = self.ServerHostlineEdit.text()
         port = self.ServerSpinBox.value()
-        return {'host': host, 'port': port}
+        protocol = 'http' if self.radioHttp.isChecked() else 'https'
+        return {'host': host, 'port': port, 'protocol': protocol}
 
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
@@ -203,17 +204,17 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 self.pull_from_server(data) 
     
     def push_to_server(self, data):
-            QMessageBox.warning(
+            QMessageBox.information(
                 self,
-                "Warning",
-                f"Pushing configuration to Host: {data['host']}, Port: {data['port']}",
+                "Information",
+                f"Pushing configuration to: {data['protocol']}://{data['host']}:{data['port']}",
             )
 
     def pull_from_server(self, data):
-            QMessageBox.warning(
+            QMessageBox.information(
                 self,
-                "Warning",
-                f"Pulling configuration from Host: {data['host']}, Port: {data['port']}",
+                "Information",
+                f"Pulling configuration from: {data['protocol']}://{data['host']}:{data['port']}",
             )
 
     def save_to_file(self, file_path):
