@@ -1767,7 +1767,7 @@
           </item>
 
           
-          <item row="2" column="1" columnspan="2">
+          <item row="2" column="1" colspan="2">
             <layout class="QHBoxLayout" name="bboxMapPlaceholder">
             </layout>
           </item>
@@ -1965,7 +1965,7 @@
 
 
             
-              <item row="0" column="1" columnspan="1">
+              <item row="0" column="1" colspan="1">
               
                 <widget class="QGroupBox">
                   <property name="title">
@@ -2078,7 +2078,7 @@
 
 
 
-              <item row="1" column="1" columnspan="1">
+              <item row="1" column="1" colspan="1">
               
                 <widget class="QGroupBox">
                   <property name="title">
