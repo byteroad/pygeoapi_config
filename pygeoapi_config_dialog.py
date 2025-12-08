@@ -23,8 +23,10 @@
 """
 
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 import os
+from wsgiref import headers
+import requests
 import yaml
 
 from .utils.data_diff import diff_yaml_dict
@@ -72,6 +74,21 @@ try:
     from qgis.gui import QgsMapCanvas
 except:
     pass
+
+headers = {
+    'accept': '*/*',
+    'Content-Type': 'application/json'
+}
+
+def preprocess_for_json(d):
+    """Recursively converts datetime/date objects in a dict to ISO strings."""
+    if isinstance(d, dict):
+        return {k: preprocess_for_json(v) for k, v in d.items()}
+    elif isinstance(d, list):
+        return [preprocess_for_json(i) for i in d]
+    elif isinstance(d, (datetime, date)):
+        return d.isoformat()
+    return d
 
 class ServerConfigDialog(QDialog, Ui_serverDialog):
     """
@@ -196,26 +213,89 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         dialog = ServerConfigDialog(self)
 
-        if dialog.exec_(): 
+        if dialog.exec_():  
             data = dialog.get_server_data()
+            url = f"{data['protocol']}://{data['host']}:{data['port']}/admin/config"
             if save == True:
-                self.push_to_server(data)
+                self.push_to_server(url)
             else:
-                self.pull_from_server(data) 
+                self.pull_from_server(url) 
     
-    def push_to_server(self, data):
-            QMessageBox.information(
-                self,
-                "Information",
-                f"Pushing configuration to: {data['protocol']}://{data['host']}:{data['port']}",
+    def push_to_server(self, url):
+
+        QMessageBox.information(
+            self,
+            "Information",
+            f"Pushing configuration to: {url}",
+        )
+
+        config_dict = self.config_data.asdict_enum_safe(self.config_data)
+
+        # Pre-process the dictionary to handle datetime objects
+        processed_config_dict = preprocess_for_json(config_dict)
+
+        # TODO: support authentication through the QT framework
+        try:
+            # Send the PUT request to Admin API
+            response = requests.put(url, headers=headers, json=processed_config_dict)
+            response.raise_for_status()
+
+            QgsMessageLog.logMessage(
+                f"Success! Status Code: {response.status_code}")
+
+        except requests.exceptions.RequestException as e:
+            QgsMessageLog.logMessage(f"An error occurred: {e}")
+
+
+    def pull_from_server(self, url):
+        
+        QMessageBox.information(
+            self,
+            "Information",
+            f"Pulling configuration from: {url}",
+        )
+
+        # TODO: support authentication through the QT framework
+        try:
+            # Send the GET request to Admin API
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+
+            QgsMessageLog.logMessage(
+                f"Success! Status Code: {response.status_code}")
+
+            QgsMessageLog.logMessage(
+                f"Response: {response.text}")
+
+            data_dict = response.json() 
+            
+            self.config_data = ConfigData()   
+            self.config_data.set_data_from_yaml(data_dict) 
+            self.ui_setter.set_ui_from_data()
+
+            # log messages about missing or mistyped values during deserialization
+            QgsMessageLog.logMessage(
+                f"Errors during deserialization: {self.config_data.error_message}"
+            )
+            QgsMessageLog.logMessage(
+                f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
             )
 
-    def pull_from_server(self, data):
-            QMessageBox.information(
-                self,
-                "Information",
-                f"Pulling configuration from: {data['protocol']}://{data['host']}:{data['port']}",
+            # summarize all properties missing/overwitten with defaults
+            # atm, warning with the full list of properties
+            all_missing_props = self.config_data.all_missing_props
+            QgsMessageLog.logMessage(
+                f"All missing or replaced properties: {self.config_data.all_missing_props}"
             )
+            if len(all_missing_props) > 0:
+                ReadOnlyTextDialog(
+                    self,
+                    "Warning",
+                    f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
+                ).exec_()
+
+        except requests.exceptions.RequestException as e:
+            QgsMessageLog.logMessage(f"An error occurred: {e}")
 
     def save_to_file(self, file_path):
 
