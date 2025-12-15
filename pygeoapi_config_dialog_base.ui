@@ -29,9 +29,9 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-71</y>
+          <y>-96</y>
           <width>834</width>
-          <height>1021</height>
+          <height>1050</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -2521,15 +2521,25 @@
           </widget>
          </item>
          <item>
+          <widget class="QRadioButton" name="localRadio">
+           <property name="layoutDirection">
+            <enum>Qt::RightToLeft</enum>
+           </property>
+           <property name="text">
+            <string>Local File</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QRadioButton" name="serverRadio">
            <property name="layoutDirection">
             <enum>Qt::RightToLeft</enum>
            </property>
            <property name="text">
             <string>Server Connection</string>
-           </property>
-           <property name="icon">
-            <iconset theme="folder-remote"/>
            </property>
           </widget>
          </item>
