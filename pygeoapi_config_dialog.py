@@ -243,8 +243,19 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             QgsMessageLog.logMessage(
                 f"Success! Status Code: {response.status_code}")
 
+            QMessageBox.information(
+                self,
+                "Information",
+                f"Success! Status Code: {response.status_code}",
+            )
+
         except requests.exceptions.RequestException as e:
             QgsMessageLog.logMessage(f"An error occurred: {e}")
+            QMessageBox.critical(
+                self,
+                "Error",
+                f"An error occurred pulling the configuration from the server: {e}",
+            )
 
 
     def pull_from_server(self, url):
@@ -263,6 +274,12 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
             QgsMessageLog.logMessage(
                 f"Success! Status Code: {response.status_code}")
+
+            QMessageBox.information(
+                self,
+                "Information",
+                f"Success! Status Code: {response.status_code}",
+            )
 
             QgsMessageLog.logMessage(
                 f"Response: {response.text}")
@@ -296,6 +313,13 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         except requests.exceptions.RequestException as e:
             QgsMessageLog.logMessage(f"An error occurred: {e}")
+
+            QMessageBox.critical(
+                self,
+                "Error",
+                f"An error occurred pulling the configuration from the server: {e}",
+            )
+
 
     def save_to_file(self, file_path):
 
