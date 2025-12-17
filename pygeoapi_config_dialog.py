@@ -33,7 +33,7 @@ from .utils.data_diff import diff_yaml_dict
 
 from .ui_widgets.utils import get_url_status
 
-from .server_config_dialog import Ui_serverDialog 
+from .server_config_dialog import Ui_serverDialog
 
 from .models.top_level.providers.records import ProviderTypes
 from .ui_widgets.providers.NewProviderWindow import NewProviderWindow
@@ -75,10 +75,8 @@ try:
 except:
     pass
 
-headers = {
-    'accept': '*/*',
-    'Content-Type': 'application/json'
-}
+headers = {"accept": "*/*", "Content-Type": "application/json"}
+
 
 def preprocess_for_json(d):
     """Recursively converts datetime/date objects in a dict to ISO strings."""
@@ -90,27 +88,29 @@ def preprocess_for_json(d):
         return d.isoformat()
     return d
 
+
 class ServerConfigDialog(QDialog, Ui_serverDialog):
     """
     Logic for the Server Configuration Dialog.
     Inherits from QDialog (functionality) and Ui_serverDialog (layout).
     """
+
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setupUi(self) # Builds the UI defined in Designer
-        
+        self.setupUi(self)  # Builds the UI defined in Designer
+
         # Optional: Set default values based on current config if needed
         # self.ServerHostlineEdit.setText("localhost")
 
-    def get_server_data(self):
+    def get_server_url(self):
         """
         Retrieve the server configuration data entered by the user.
         :return: A dictionary with 'host' and 'port' keys.
         """
         host = self.ServerHostlineEdit.text()
         port = self.ServerSpinBox.value()
-        protocol = 'http' if self.radioHttp.isChecked() else 'https'
-        return {'host': host, 'port': port, 'protocol': protocol}
+        protocol = "http" if self.radioHttp.isChecked() else "https"
+        return f"{protocol}://{host}:{port}/admin/config"
 
 
 # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
@@ -118,7 +118,7 @@ FORM_CLASS, _ = uic.loadUiType(
     os.path.join(os.path.dirname(__file__), "pygeoapi_config_dialog_base.ui")
 )
 
-        
+
 class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
     config_data: ConfigData
@@ -183,17 +183,25 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         # You can also check the standard button type
         if button == self.buttonBox.button(QDialogButtonBox.Save):
+            # proceed only if UI data inputs are valid
             if self._set_validate_ui_data()[0]:
 
                 if self.serverRadio.isChecked():
+                    # check #1: show diff with "Procced" and "Cancel" options
+                    if not self._diff_original_and_current_data():
+                        return
+                    
                     self.server_config(save=True)
                 else:
+                    # check #1: show diff with "Procced" and "Cancel" options
+                    if not self._diff_original_and_current_data():
+                        return
+
                     file_path, _ = QFileDialog.getSaveFileName(
                         self, "Save File", "", "YAML Files (*.yml);;All Files (*)"
                     )
-
-                    # before saving, show diff with "Procced" and "Cancel" options
-                    if file_path and self._diff_original_and_current_data():
+                    # check #2: valid file path
+                    if file_path:
                         self.save_to_file(file_path)
 
         elif button == self.buttonBox.button(QDialogButtonBox.Open):
@@ -213,14 +221,13 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
         dialog = ServerConfigDialog(self)
 
-        if dialog.exec_():  
-            data = dialog.get_server_data()
-            url = f"{data['protocol']}://{data['host']}:{data['port']}/admin/config"
-            if save == True:
+        if dialog.exec_():
+            url = dialog.get_server_url()
+            if save:
                 self.push_to_server(url)
             else:
-                self.pull_from_server(url) 
-    
+                self.pull_from_server(url)
+
     def push_to_server(self, url):
 
         QMessageBox.information(
@@ -240,8 +247,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             response = requests.put(url, headers=headers, json=processed_config_dict)
             response.raise_for_status()
 
-            QgsMessageLog.logMessage(
-                f"Success! Status Code: {response.status_code}")
+            QgsMessageLog.logMessage(f"Success! Status Code: {response.status_code}")
 
             QMessageBox.information(
                 self,
@@ -257,9 +263,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 f"An error occurred pulling the configuration from the server: {e}",
             )
 
-
     def pull_from_server(self, url):
-        
+
         QMessageBox.information(
             self,
             "Information",
@@ -272,8 +277,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             response = requests.get(url, headers=headers)
             response.raise_for_status()
 
-            QgsMessageLog.logMessage(
-                f"Success! Status Code: {response.status_code}")
+            QgsMessageLog.logMessage(f"Success! Status Code: {response.status_code}")
 
             QMessageBox.information(
                 self,
@@ -281,35 +285,10 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 f"Success! Status Code: {response.status_code}",
             )
 
-            QgsMessageLog.logMessage(
-                f"Response: {response.text}")
+            QgsMessageLog.logMessage(f"Response: {response.text}")
 
-            data_dict = response.json() 
-            
-            self.config_data = ConfigData()   
-            self.config_data.set_data_from_yaml(data_dict) 
-            self.ui_setter.set_ui_from_data()
-
-            # log messages about missing or mistyped values during deserialization
-            QgsMessageLog.logMessage(
-                f"Errors during deserialization: {self.config_data.error_message}"
-            )
-            QgsMessageLog.logMessage(
-                f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
-            )
-
-            # summarize all properties missing/overwitten with defaults
-            # atm, warning with the full list of properties
-            all_missing_props = self.config_data.all_missing_props
-            QgsMessageLog.logMessage(
-                f"All missing or replaced properties: {self.config_data.all_missing_props}"
-            )
-            if len(all_missing_props) > 0:
-                ReadOnlyTextDialog(
-                    self,
-                    "Warning",
-                    f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
-                ).exec_()
+            data_dict = response.json()
+            self.update_config_data_and_ui(data_dict)
 
         except requests.exceptions.RequestException as e:
             QgsMessageLog.logMessage(f"An error occurred: {e}")
@@ -319,7 +298,6 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 "Error",
                 f"An error occurred pulling the configuration from the server: {e}",
             )
-
 
     def save_to_file(self, file_path):
 
@@ -360,48 +338,53 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             # QApplication.setOverrideCursor(Qt.WaitCursor)
             with open(file_name, "r", encoding="utf-8") as file:
                 file_content = file.read()
+                yaml_original_data_dict = yaml.safe_load(file_content)
 
-                # reset data
-                self.config_data = ConfigData()
-
-                # set data and .all_missing_props:
-                yaml_original_data = yaml.safe_load(file_content)
-                self.yaml_original_data = deepcopy(yaml_original_data)
-
-                self.config_data.set_data_from_yaml(yaml_original_data)
-
-                # set UI from data
-                self.ui_setter.set_ui_from_data()
-
-                # log messages about missing or mistyped values during deserialization
-                # try/except in case of running it from pytests
-                try:
-                    QgsMessageLog.logMessage(
-                        f"Errors during deserialization: {self.config_data.error_message}"
-                    )
-                    QgsMessageLog.logMessage(
-                        f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
-                    )
-
-                    # summarize all properties missing/overwitten with defaults
-                    # atm, warning with the full list of properties
-                    QgsMessageLog.logMessage(
-                        f"All missing or replaced properties: {self.config_data.all_missing_props}"
-                    )
-
-                    if len(self.config_data.all_missing_props) > 0:
-                        ReadOnlyTextDialog(
-                            self,
-                            "Warning",
-                            f"All missing or replaced properties (check logs for more details): {self.config_data.all_missing_props}",
-                        ).exec_()
-                except:
-                    pass
+                self.update_config_data_and_ui(yaml_original_data_dict)
 
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Cannot open file:\n{str(e)}")
         # finally:
         #     QApplication.restoreOverrideCursor()
+
+    def update_config_data_and_ui(self, data_dict):
+        """Use the data from local file or local server to reset the ConfigData and UI."""
+
+        # reset data
+        self.config_data = ConfigData()
+
+        # set data and .all_missing_props:
+        self.yaml_original_data = deepcopy(data_dict)
+        self.config_data.set_data_from_yaml(data_dict)
+
+        # set UI from data
+        self.ui_setter.set_ui_from_data()
+
+        # log messages about missing or mistyped values during deserialization
+        # try/except in case of running it from pytests
+        try:
+            QgsMessageLog.logMessage(
+                f"Errors during deserialization: {self.config_data.error_message}"
+            )
+            QgsMessageLog.logMessage(
+                f"Default values used for missing YAML fields: {self.config_data.defaults_message}"
+            )
+
+            # summarize all properties missing/overwitten with defaults
+            # atm, warning with the full list of properties
+            all_missing_props = self.config_data.all_missing_props
+            QgsMessageLog.logMessage(
+                f"All missing or replaced properties: {all_missing_props}"
+            )
+
+            if len(all_missing_props) > 0:
+                ReadOnlyTextDialog(
+                    self,
+                    "Warning",
+                    f"All missing or replaced properties (check logs for more details): {all_missing_props}",
+                ).exec_()
+        except:
+            pass  # QgsMessageLog import error in pytests, ignore
 
     def _set_validate_ui_data(self) -> tuple[bool, list]:
         # Set and validate data from UI
