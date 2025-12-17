@@ -78,17 +78,6 @@ except:
 headers = {"accept": "*/*", "Content-Type": "application/json"}
 
 
-def preprocess_for_json(d):
-    """Recursively converts datetime/date objects in a dict to ISO strings."""
-    if isinstance(d, dict):
-        return {k: preprocess_for_json(v) for k, v in d.items()}
-    elif isinstance(d, list):
-        return [preprocess_for_json(i) for i in d]
-    elif isinstance(d, (datetime, date)):
-        return d.isoformat()
-    return d
-
-
 class ServerConfigDialog(QDialog, Ui_serverDialog):
     """
     Logic for the Server Configuration Dialog.
@@ -190,7 +179,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                     # check #1: show diff with "Procced" and "Cancel" options
                     if not self._diff_original_and_current_data():
                         return
-                    
+
                     self.server_config(save=True)
                 else:
                     # check #1: show diff with "Procced" and "Cancel" options
@@ -236,10 +225,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             f"Pushing configuration to: {url}",
         )
 
-        config_dict = self.config_data.asdict_enum_safe(self.config_data)
-
-        # Pre-process the dictionary to handle datetime objects
-        processed_config_dict = preprocess_for_json(config_dict)
+        processed_config_dict = self.config_data.asdict_enum_safe(
+            self.config_data, datetime_to_str=True
+        )
 
         # TODO: support authentication through the QT framework
         try:
