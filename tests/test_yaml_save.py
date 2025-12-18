@@ -41,8 +41,11 @@ def test_json_schema_on_open_save(qtbot, sample_yaml: str):
     dialog.open_file(sample_yaml)  # now dialog.config_data has the data stored
 
     # Save YAML
+    processed_config_data = dialog.config_data.asdict_enum_safe(
+        dialog.config_data, datetime_to_str=True
+    )
     abs_new_yaml_path = sample_yaml.with_name(f"saved_{sample_yaml.name}")
-    dialog.save_to_file(abs_new_yaml_path)
+    dialog.save_to_file(processed_config_data, abs_new_yaml_path)
 
     result = subprocess.run(
         [
@@ -103,8 +106,11 @@ def test_open_file_validate_ui_data_save_file(qtbot, sample_yaml: str):
     yaml1_missing_props = deepcopy(dialog.config_data.all_missing_props)
 
     # Save YAML - EVEN THOUGH some mandatory fields might be missing and recorded as empty strings/lists
+    processed_config_data = dialog.config_data.asdict_enum_safe(
+        dialog.config_data, datetime_to_str=True
+    )
     abs_new_yaml_path = sample_yaml.with_name(f"saved_updated_{sample_yaml.name}")
-    dialog.save_to_file(abs_new_yaml_path)
+    dialog.save_to_file(processed_config_data, abs_new_yaml_path)
 
     # open the new file
     dialog.open_file(abs_new_yaml_path)  # now dialog.config_data has the data stored

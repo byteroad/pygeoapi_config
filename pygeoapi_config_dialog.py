@@ -149,14 +149,6 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             ),
         )
 
-        def represent_datetime_as_timestamp(dumper, data: datetime):
-            value = self.config_data.datetime_to_string(data)
-
-            # emit as YAML timestamp → plain scalar, no quotes
-            return dumper.represent_scalar("tag:yaml.org,2002:timestamp", value)
-
-        self.dumper.add_representer(datetime, represent_datetime_as_timestamp)
-
         # custom assignments
         self.model = QStringListModel()
         self.proxy = QSortFilterProxyModel()
@@ -177,13 +169,19 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
 
                 if self.serverRadio.isChecked():
                     # check #1: show diff with "Procced" and "Cancel" options
-                    if not self._diff_original_and_current_data():
+                    diff_approved, processed_config_data = (
+                        self._diff_original_and_current_data()
+                    )
+                    if not diff_approved:
                         return
 
-                    self.server_config(save=True)
+                    self.server_config(data_to_push=processed_config_data)
                 else:
                     # check #1: show diff with "Procced" and "Cancel" options
-                    if not self._diff_original_and_current_data():
+                    diff_approved, processed_config_data = (
+                        self._diff_original_and_current_data()
+                    )
+                    if not diff_approved:
                         return
 
                     file_path, _ = QFileDialog.getSaveFileName(
@@ -191,11 +189,11 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                     )
                     # check #2: valid file path
                     if file_path:
-                        self.save_to_file(file_path)
+                        self.save_to_file(processed_config_data, file_path)
 
         elif button == self.buttonBox.button(QDialogButtonBox.Open):
             if self.serverRadio.isChecked():
-                self.server_config(save=False)
+                self.server_config(data_to_push=None)
             else:
                 file_name, _ = QFileDialog.getOpenFileName(
                     self, "Open File", "", "YAML Files (*.yml);;All Files (*)"
@@ -206,18 +204,18 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             self.reject()
             return
 
-    def server_config(self, save):
+    def server_config(self, data_to_push: dict | None = None):
 
         dialog = ServerConfigDialog(self)
 
         if dialog.exec_():
             url = dialog.get_server_url()
-            if save:
-                self.push_to_server(url)
+            if data_to_push is not None:
+                self.push_to_server(url, data_to_push)
             else:
                 self.pull_from_server(url)
 
-    def push_to_server(self, url):
+    def push_to_server(self, url, data_to_push: dict):
 
         QMessageBox.information(
             self,
@@ -225,14 +223,10 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             f"Pushing configuration to: {url}",
         )
 
-        processed_config_dict = self.config_data.asdict_enum_safe(
-            self.config_data, datetime_to_str=True
-        )
-
         # TODO: support authentication through the QT framework
         try:
             # Send the PUT request to Admin API
-            response = requests.put(url, headers=headers, json=processed_config_dict)
+            response = requests.put(url, headers=headers, json=data_to_push)
             response.raise_for_status()
 
             QgsMessageLog.logMessage(f"Success! Status Code: {response.status_code}")
@@ -248,7 +242,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             QMessageBox.critical(
                 self,
                 "Error",
-                f"An error occurred pulling the configuration from the server: {e}",
+                f"An error occurred pushing the configuration to the server: {e}",
             )
 
     def pull_from_server(self, url):
@@ -287,14 +281,14 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 f"An error occurred pulling the configuration from the server: {e}",
             )
 
-    def save_to_file(self, file_path):
+    def save_to_file(self, new_config_data: dict, file_path: str):
 
         if file_path:
             QApplication.setOverrideCursor(Qt.WaitCursor)
             try:
                 with open(file_path, "w", encoding="utf-8") as file:
                     yaml.dump(
-                        self.config_data.asdict_enum_safe(self.config_data),
+                        new_config_data,
                         file,
                         Dumper=self.dumper,
                         default_flow_style=False,
@@ -402,14 +396,20 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             QMessageBox.warning(f"Error deserializing: {e}")
             return
 
-    def _diff_original_and_current_data(self) -> tuple[bool, list]:
+    def _diff_original_and_current_data(self) -> tuple[bool, dict]:
         """Before saving the file, show the diff and give an option to proceed or cancel."""
+
+        new_config_data = self.config_data.asdict_enum_safe(
+            self.config_data, datetime_to_str=True
+        )
+
+        # if created from skratch, no original data to compare to
         if not self.yaml_original_data:
-            return True
+            return True, new_config_data
 
         diff_data = diff_yaml_dict(
             self.yaml_original_data,
-            self.config_data.asdict_enum_safe(self.config_data),
+            new_config_data,
         )
 
         if (
@@ -418,7 +418,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             + len(diff_data["changed"])
             == 0
         ):
-            return True
+            return True, new_config_data
 
         # add a window with the choice
         QgsMessageLog.logMessage(f"{diff_data}")
@@ -426,9 +426,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         result = dialog.exec_()  # returns QDialog.Accepted (1) or QDialog.Rejected (0)
 
         if result == QDialog.Accepted:
-            return True
+            return True, new_config_data
         else:
-            return False
+            return False, None
 
     def open_templates_path_dialog(self):
         """Defining Server.templates.path path, called from .ui file."""
