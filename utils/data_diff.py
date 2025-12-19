@@ -91,6 +91,7 @@ def diff_obj(obj1: Any, obj2: Any, diff: dict, path: str = "") -> dict:
                 type(obj1) == type(obj2) == str
                 and obj2.endswith("Z")
                 and obj1.endswith("+00:00")
+                and obj2[:-1] == obj1[:-6]
             ):
                 return diff
 
