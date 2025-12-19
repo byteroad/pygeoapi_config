@@ -23,12 +23,13 @@
 """
 
 from copy import deepcopy
-from datetime import date, datetime, timezone
+from datetime import datetime
 import os
 from wsgiref import headers
 import requests
 import yaml
 
+from .utils.helper_functions import datetime_to_string
 from .utils.data_diff import diff_yaml_dict
 
 from .ui_widgets.utils import get_url_status
@@ -149,6 +150,15 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             ),
         )
 
+        # make sure datetime items are not saved as strings with quotes
+        def represent_datetime_as_timestamp(dumper, data: datetime):
+            value = datetime_to_string(data)
+
+            # emit as YAML timestamp → plain scalar, no quotes
+            return dumper.represent_scalar("tag:yaml.org,2002:timestamp", value)
+
+        self.dumper.add_representer(datetime, represent_datetime_as_timestamp)
+
         # custom assignments
         self.model = QStringListModel()
         self.proxy = QSortFilterProxyModel()
@@ -179,7 +189,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 else:
                     # check #1: show diff with "Procced" and "Cancel" options
                     diff_approved, processed_config_data = (
-                        self._diff_original_and_current_data()
+                        self._diff_original_and_current_data(get_yaml_output=True)
                     )
                     if not diff_approved:
                         return
@@ -396,7 +406,9 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             QMessageBox.warning(f"Error deserializing: {e}")
             return
 
-    def _diff_original_and_current_data(self) -> tuple[bool, dict]:
+    def _diff_original_and_current_data(
+        self, get_yaml_output=False
+    ) -> tuple[bool, dict]:
         """Before saving the file, show the diff and give an option to proceed or cancel."""
 
         new_config_data = self.config_data.asdict_enum_safe(
@@ -412,6 +424,14 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
             new_config_data,
         )
 
+        # if get_yaml_output, preserve datetime objects without string conversion.
+        # This is needed so the yaml dumper is using representer removing quotes from datetime strings
+        if get_yaml_output:
+            new_config_data = self.config_data.asdict_enum_safe(
+                self.config_data, datetime_to_str=False
+            )
+
+        # if no diff detected, directly accept the changes
         if (
             len(diff_data["added"])
             + len(diff_data["removed"])
@@ -420,7 +440,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         ):
             return True, new_config_data
 
-        # add a window with the choice
+        # if diff detected, show a window with the choice to approve the diff
         QgsMessageLog.logMessage(f"{diff_data}")
         dialog = ReadOnlyTextDialog(self, "Warning", diff_data, True)
         result = dialog.exec_()  # returns QDialog.Accepted (1) or QDialog.Rejected (0)
