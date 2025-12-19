@@ -76,7 +76,7 @@ try:
 except:
     pass
 
-headers = {"accept": "*/*", "Content-Type": "application/json"}
+headers = {"accept": "*/*", "Content-Type": "application/json; charset=utf-8"}
 
 
 class ServerConfigDialog(QDialog, Ui_serverDialog):
