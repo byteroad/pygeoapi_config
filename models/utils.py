@@ -7,8 +7,8 @@ from typing import Any, get_origin, get_args, Union, get_type_hints
 from .top_level.utils import (
     InlineList,
     get_enum_value_from_string,
-    datetime_from_string,
 )
+from ..utils.helper_functions import datetime_from_string
 
 
 def update_dataclass_from_dict(

@@ -9,7 +9,7 @@ from .top_level import (
     MetadataConfig,
     ResourceConfigTemplate,
 )
-from .top_level.utils import datetime_to_string
+from ..utils.helper_functions import datetime_to_string
 from .top_level.utils import InlineList
 from .top_level.providers import ProviderTemplate
 from .top_level.providers.records import ProviderTypes

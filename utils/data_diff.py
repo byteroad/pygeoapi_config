@@ -1,4 +1,7 @@
+from datetime import datetime
 from typing import Any
+
+from .helper_functions import datetime_to_string
 
 
 def diff_yaml_dict(obj1: dict, obj2: dict) -> dict:
@@ -74,6 +77,14 @@ def diff_obj(obj1: Any, obj2: Any, diff: dict, path: str = "") -> dict:
 
     else:
         if obj1 != obj2:
+
+            # ignore the case where incoming datetime was never a string
+            if (
+                isinstance(obj1, datetime)
+                and isinstance(obj2, str)
+                and datetime_to_string(obj1) == obj2
+            ):
+                return diff
 
             # ignore the case where dates came from 'requests' in +00:00 format
             if (
