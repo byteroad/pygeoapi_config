@@ -74,6 +74,15 @@ def diff_obj(obj1: Any, obj2: Any, diff: dict, path: str = "") -> dict:
 
     else:
         if obj1 != obj2:
+
+            # ignore the case where dates came from 'requests' in +00:00 format
+            if (
+                type(obj1) == type(obj2) == str
+                and obj2.endswith("Z")
+                and obj1.endswith("+00:00")
+            ):
+                return diff
+
             diff["changed"][path] = {"old": obj1, "new": obj2}
 
     return diff
