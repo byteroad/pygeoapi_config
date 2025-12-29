@@ -18,6 +18,23 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Start pygeoapi container
+        run: |
+          docker run --rm -d \
+            -p 5000:80 \
+            --rm --name=pygeoapi \
+            geopython/pygeoapi:latest run-with-hot-reload
+
+      - name: Wait for service to be ready
+        run: |
+          # This gives the container a few seconds to initialize
+          timeout 60s bash -c 'until curl -s localhost:5000 > /dev/null; do sleep 2; done'
+          echo "pygeoapi is up and running"
+
+      - name: Enable admin api
+        run: |
+          docker exec pygeoapi sed -i 's/admin: .*/admin: true/' /pygeoapi/local.config.yml
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip

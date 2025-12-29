@@ -5,6 +5,10 @@ from unittest.mock import MagicMock, patch
 from ..utils.data_diff import diff_yaml_dict_remove_known_faulty_fields
 from ..pygeoapi_config_dialog import PygeoapiConfigDialog
 
+# Important: get your pygeoapi instance up & running, first!
+# docker run -p 5000:80 -v $(pwd)/example-config.yml:/pygeoapi/local.config.yml geopython/pygeoapi:latest run-with-hot-reload
+# Double check the SERVER_URL is correct
+
 SERVER_URL = 'http://localhost:5000/admin/config'
 
 @pytest.fixture
