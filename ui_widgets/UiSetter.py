@@ -28,6 +28,7 @@ from .ui_setter_utils import (
     fill_combo_box,
     pack_locales_data_into_list,
     pack_list_data_into_list_widget,
+    get_default_language,
 )
 from .utils import get_widget_text_value, reset_widget
 
@@ -239,22 +240,27 @@ class UiSetter:
         # incoming type: possible list of strings or dictionary
         # limitation: even if YAML had just a list of strings, it will be interpreted here as "en" locale by default
 
+        default_language = get_default_language(config_data)
+
         # title
         pack_locales_data_into_list(
             config_data.metadata.identification.title,
             self.dialog.listWidgetMetadataIdTitle,
+            default_language,
         )
 
         # description
         pack_locales_data_into_list(
             config_data.metadata.identification.description,
             self.dialog.listWidgetMetadataIdDescription,
+            default_language,
         )
 
         # keywords
         pack_locales_data_into_list(
             config_data.metadata.identification.keywords,
             self.dialog.listWidgetMetadataIdKeywords,
+            default_language,
         )
         set_combo_box_value_from_data(
             combo_box=self.dialog.comboBoxMetadataIdKeywordsType,
@@ -336,6 +342,7 @@ class UiSetter:
     def set_resource_ui_from_data(self, res_data: ResourceConfigTemplate):
         """Set values for Resource UI from resource data."""
         dialog = self.dialog
+        config_data: ConfigData = self.dialog.config_data
 
         # first, reset some fields to defaults (e.g. for data setting, or optional - they might not have a new value to overwrite it)
         # data entry fields
@@ -364,20 +371,23 @@ class UiSetter:
             value=res_data.type,
         )
 
+        # data with locales
+        default_language = get_default_language(config_data)
+
         # title
         pack_locales_data_into_list(
-            res_data.title,
-            dialog.listWidgetResTitle,
+            res_data.title, dialog.listWidgetResTitle, default_language
         )
 
         # description
         pack_locales_data_into_list(
-            res_data.description,
-            dialog.listWidgetResDescription,
+            res_data.description, dialog.listWidgetResDescription, default_language
         )
 
         # keywords
-        pack_locales_data_into_list(res_data.keywords, dialog.listWidgetResKeywords)
+        pack_locales_data_into_list(
+            res_data.keywords, dialog.listWidgetResKeywords, default_language
+        )
 
         # visibility
         set_combo_box_value_from_data(

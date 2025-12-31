@@ -76,17 +76,30 @@ def _apply_red_transparent_style(layer):
     layer.triggerRepaint()
 
 
-def pack_locales_data_into_list(data, list_widget):
+def get_default_language(config_data) -> str:
+    """Get the default language from ConfigData (server.language or server.languages)."""
+    if config_data.server.language is not None:
+        return config_data.server.language.value.split("-")[0]
+
+    if config_data.server.languages is not None:
+        for lang in config_data.server.languages:  # list
+            return lang.split("-")[0]
+
+    return "en"
+
+
+def pack_locales_data_into_list(data, list_widget, default_language="en"):
     """Use ConfigData (list of strings, dict with strings, or a single string) to fill the UI widget list."""
     list_widget.clear()
 
     # data can be string, list or dict (for properties like title, description, keywords)
     if isinstance(data, str):
         if is_valid_string(data):
-            value = f"en: {data}"
+            value = f"{default_language}: {data}"
             list_widget.addItem(value)
             return
 
+    # 'data' can be a list (iterating through values) or dict (iterating through keys)
     for key in data:
         if isinstance(data, dict):
             local_key_content = data[key]
@@ -101,7 +114,7 @@ def pack_locales_data_into_list(data, list_widget):
                         list_widget.addItem(value)
         elif isinstance(data, list):  # list of strings
             if is_valid_string(key):
-                value = f"en: {key}"
+                value = f"{default_language}: {key}"
                 list_widget.addItem(value)
 
 
