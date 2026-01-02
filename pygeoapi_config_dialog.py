@@ -706,10 +706,20 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
     def delete_resource(self):
         """Delete selected resource. Called from .ui."""
         # hide detailed collection UI, show preview
-        self.config_data.delete_resource(self)
-        self.ui_setter.preview_resource()
-        self.ui_setter.refresh_resources_list_ui()
-        self.current_res_name = ""
+        if self.current_res_name == "":
+            return
+
+        reply = QMessageBox.question(
+            self,
+            "Confirm action",
+            f"Delete resource '{self.current_res_name}'?",
+            QMessageBox.Yes | QMessageBox.No,
+        )
+        if reply == QMessageBox.Yes:
+            self.config_data.delete_resource(self)
+            self.ui_setter.preview_resource()
+            self.ui_setter.refresh_resources_list_ui()
+            self.current_res_name = ""
 
     def new_resource(self):
         """Called from .ui."""
@@ -739,5 +749,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         res_data = self.config_data.resources[self.current_res_name]
         # self.ui_setter.setup_resouce_loaded_ui(res_data)
 
-        # set the values to UI widgets
+        # first, set ConfigData from UI (e.g. in case language was changed)
+        self.data_from_ui_setter.set_data_from_ui()
+
+        # set the values to Resource UI widgets
         self.ui_setter.set_resource_ui_from_data(res_data)

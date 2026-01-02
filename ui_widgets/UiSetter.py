@@ -596,16 +596,6 @@ class UiSetter:
 
     def preview_resource(self, model_index: "QModelIndex" = None):
         dialog = self.dialog
-        dialog.current_res_name = model_index.data()
-
-        # do nothing, if resource is unsupported
-        if isinstance(dialog.config_data.resources[dialog.current_res_name], dict):
-            QMessageBox.warning(
-                self.dialog,
-                "Message",
-                f"Preview is not supported for the Resource type '{dialog.config_data.resources[dialog.current_res_name].get('type')}'.",
-            )
-            return
 
         # if called as a generic preview, no selected collection
         if not model_index:
@@ -616,6 +606,19 @@ class UiSetter:
             dialog.groupBoxCollectionLoaded.hide()
             dialog.groupBoxCollectionSelect.show()
             dialog.groupBoxCollectionPreview.show()
+
+            dialog.current_res_name = ""
+            return
+
+        dialog.current_res_name = model_index.data()
+
+        # do nothing, if resource is unsupported
+        if isinstance(dialog.config_data.resources[dialog.current_res_name], dict):
+            QMessageBox.warning(
+                self.dialog,
+                "Message",
+                f"Preview is not supported for the Resource type '{dialog.config_data.resources[dialog.current_res_name].get('type')}'.",
+            )
             return
 
         # hide detailed collection UI, show preview
