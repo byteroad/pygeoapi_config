@@ -8,7 +8,7 @@ on:
       - master
 jobs:
   test-on-pr: 
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -18,11 +18,48 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Start pygeoapi container
+        run: |
+          docker run --rm -d \
+            -p 5000:80 \
+            --rm --name=pygeoapi \
+            geopython/pygeoapi:latest run-with-hot-reload
+
+      - name: Wait for service to be ready
+        run: |
+          # This gives the container a few seconds to initialize
+          timeout 60s bash -c 'until curl -s localhost:5000 > /dev/null; do sleep 2; done'
+          echo "pygeoapi is up and running"
+
+      - name: Enable admin api
+        run: |
+          docker exec pygeoapi sed -i 's/admin: .*/admin: true/' /pygeoapi/local.config.yml
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements_dev.txt
+
+      - name: Install GUI dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgl1 \
+            libegl1 \
+            libglx-mesa0 \
+            libglib2.0-0t64 \
+            libdbus-1-3 \
+            libxkbcommon-x11-0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-xinerama0 \
+            libxcb-xinput0 \
+            libxcb-xfixes0 \
+            libxcb-shape0
 
       - name: Run unit tests (headless PyQt)
         env:
