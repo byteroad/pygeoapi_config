@@ -25,7 +25,7 @@ hasProcessingProvider=no
 # Tags are comma separated with spaces allowed
 tags=pygeoapi
 
-homepage=https://github.com/byteroad/pygeoapi_config/blob/master/README.md
+homepage=https://byteroad.github.io/pygeoapi_config_website/
 category=Plugins
 icon=icon.png
 # experimental flag
