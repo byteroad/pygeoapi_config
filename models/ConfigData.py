@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field, fields, is_dataclass
-from datetime import datetime, timezone
+from datetime import datetime
 from enum import Enum
 
 from .utils import update_dataclass_from_dict
@@ -9,6 +9,7 @@ from .top_level import (
     MetadataConfig,
     ResourceConfigTemplate,
 )
+from ..utils.helper_functions import datetime_to_string
 from .top_level.utils import InlineList
 from .top_level.providers import ProviderTemplate
 from .top_level.providers.records import ProviderTypes
@@ -141,14 +142,6 @@ class ConfigData:
             return self._all_missing_props
         return []
 
-    def datetime_to_string(self, data: datetime):
-        # normalize to UTC and format with Z
-        if data.tzinfo is None:
-            data = data.replace(tzinfo=timezone.utc)
-        else:
-            data = data.astimezone(timezone.utc)
-        return data.strftime("%Y-%m-%dT%H:%M:%SZ")
-
     def asdict_enum_safe(self, obj, datetime_to_str=False):
         """Overwriting dataclass 'asdict' fuction to replace Enums with strings."""
         if is_dataclass(obj):
@@ -177,7 +170,7 @@ class ConfigData:
             }
         else:
             if isinstance(obj, datetime) and datetime_to_str:
-                return self.datetime_to_string(obj)
+                return datetime_to_string(obj)
             else:
                 return obj
 
