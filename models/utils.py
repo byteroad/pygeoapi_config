@@ -4,7 +4,11 @@ from enum import Enum
 from types import UnionType
 from typing import Any, get_origin, get_args, Union, get_type_hints
 
-from .top_level.utils import InlineList, get_enum_value_from_string
+from .top_level.utils import (
+    InlineList,
+    get_enum_value_from_string,
+)
+from ..utils.helper_functions import datetime_from_string
 
 
 def update_dataclass_from_dict(
@@ -67,12 +71,7 @@ def update_dataclass_from_dict(
                     if (datetime in args or expected_type is datetime) and isinstance(
                         new_value, str
                     ):
-                        try:
-                            new_value = datetime.strptime(
-                                new_value, "%Y-%m-%dT%H:%M:%SZ"
-                            )
-                        except:
-                            pass
+                        new_value = datetime_from_string(new_value)
 
                     # Exception: remap str to Enum
                     elif isinstance(expected_type, type) and issubclass(
@@ -294,11 +293,10 @@ def _is_instance_of_type(value, expected_type) -> bool:
 
     # Exception: try cast str to datetime manually
     if expected_type is datetime:
-        try:
-            datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
+        if datetime_from_string(value) is not None:
             return True
-        except:
-            pass
+        else:
+            return False
 
     # Fallback for normal types
     return isinstance(value, expected_type)
