@@ -33,7 +33,7 @@ jobs:
 
       - name: Enable admin api
         run: |
-          docker exec pygeoapi sed -i 's/admin: .*/admin: true/' /pygeoapi/local.config.yml
+          docker exec pygeoapi sed -i 's/admin:[[:space:]]*\${PYGEOAPI_SERVER_ADMIN:-false}/admin: true/' /pygeoapi/local.config.yml
 
       - name: Install dependencies
         run: |
