@@ -1,4 +1,4 @@
-![icon](/icon.png)
+![icon](/conf-icon.png)
 # pygeoapi configurator
 
 This plugin lets you read and write a [pygeoapi](https://pygeoapi.io/) configuration file on your local machine. You can deploy this configuration, by uploading it to a server with a pygeoapi instance.
