@@ -14,7 +14,7 @@ It goes without saying that a combination of an unprotected instance and an enab
 Run pygeoapi docker container with hot reload, mounting a local configuration file:
 
 ```bash
-docker run -p 5000:80 -v $(pwd)/example-config.yml:/pygeoapi/local.config.yml geopython/pygeoapi:latest run-with-hot-reload
+docker run -p 5000:80 -e PYGEOAPI_SERVER_ADMIN=true geopython/pygeoapi:latest run-with-hot-reload
 ```
 
 ## Deploy
