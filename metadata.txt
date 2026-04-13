@@ -6,7 +6,7 @@
 name=pygeoapi configurator
 qgisMinimumVersion=3.0
 description=Read and write a pygeoapi configuration
-version=0.2
+version=0.21
 author=ByteRoad
 email=info@byteroad.net
 
