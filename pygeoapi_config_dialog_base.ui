@@ -2558,7 +2558,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Brought to you with ❤️ by ByteRoad</string>
+            <string>Brought to you with ❤️ by ByteRoad and DGT</string>
            </property>
            <property name="textFormat">
             <enum>Qt::MarkdownText</enum>
