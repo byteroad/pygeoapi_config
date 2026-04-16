@@ -33,7 +33,7 @@ from .ui_setter_utils import (
 from .utils import get_widget_text_value, reset_widget
 
 
-from PyQt5.QtGui import QIntValidator
+from PyQt5.QtGui import QIntValidator, QDoubleValidator
 from PyQt5.QtCore import (
     Qt,
 )
@@ -555,10 +555,10 @@ class UiSetter:
 
         # set validators for some fields
         # resource bbox
-        self.dialog.lineEditResExtentsSpatialXMin.setValidator(QIntValidator())
-        self.dialog.lineEditResExtentsSpatialYMin.setValidator(QIntValidator())
-        self.dialog.lineEditResExtentsSpatialXMax.setValidator(QIntValidator())
-        self.dialog.lineEditResExtentsSpatialYMax.setValidator(QIntValidator())
+        self.dialog.lineEditResExtentsSpatialXMin.setValidator(QDoubleValidator())
+        self.dialog.lineEditResExtentsSpatialYMin.setValidator(QDoubleValidator())
+        self.dialog.lineEditResExtentsSpatialXMax.setValidator(QDoubleValidator())
+        self.dialog.lineEditResExtentsSpatialYMax.setValidator(QDoubleValidator())
         # regex_bbox = QRegularExpression(r"-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?,-?\d+(\.\d+)?")
         # validator_bbox = QRegularExpressionValidator(regex_bbox)
         # self.dialog.lineEditResExtentsSpatialBbox.setValidator(validator_bbox)
