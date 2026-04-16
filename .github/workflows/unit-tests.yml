@@ -23,6 +23,7 @@ jobs:
           docker run --rm -d \
             -p 5000:80 \
             --rm --name=pygeoapi \
+            -e PYGEOAPI_SERVER_ADMIN=true \
             geopython/pygeoapi:latest run-with-hot-reload
 
       - name: Wait for service to be ready
@@ -30,10 +31,6 @@ jobs:
           # This gives the container a few seconds to initialize
           timeout 60s bash -c 'until curl -s localhost:5000 > /dev/null; do sleep 2; done'
           echo "pygeoapi is up and running"
-
-      - name: Enable admin api
-        run: |
-          docker exec pygeoapi sed -i 's/admin:[[:space:]]*\${PYGEOAPI_SERVER_ADMIN:-false}/admin: true/' /pygeoapi/local.config.yml
 
       - name: Install dependencies
         run: |
