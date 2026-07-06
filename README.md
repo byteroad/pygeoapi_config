@@ -57,6 +57,23 @@ Modify the user interface by opening pygeoapiconfig_dialog_base.ui in [Qt Creato
 
 `lrelease pygeoapi_config_pt.ts`
 
+## Documentation
+
+Build using:
+
+` mkdocs build`
+
+Test with live reload:
+
+` mkdocs serve --livereload`
+
+Deploy using
+
+`mkdocs gh-deploy`
+
+The site is live at: https://pygeoapi-config.byteroad.net
+
+
 ## Contributing 🤝
 
 This plugin is a live project and we welcome contributions from the community! If you have suggestions for improvements, found a bug, or want to add new features, feel free to:

@@ -1,0 +1,7 @@
+site_name: pygeoapi config
+
+site_url: https://pygeoapi-config.byteroad.net/
+
+markdown_extensions:
+  - attr_list
+  - tables
