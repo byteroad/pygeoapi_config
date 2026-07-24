@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from urllib.parse import urlparse
+# from urllib.parse import urlparse
 
 
 # records

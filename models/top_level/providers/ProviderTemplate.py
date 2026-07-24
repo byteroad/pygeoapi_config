@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, is_dataclass, MISSING
+from dataclasses import dataclass, MISSING
 from types import UnionType
 from typing import Any, Type, get_type_hints, get_args
 from .records import ProviderTypes

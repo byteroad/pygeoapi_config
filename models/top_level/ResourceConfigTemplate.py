@@ -7,7 +7,6 @@ from .utils import (
     InlineList,
     bbox_from_list,
     get_enum_value_from_string,
-    is_valid_string,
 )
 from .providers.records import CrsAuthorities
 
