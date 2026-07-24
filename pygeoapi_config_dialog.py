@@ -236,7 +236,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # TODO: support authentication through the QT framework
         try:
             # Send the PUT request to Admin API
-            response = requests.put(url, headers=headers, json=data_to_push)
+            response = requests.put(url, headers=headers, json=data_to_push, timeout=10)
             response.raise_for_status()
 
             QgsMessageLog.logMessage(f"Success! Status Code: {response.status_code}")
@@ -266,7 +266,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
         # TODO: support authentication through the QT framework
         try:
             # Send the GET request to Admin API
-            response = requests.get(url, headers=headers)
+            response = requests.get(url, headers=headers, timeout=10)
             response.raise_for_status()
 
             QgsMessageLog.logMessage(f"Success! Status Code: {response.status_code}")
