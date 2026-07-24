@@ -6,8 +6,8 @@
 name=pygeoapi configurator
 qgisMinimumVersion=3.0
 description=Read and write a pygeoapi configuration
-version=0.22
-author=ByteRoad
+version=0.23
+author=DGT,ByteRoad
 email=info@byteroad.net
 
 about=This plugin lets you read and write a pygeoapi configuration file that you can later upload to a server. You can also pull and push a configuration directly from an (unprotected) server.
