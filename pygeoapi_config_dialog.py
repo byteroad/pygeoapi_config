@@ -74,7 +74,7 @@ try:
 
     from qgis.gui import QgsMapCanvas
 except:
-    pass # nosec
+    pass
 
 headers = {"accept": "*/*", "Content-Type": "application/json; charset=utf-8"}
 
@@ -311,7 +311,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                 try:
                     QgsMessageLog.logMessage(f"File saved to: {file_path}")
                 except:
-                    pass # nosec
+                    pass
 
             except Exception as e:
                 QgsMessageLog.logMessage(f"Error saving file: {e}")
@@ -396,7 +396,7 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                         f"Properties are missing or have invalid values: {invalid_props}",
                     ).exec_()
                 except:
-                    pass # nosec
+                    pass
 
                 return False, invalid_props
             return True, []
