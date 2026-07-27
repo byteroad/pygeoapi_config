@@ -20,10 +20,6 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: List repo root (debug - before build)
-        run: |
-          Get-ChildItem -Recurse -Force | Where-Object { $_.FullName -match 'buildinfo' }
-
       - name: Install pb_tool
         run: |
           pip install pb_tool==3.1.0
@@ -32,21 +28,25 @@ jobs:
         run: |
           pb_tool zip
 
-      - name: List everything after pb_tool zip (debug - after build)
+      - name: Remove .buildinfo from the built zip
+        shell: pwsh
         run: |
-          Get-ChildItem -Recurse -Force zip_build | Where-Object { $_.FullName -match 'buildinfo' }
-          Get-ChildItem -Recurse -Force | Where-Object { $_.Name -eq '.buildinfo' }
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zipPath = (Resolve-Path "zip_build\*.zip").Path
+          $zip = [System.IO.Compression.ZipFile]::Open($zipPath, 'Update')
+          $entry = $zip.Entries | Where-Object { $_.FullName -eq 'pygeoapi_config/help/.buildinfo' }
+          if ($entry) {
+            $entry.Delete()
+            Write-Host "Removed $($entry.FullName) from $zipPath"
+          } else {
+            Write-Host "No .buildinfo entry found in zip"
+          }
+          $zip.Dispose()
 
       - name: Copy zip file to staging directory
         run: |
           New-Item -ItemType Directory -Path build -Force
           Copy-Item zip_build\*.zip build\
-
-
-      - name: Inspect zip contents directly (debug)
-        run: |
-          Expand-Archive -Path zip_build\*.zip -DestinationPath zip_inspect
-          Get-ChildItem -Recurse zip_inspect | Where-Object { $_.Name -eq '.buildinfo' }
 
       - name: Upload ZIP to GitHub Release
         uses: softprops/action-gh-release@v2
