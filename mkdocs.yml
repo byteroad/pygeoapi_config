@@ -2,6 +2,10 @@ site_name: pygeoapi config
 
 site_url: https://pygeoapi-config.byteroad.net/
 
+theme:
+  name: material
+  logo: img/PRR.png
+
 markdown_extensions:
   - attr_list
   - tables
