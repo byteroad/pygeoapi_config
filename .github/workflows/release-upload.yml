@@ -29,7 +29,7 @@ jobs:
           pb_tool zip
 
       - name: Remove help/.buildinfo if it exists
-        run: rm -f help/.buildinfo
+        run: rm -Force help/.buildinfo
 
       - name: Copy zip file to staging directory
         run: |
