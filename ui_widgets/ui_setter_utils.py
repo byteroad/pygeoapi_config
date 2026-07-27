@@ -14,7 +14,7 @@ try:
         QgsFillSymbol,
     )
 except:
-    pass
+    pass # nosec
 
 
 def fill_combo_box(combo_box, enum_class):

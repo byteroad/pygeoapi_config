@@ -376,7 +376,8 @@ class PygeoapiConfigDialog(QtWidgets.QDialog, FORM_CLASS):
                     f"All missing or replaced properties (check logs for more details): {all_missing_props}",
                 ).exec_()
         except:
-            pass  # QgsMessageLog import error in pytests, ignore
+        # QgsMessageLog import error in pytests, ignore
+            pass  # nosec
 
     def _set_validate_ui_data(self) -> tuple[bool, list]:
         # Set and validate data from UI

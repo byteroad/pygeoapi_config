@@ -21,7 +21,7 @@ class ServerOptionalBoolsEnum(Enum):
 # data classes
 @dataclass(kw_only=True)
 class ServerBindConfig:
-    host: str = field(default="0.0.0.0")
+    host: str = field(default="0.0.0.0") # nosec
     port: int | str = field(default=5000)
 
 

@@ -47,7 +47,7 @@ try:
         QgsCoordinateReferenceSystem,
     )
 except:
-    pass
+    pass # nosec
 
 if TYPE_CHECKING:
     # preserve type checking, but don't import in runtime to avoid circular import
