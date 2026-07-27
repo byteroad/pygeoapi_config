@@ -25,8 +25,8 @@ jobs:
           Remove-Item -Path help\build\html\.buildinfo -Force -ErrorAction SilentlyContinue
 
       - name: List help build contents (debug)
-              run: |
-                Get-ChildItem -Recurse help\build\html
+        run: |
+          Get-ChildItem -Recurse help\build\html
 
       - name: Install pb_tool
         run: |
