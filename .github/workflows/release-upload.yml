@@ -28,13 +28,13 @@ jobs:
         run: |
           pb_tool zip
 
-      - name: Remove help/.buildinfo if it exists
-        run: rm -Force help/.buildinfo -ErrorAction SilentlyContinue
-
       - name: Copy zip file to staging directory
         run: |
           New-Item -ItemType Directory -Path build -Force
           Copy-Item zip_build\*.zip build\
+
+      - name: Remove help/.buildinfo if it exists
+        run: rm -Force build/help/.buildinfo -ErrorAction SilentlyContinue
 
       - name: Upload ZIP to GitHub Release
         uses: softprops/action-gh-release@v2
