@@ -20,6 +20,10 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Remove Sphinx .buildinfo before packaging
+        run: |
+          Remove-Item -Path help\build\html\.buildinfo -Force -ErrorAction SilentlyContinue
+
       - name: Install pb_tool
         run: |
           pip install pb_tool==3.1.0
@@ -32,9 +36,6 @@ jobs:
         run: |
           New-Item -ItemType Directory -Path build -Force
           Copy-Item zip_build\*.zip build\
-
-      - name: Remove help/.buildinfo if it exists
-        run: rm -Force build/help/.buildinfo -ErrorAction SilentlyContinue
 
       - name: Upload ZIP to GitHub Release
         uses: softprops/action-gh-release@v2
