@@ -2,4 +2,4 @@
 .venv_workflow*
 tests/yaml_samples/saved_*
 site/*
-help/.buildinfo 
+help/build/*
