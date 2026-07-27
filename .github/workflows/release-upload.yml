@@ -33,7 +33,7 @@ jobs:
 
       - name: Copy zip file to staging directory
         run: |
-          New-Item -ItemType Directory -Path build -Force
+          New-Item -ItemType Directory -Path build -Force -ErrorAction SilentlyContinue
           Copy-Item zip_build\*.zip build\
 
       - name: Upload ZIP to GitHub Release
