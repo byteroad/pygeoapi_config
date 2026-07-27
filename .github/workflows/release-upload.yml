@@ -29,12 +29,11 @@ jobs:
           pb_tool zip
 
       - name: Remove help/.buildinfo if it exists
-        run: rm -Force help/.buildinfo
+        run: rm -Force help/.buildinfo -ErrorAction SilentlyContinue
 
       - name: Copy zip file to staging directory
         run: |
-          New-Item -ItemType Directory -Path build \
-          -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Path build -Force
           Copy-Item zip_build\*.zip build\
 
       - name: Upload ZIP to GitHub Release
