@@ -20,13 +20,9 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Remove Sphinx .buildinfo before packaging
+      - name: List repo root (debug - before build)
         run: |
-          Remove-Item -Path help\build\html\.buildinfo -Force -ErrorAction SilentlyContinue
-
-      - name: List help build contents (debug)
-        run: |
-          Get-ChildItem -Recurse help\build\html
+          Get-ChildItem -Recurse -Force | Where-Object { $_.FullName -match 'buildinfo' }
 
       - name: Install pb_tool
         run: |
@@ -36,10 +32,21 @@ jobs:
         run: |
           pb_tool zip
 
+      - name: List everything after pb_tool zip (debug - after build)
+        run: |
+          Get-ChildItem -Recurse -Force zip_build | Where-Object { $_.FullName -match 'buildinfo' }
+          Get-ChildItem -Recurse -Force | Where-Object { $_.Name -eq '.buildinfo' }
+
       - name: Copy zip file to staging directory
         run: |
           New-Item -ItemType Directory -Path build -Force
           Copy-Item zip_build\*.zip build\
+
+
+      - name: Inspect zip contents directly (debug)
+        run: |
+          Expand-Archive -Path zip_build\*.zip -DestinationPath zip_inspect
+          Get-ChildItem -Recurse zip_inspect | Where-Object { $_.Name -eq '.buildinfo' }
 
       - name: Upload ZIP to GitHub Release
         uses: softprops/action-gh-release@v2
