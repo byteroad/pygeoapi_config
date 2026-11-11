@@ -8,7 +8,7 @@ qgisMinimumVersion=3.0
 qgisMaximumVersion=4.99
 supportsQt6=True
 description=Read and write a pygeoapi configuration
-version=0.24
+version=0.25
 author=DGT,ByteRoad
 email=info@byteroad.net
 
